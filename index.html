@@ -95,6 +95,18 @@ body{margin:0; background:var(--wa-panel); font-family:Calibri,Arial,sans-serif;
 .optbtn:hover{background:rgba(255,255,255,.09);}
 .optbtn .n{direction:ltr; display:inline-block; color:var(--accent); font-weight:bold; margin-left:6px;}
 
+.voicebar{display:flex; align-items:center; gap:8px; padding:6px 10px; background:var(--wa-header); flex-shrink:0; border-top:1px solid rgba(255,255,255,.08);}
+.voicebtn{background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.15); color:#fff; width:30px; height:30px; border-radius:50%; font-size:14px; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; padding:0;}
+.voicebtn.active{background:var(--accent); border-color:var(--accent);}
+.voicebtn.listening{animation:pulse 1.2s infinite;}
+.voicebtn.unsupported{opacity:.3; cursor:not-allowed;}
+.langbtn{border-radius:8px; width:34px; font-size:10px; font-weight:bold;}
+.voicehint{flex:1; font-size:10.5px; color:var(--muted); text-align:center;}
+@keyframes pulse{
+  0%{ box-shadow:0 0 0 0 rgba(0,168,132,.5); }
+  70%{ box-shadow:0 0 0 8px rgba(0,168,132,0); }
+  100%{ box-shadow:0 0 0 0 rgba(0,168,132,0); }
+}
 .inputbar{display:flex; gap:8px; padding:10px; padding-bottom:calc(10px + env(safe-area-inset-bottom,0px)); background:var(--wa-header); flex-shrink:0;}
 .inputbar input{flex:1; border:none; border-radius:20px; padding:10px 14px; font-size:14px; background:var(--card-bg); color:var(--text);}
 .inputbar button{background:var(--accent); border:none; color:#fff; width:40px; height:40px; border-radius:50%; font-size:16px; cursor:pointer; flex-shrink:0;}
@@ -126,6 +138,12 @@ body{margin:0; background:var(--wa-panel); font-family:Calibri,Arial,sans-serif;
     <div class="quickchip" data-q="amber" role="button" tabindex="0">amber projects</div>
     <div class="quickchip" data-q="Tabuk" role="button" tabindex="0">Tabuk</div>
     <div class="quickchip" data-q="Madinah" role="button" tabindex="0">Madinah</div>
+  </div>
+  <div class="voicebar">
+    <button id="micBtn" class="voicebtn" aria-label="Speak your question" title="Tap to speak">🎤</button>
+    <button id="langBtn" class="voicebtn langbtn" aria-label="Voice input language" title="Voice recognition language">EN</button>
+    <span class="voicehint" id="voiceHint">Tap 🎤 to ask by voice</span>
+    <button id="speakToggleBtn" class="voicebtn" aria-label="Toggle spoken replies" title="Read replies aloud">🔇</button>
   </div>
   <div class="inputbar">
     <input type="text" id="inp" placeholder="Type project number, name, or city..." aria-label="Ask the PMO Bot">
@@ -247,40 +265,171 @@ function addCard(p){
 
 function norm(s){ return (s||'').toString().toLowerCase().trim(); }
 
+// ---------- Smart query parsing: filler stripping + synonym/criteria detection ----------
+const FILLER_PHRASES = [
+  "can you show me","show me","find me","search for","what is","what's","whats",
+  "give me","tell me about","look up","lookup","can you","please","i want to know",
+  "i want","i need to know","i need","pull up","get me","check on","check",
+  "status of","the status of","do you have","what about"
+];
+
+// trigger words the person might type/say, mapped to a canonical key
+const STATUS_SYNONYMS = {
+  "delayed":    ["delayed","late","behind","slipping","slow","running late"],
+  "distressed": ["distressed","critical","trouble","troubled","struggling"],
+  "suspended":  ["suspended","stopped","halted","paused","frozen","on hold","holding"],
+  "withdrawn":  ["withdrawn","cancelled","canceled","terminated"],
+  "completed":  ["completed","finished","done","closed","handover","handed over"],
+  "ahead":      ["ahead","early"],
+  "on track":   ["on track","ontrack","on-track","normal","regular","healthy"],
+};
+// actual substrings to test against projectStatus for each canonical key — not the same as the
+// trigger words above (e.g. "handover" should match "Provisional Handover", not literal "completed")
+const STATUS_MATCH = {
+  "delayed":    ["delayed"],
+  "distressed": ["distressed"],
+  "suspended":  ["suspended"],
+  "withdrawn":  ["withdrawn"],
+  "completed":  ["completed","handover"],
+  "ahead":      ["ahead"],
+  "on track":   ["on track"],
+};
+
+const REGION_SYNONYMS = {
+  "Madinah": ["madinah","al madinah","al-madinah","medina","madina"],
+  "Tabuk":   ["tabuk"],
+};
+
+const STOPWORDS = /\b(project|projects|in|at|for|of|the|near|with|a|an|please|show|me|schedule|status|health|score|currently|right|now|is|are|that|are|all)\b/gi;
+
+function escapeRe(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+function stripFillers(q){
+  let out = ' ' + q + ' ';
+  [...FILLER_PHRASES].sort((a,b)=>b.length-a.length).forEach(f=>{
+    out = out.replace(new RegExp('\\b'+escapeRe(f)+'\\b','g'), ' ');
+  });
+  return out.replace(/\s+/g,' ').trim();
+}
+
+function parseSmartQuery(qRaw){
+  const padded = ' ' + norm(qRaw) + ' ';
+  let ragFilter = null, statusKey = null, region = null;
+
+  ['red','amber','green'].forEach(c=>{ if(padded.includes(' '+c+' ')) ragFilter = c[0].toUpperCase()+c.slice(1); });
+  Object.entries(STATUS_SYNONYMS).forEach(([canon, words])=>{
+    words.forEach(w=>{ if(padded.includes(' '+w+' ')) statusKey = canon; });
+  });
+  Object.entries(REGION_SYNONYMS).forEach(([canon, words])=>{
+    words.forEach(w=>{ if(padded.includes(' '+w+' ')) region = canon; });
+  });
+
+  let remainder = stripFillers(norm(qRaw));
+  const toStrip = [];
+  if(ragFilter) toStrip.push(ragFilter.toLowerCase());
+  if(statusKey) toStrip.push(...STATUS_SYNONYMS[statusKey]);
+  if(region) toStrip.push(...REGION_SYNONYMS[region]);
+  toStrip.forEach(w=>{ remainder = remainder.replace(new RegExp('\\b'+escapeRe(w)+'\\b','g'),' '); });
+  remainder = remainder.replace(STOPWORDS,' ').replace(/\s+/g,' ').trim();
+
+  return { ragFilter, statusKey, region, remainder };
+}
+
+// ---------- Fuzzy fallback (typo tolerance) ----------
+function levenshtein(a,b){
+  const m=a.length, n=b.length;
+  if(!m) return n; if(!n) return m;
+  const dp = [];
+  for(let i=0;i<=m;i++){ dp.push(new Array(n+1).fill(0)); dp[i][0]=i; }
+  for(let j=0;j<=n;j++) dp[0][j]=j;
+  for(let i=1;i<=m;i++){
+    for(let j=1;j<=n;j++){
+      dp[i][j] = a[i-1]===b[j-1] ? dp[i-1][j-1] : 1+Math.min(dp[i-1][j-1],dp[i-1][j],dp[i][j-1]);
+    }
+  }
+  return dp[m][n];
+}
+
+function fuzzyFind(qRaw){
+  const qn = norm(qRaw);
+  if(qn.length<3) return [];
+  const threshold = qn.length<=4 ? 1 : qn.length<=7 ? 2 : 3;
+  const scored = [];
+  PROJECTS.forEach(p=>{
+    const fields = [norm(p.num), ...norm(p.city).split(' '), ...norm(p.name).split(' ')].filter(Boolean);
+    let best = Infinity;
+    fields.forEach(f=>{ const d = levenshtein(qn, f); if(d<best) best = d; });
+    if(best <= threshold) scored.push({p, dist:best});
+  });
+  scored.sort((a,b)=>a.dist-b.dist);
+  return scored.slice(0,8).map(s=>s.p);
+}
+
 function findMatches(qRaw){
   const q = norm(qRaw);
   if(!q) return {type:'none'};
 
-  // exact project number
+  // exact project number — fastest, unambiguous path
   let exact = PROJECTS.filter(p=>norm(p.num)===q);
   if(exact.length===1) return {type:'one', project:exact[0]};
 
-  // command words
-  if(['red','amber','green'].includes(q)){
-    const rag = q[0].toUpperCase()+q.slice(1);
-    const list = PROJECTS.filter(p=>p.rag===rag);
-    return {type:'rag', rag, list};
-  }
   if(q==='help'){ return {type:'help'}; }
 
-  // region match
+  // smart multi-criteria parse (handles natural phrasing: "red projects in tabuk", "delayed in madinah", etc.)
+  const parsed = parseSmartQuery(qRaw);
+  const filterCount = [parsed.ragFilter, parsed.statusKey, parsed.region].filter(Boolean).length;
+
+  if(filterCount > 0){
+    let list = PROJECTS.slice();
+    if(parsed.ragFilter) list = list.filter(p=>p.rag===parsed.ragFilter);
+    if(parsed.statusKey) list = list.filter(p=>STATUS_MATCH[parsed.statusKey].some(sub=>norm(p.projectStatus).includes(sub)));
+    if(parsed.region) list = list.filter(p=>p.region===parsed.region);
+    if(parsed.remainder){
+      list = list.filter(p=>
+        norm(p.name).includes(parsed.remainder) || norm(p.city).includes(parsed.remainder) ||
+        norm(p.contractorName).includes(parsed.remainder) || norm(p.consultantName).includes(parsed.remainder)
+      );
+    }
+    // simple single-criterion cases keep their original response shape for familiar replies
+    if(filterCount===1 && !parsed.remainder){
+      if(parsed.ragFilter) return {type:'rag', rag: parsed.ragFilter, list};
+      if(parsed.region) return {type:'region', region: parsed.region, list};
+    }
+    const labelParts = [];
+    if(parsed.statusKey) labelParts.push(parsed.statusKey);
+    if(parsed.ragFilter) labelParts.push(parsed.ragFilter.toLowerCase());
+    if(parsed.region) labelParts.push(`in ${parsed.region}`);
+    if(parsed.remainder) labelParts.push(`matching "${parsed.remainder}"`);
+    return { type:'filtered', label: labelParts.join(' '), list };
+  }
+
+  // region keyword alone (no other criteria detected above, e.g. just "Tabuk")
   const regions = [...new Set(PROJECTS.map(p=>p.region.toLowerCase()))];
   if(regions.includes(q)){
     const list = PROJECTS.filter(p=>p.region.toLowerCase()===q);
     return {type:'region', region: PROJECTS.find(p=>p.region.toLowerCase()===q).region, list};
   }
 
-  // partial project number
-  let partialNum = PROJECTS.filter(p=>norm(p.num).includes(q));
+  // filler-stripped text so a question like "what is the status of O138" still resolves cleanly
+  const cleaned = stripFillers(q) || q;
+
+  // partial project number — check both the raw and filler-stripped query
+  let partialNum = PROJECTS.filter(p=>norm(p.num).includes(q) || norm(p.num).includes(cleaned));
   if(partialNum.length===1) return {type:'one', project:partialNum[0]};
   if(partialNum.length>1) return {type:'many', list:partialNum};
 
-  // name / city / contractor contains
+  // name / city / contractor / consultant contains
   let byText = PROJECTS.filter(p=>
-    norm(p.name).includes(q) || norm(p.city).includes(q) || norm(p.contractorName).includes(q) || norm(p.consultantName).includes(q)
+    norm(p.name).includes(cleaned) || norm(p.city).includes(cleaned) ||
+    norm(p.contractorName).includes(cleaned) || norm(p.consultantName).includes(cleaned)
   );
   if(byText.length===1) return {type:'one', project:byText[0]};
   if(byText.length>1) return {type:'many', list:byText};
+
+  // last resort: typo-tolerant fuzzy match
+  const fuzzy = fuzzyFind(cleaned);
+  if(fuzzy.length===1) return {type:'one', project:fuzzy[0], fuzzy:true};
+  if(fuzzy.length>1) return {type:'many', list:fuzzy, fuzzy:true};
 
   return {type:'none'};
 }
@@ -293,32 +442,48 @@ function handleQuery(qRaw, isNum){
     hideTyping();
     const r = findMatches(qRaw);
     if(r.type==='help'){
-      addText("You can ask me for a project by:\n• *Project number* — e.g. O138\n• *Project name keyword* — e.g. Yanbu, Badr\n• *City / Region* — e.g. Tabuk, Madinah\n\nOr type *red* / *amber* / *green* to list projects in that health band.", 'in');
+      addText("I understand natural phrasing too — try things like:\n• \"red projects in Tabuk\"\n• \"delayed projects in Madinah\"\n• \"show me suspended projects\"\n\nOr the basics:\n• *Project number* — e.g. O138\n• *Project name keyword* — e.g. Yanbu, Badr\n• *City / Region* — e.g. Tabuk, Madinah\n• *red* / *amber* / *green* for a health band\n\n🎤 Tap the mic to speak your question, and toggle 🔊 to hear replies read aloud.", 'in');
+      speakResponse("You can ask me by project number, name, city, or status. Try saying red projects in Tabuk, or delayed projects in Madinah.");
       return;
     }
     if(r.type==='none'){
-      addText(`I couldn't find a project matching "${qRaw}". Try a project number, part of the name, or a city/region. Type *help* for options.`, 'in');
+      addText(`I couldn't find a project matching "${qRaw}". Try a project number, part of a name, a city/region, or a status like "delayed" or "suspended". Type *help* for examples.`, 'in');
+      speakResponse(`I couldn't find a match for ${qRaw}. Try a project number, a city, or a status like delayed or suspended.`);
       return;
     }
     if(r.type==='one'){
-      addText(`Here's the latest card for *${r.project.num}* (data as of 17 Sep 2026):`, 'in');
+      const prefix = r.fuzzy ? `Closest match for *"${qRaw}"* — here's *${r.project.num}*:` : `Here's the latest card for *${r.project.num}* (data as of 17 Sep 2026):`;
+      addText(prefix, 'in');
       addCard(r.project);
+      speakResponse(cardToSpeech(r.project));
       return;
     }
     if(r.type==='many'){
+      speakResponse(`I found ${r.list.length} matching projects. Please pick one.`);
       addOptions(r.list, qRaw);
+      return;
+    }
+    if(r.type==='filtered'){
+      if(r.list.length===0){ addText(`No projects found ${r.label}.`, 'in'); speakResponse(`No projects found ${r.label}.`); return; }
+      const counts = {Green:0,Amber:0,Red:0};
+      r.list.forEach(p=>counts[p.rag]++);
+      addText(`${r.list.length} project(s) ${r.label} — 🟢 ${counts.Green} · 🟠 ${counts.Amber} · 🔴 ${counts.Red}\n\nTap one for its full card:`, 'in');
+      speakResponse(`Found ${r.list.length} projects ${r.label}.`);
+      addOptions(r.list.slice(0,8), r.label);
       return;
     }
     if(r.type==='region'){
       const counts = {Green:0,Amber:0,Red:0};
       r.list.forEach(p=>counts[p.rag]++);
-      addText(`${r.region}: ${r.list.length} projects — 🟢 ${counts.Green} · 🟠 ${counts.Amber} · 🔴 ${counts.Red}\n\nReply with a project number, or type "${r.region.toLowerCase()} red" style isn't supported yet — try a project name or number below:`, 'in');
+      addText(`${r.region}: ${r.list.length} projects — 🟢 ${counts.Green} · 🟠 ${counts.Amber} · 🔴 ${counts.Red}\n\nReply with a project number, or try "red in ${r.region}" — or tap one below:`, 'in');
+      speakResponse(`${r.region} has ${r.list.length} projects: ${counts.Green} green, ${counts.Amber} amber, and ${counts.Red} red.`);
       addOptions(r.list.filter(p=>p.rag!=='Green').concat(r.list.filter(p=>p.rag==='Green')).slice(0,8), r.region);
       return;
     }
     if(r.type==='rag'){
-      if(r.list.length===0){ addText(`No ${r.rag} projects right now — good news!`, 'in'); return; }
+      if(r.list.length===0){ addText(`No ${r.rag} projects right now — good news!`, 'in'); speakResponse(`No ${r.rag} projects right now. Good news.`); return; }
       addText(`${r.list.length} project(s) currently ${r.rag}:`, 'in');
+      speakResponse(`${r.list.length} projects are currently ${r.rag}.`);
       addOptions(r.list, r.rag);
       return;
     }
@@ -338,6 +503,101 @@ document.querySelectorAll('.quickchip').forEach(c=>{
     if(e.key==='Enter' || e.key===' '){ e.preventDefault(); handleQuery(c.dataset.q); }
   });
 });
+
+// ============================================================
+// Voice output (text-to-speech)
+// ============================================================
+let voiceOutputEnabled = false;
+const speakToggleBtn = document.getElementById('speakToggleBtn');
+
+function cleanForSpeech(text){
+  return text.replace(/\*/g,'').replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,'').replace(/\s+/g,' ').trim();
+}
+
+function speakResponse(text){
+  if(!voiceOutputEnabled) return;
+  if(!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const utter = new SpeechSynthesisUtterance(cleanForSpeech(text));
+  utter.lang = 'en-US';
+  utter.rate = 1.0;
+  window.speechSynthesis.speak(utter);
+}
+
+function cardToSpeech(p){
+  const svPart = p.sv>0 ? `running ${p.sv} points behind schedule` : p.sv<0 ? `running ${Math.abs(p.sv)} points ahead of schedule` : `on schedule`;
+  return `Project ${p.num}, status ${p.projectStatus}. Health score ${p.health} out of 100. ${svPart}. Contract value ${p.value} million riyals, ${p.elapsed} percent of duration elapsed.`;
+}
+
+if(speakToggleBtn){
+  speakToggleBtn.addEventListener('click', ()=>{
+    voiceOutputEnabled = !voiceOutputEnabled;
+    speakToggleBtn.textContent = voiceOutputEnabled ? '🔊' : '🔇';
+    speakToggleBtn.classList.toggle('active', voiceOutputEnabled);
+    speakToggleBtn.title = voiceOutputEnabled ? 'Spoken replies: on' : 'Spoken replies: off';
+    if(!voiceOutputEnabled && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+    if(voiceOutputEnabled) speakResponse('Spoken replies are now on.');
+  });
+}
+
+// ============================================================
+// Voice input (speech-to-text)
+// ============================================================
+const micBtn = document.getElementById('micBtn');
+const langBtn = document.getElementById('langBtn');
+const voiceHint = document.getElementById('voiceHint');
+const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recogLang = 'en-US';
+let recognition = null;
+let isListening = false;
+
+if(SpeechRecognitionAPI){
+  recognition = new SpeechRecognitionAPI();
+  recognition.continuous = false;
+  recognition.interimResults = false;
+  recognition.maxAlternatives = 1;
+
+  recognition.onstart = ()=>{
+    isListening = true;
+    micBtn.classList.add('listening','active');
+    voiceHint.textContent = recogLang==='ar-SA' ? 'Listening… (Arabic)' : 'Listening…';
+  };
+  recognition.onend = ()=>{
+    isListening = false;
+    micBtn.classList.remove('listening','active');
+    voiceHint.textContent = 'Tap 🎤 to ask by voice';
+  };
+  recognition.onerror = (e)=>{
+    isListening = false;
+    micBtn.classList.remove('listening','active');
+    voiceHint.textContent = e.error==='not-allowed' ? 'Microphone permission denied' : 'Tap 🎤 to ask by voice';
+  };
+  recognition.onresult = (e)=>{
+    const transcript = e.results[0][0].transcript;
+    const inp = document.getElementById('inp');
+    inp.value = transcript;
+    handleQuery(transcript);
+    inp.value = '';
+  };
+
+  micBtn.addEventListener('click', ()=>{
+    if(isListening){ recognition.stop(); return; }
+    recognition.lang = recogLang;
+    try{ recognition.start(); } catch(err){ /* already running */ }
+  });
+
+  langBtn.addEventListener('click', ()=>{
+    recogLang = recogLang==='en-US' ? 'ar-SA' : 'en-US';
+    langBtn.textContent = recogLang==='en-US' ? 'EN' : 'AR';
+    langBtn.title = `Voice recognition language: ${recogLang==='en-US' ? 'English' : 'Arabic'}`;
+  });
+} else {
+  micBtn.classList.add('unsupported');
+  micBtn.disabled = true;
+  micBtn.title = 'Voice input is not supported in this browser';
+  langBtn.style.display = 'none';
+  voiceHint.textContent = 'Voice input not supported on this browser';
+}
 
 // Welcome message
 document.getElementById('headerAvatarImg').src = BOT_AVATAR;
