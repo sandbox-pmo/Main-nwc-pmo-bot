@@ -14,48 +14,21 @@
   --wa-bg:#0B141A; --wa-header:#202C33; --wa-panel:#111B21;
   --bubble-in:#202C33; --bubble-out:#0F5C46; --text:#E9EDEF; --muted:#8696A0;
   --accent:#00A884; --card-bg:#0F1A20; --line:#2A3942;
-  --green:#00C288; --amber:#FFC24B; --red:#FF6B6B;
   --saudi-green:#0B6E4F; --gold:#C9A96A; --water-blue:#1E5F8C;
   box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
-:root[data-theme="light"]{
-  --wa-bg:#E5DDD5; --wa-header:#008069; --wa-panel:#F0F2F5;
-  --bubble-in:#FFFFFF; --bubble-out:#D9FDD3; --text:#111B21; --muted:#667781;
-  --accent:#008069; --card-bg:#FFFFFF; --line:#E9EDEF;
-}
 *{box-sizing:border-box;}
 html{scroll-padding-top:env(safe-area-inset-top,0px);}
-body{margin:0; background:var(--wa-panel); font-family:Calibri,Arial,sans-serif; min-height:100%; color:var(--text);}
+body{margin:0; background:var(--wa-panel); font-family:Calibri,"Segoe UI",Arial,sans-serif; min-height:100%; color:var(--text);}
 .phone{max-width:460px; margin:0 auto; height:100vh; height:100dvh; display:flex; flex-direction:column; background:var(--wa-bg); box-shadow:0 0 40px rgba(0,0,0,.3);}
 
-.header{background:linear-gradient(120deg, var(--saudi-green) 0%, var(--water-blue) 100%); color:#fff; padding:10px 16px; padding-top:calc(10px + env(safe-area-inset-top,0px)); display:flex; align-items:center; gap:12px; flex-shrink:0; position:relative;}
-.avatar{width:46px; height:46px; border-radius:50%; background:#F4E4C9; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.25); border:2px solid rgba(255,255,255,.85);}
-.avatar svg{width:100%; height:100%; display:block;}
-
-/* Animated avatar: blinking eyes + swaying ghutra drapes + subtle robe motion */
-@keyframes avatarBlink {
-  0%, 90%, 100% { transform: scaleY(1); }
-  95% { transform: scaleY(0.08); }
-}
-.avatar-eye { transform-box: fill-box; transform-origin: center; animation: avatarBlink 4.5s ease-in-out infinite; }
-@keyframes avatarSwayL {
-  0%, 100% { transform: rotate(-3deg); }
-  50% { transform: rotate(2deg); }
-}
-@keyframes avatarSwayR {
-  0%, 100% { transform: rotate(3deg); }
-  50% { transform: rotate(-2deg); }
-}
-.avatar-drape-l { transform-box: fill-box; transform-origin: top center; animation: avatarSwayL 3.4s ease-in-out infinite; }
-.avatar-drape-r { transform-box: fill-box; transform-origin: top center; animation: avatarSwayR 3.8s ease-in-out infinite; }
-@keyframes avatarBreathe {
-  0%, 100% { transform: scaleX(1); }
-  50% { transform: scaleX(1.025); }
-}
-.avatar-robe { transform-box: fill-box; transform-origin: bottom center; animation: avatarBreathe 4.2s ease-in-out infinite; }
+/* ---------- header / branding ---------- */
+.header{background:linear-gradient(120deg, var(--saudi-green) 0%, var(--water-blue) 100%); color:#fff; padding:6px 16px; padding-top:calc(6px + env(safe-area-inset-top,0px)); display:flex; align-items:center; gap:14px; flex-shrink:0; position:relative;}
+.avatar{width:78px; height:90px; flex-shrink:0; display:flex; align-items:center; justify-content:center; filter:drop-shadow(0 3px 4px rgba(0,0,0,.4));}
+.avatar svg{width:100%; height:100%; display:block; overflow:visible;}
 .header .headtext{flex:1; min-width:0;}
-.header .name{font-weight:bold; font-size:15px; line-height:1.25;}
-.header .status{font-size:11px; opacity:.9;}
+.header .name{font-weight:bold; font-size:19px; line-height:1.25;}
+.header .status{font-size:11.5px; opacity:.92; line-height:1.35;}
 .logobar{display:flex; align-items:center; justify-content:center; gap:10px; background:#FFFFFF; padding:7px 12px; flex-shrink:0;}
 .logochip{display:flex; align-items:center; height:26px;}
 .logochip img{height:100%; width:auto; display:block; object-fit:contain;}
@@ -63,61 +36,143 @@ body{margin:0; background:var(--wa-panel); font-family:Calibri,Arial,sans-serif;
 .geopattern{height:6px; flex-shrink:0; background-color:var(--wa-bg);
   background-image: repeating-linear-gradient(45deg, var(--gold) 0, var(--gold) 3px, transparent 3px, transparent 9px),
                      repeating-linear-gradient(-45deg, var(--gold) 0, var(--gold) 3px, transparent 3px, transparent 9px);
-  background-position: 0 0, 0 0; opacity:.55;
+  opacity:.55;
 }
 
-.typing{display:flex; gap:4px; align-items:center; padding:10px 12px; background:var(--bubble-in); border-radius:10px; border-top-left-radius:2px; align-self:flex-start; width:fit-content;}
-.typing span{width:6px; height:6px; border-radius:50%; background:var(--muted); display:inline-block; animation:tbounce 1.2s infinite ease-in-out;}
-.typing span:nth-child(2){animation-delay:.15s;}
-.typing span:nth-child(3){animation-delay:.3s;}
-@keyframes tbounce{
-  0%, 60%, 100%{ transform:translateY(0); opacity:.5; }
-  30%{ transform:translateY(-4px); opacity:1; }
-}
+/* ---------- animated avatar: blinking eyes + swaying ghutra drapes + subtle robe motion ---------- */
+@keyframes avatarBlink { 0%,90%,100%{transform:scaleY(1);} 95%{transform:scaleY(.08);} }
+.avatar-eye{ transform-box:fill-box; transform-origin:center; animation:avatarBlink 4.5s ease-in-out infinite; }
+@keyframes avatarSwayL { 0%,100%{transform:rotate(-3deg);} 50%{transform:rotate(2deg);} }
+@keyframes avatarSwayR { 0%,100%{transform:rotate(3deg);} 50%{transform:rotate(-2deg);} }
+.avatar-drape-l{ transform-box:fill-box; transform-origin:top center; animation:avatarSwayL 3.4s ease-in-out infinite; }
+.avatar-drape-r{ transform-box:fill-box; transform-origin:top center; animation:avatarSwayR 3.8s ease-in-out infinite; }
+@keyframes avatarBreathe { 0%,100%{transform:scaleX(1);} 50%{transform:scaleX(1.025);} }
+.avatar-robe{ transform-box:fill-box; transform-origin:bottom center; animation:avatarBreathe 4.2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce){ .avatar-eye,.avatar-drape-l,.avatar-drape-r,.avatar-robe,.typing span{ animation:none; } }
 
-.thread{flex:1; overflow-y:auto; padding:14px 10px; display:flex; flex-direction:column; gap:8px;
+/* ---------- chat thread ---------- */
+.thread{position:relative; flex:1; overflow-y:auto; padding:14px 10px; display:flex; flex-direction:column; gap:8px; -webkit-overflow-scrolling:touch;
   background-image: radial-gradient(circle at 20% 30%, rgba(255,255,255,.02) 0, transparent 40%);
 }
-.msg{max-width:86%; padding:8px 10px; border-radius:10px; font-size:13.5px; line-height:1.5; white-space:pre-wrap; word-wrap:break-word;}
-.msgrow{display:flex; align-items:flex-end; gap:7px; align-self:flex-start; max-width:90%;}
-.msgavatar{width:28px; height:28px; border-radius:50%; flex-shrink:0; box-shadow:0 1px 3px rgba(0,0,0,.35); border:1.5px solid rgba(255,255,255,.7); overflow:hidden; display:inline-block; background:#F4E4C9;}
-.msgavatar svg{width:100%; height:100%; display:block;}
+.msg{max-width:86%; padding:8px 10px; border-radius:10px; font-size:13.5px; line-height:1.5; word-wrap:break-word; overflow-wrap:anywhere;}
+.msgrow{display:flex; align-items:flex-end; gap:7px; align-self:flex-start; max-width:92%;}
+.msgrow.wide{max-width:100%; width:100%; align-items:flex-start;}
+.msgavatar{width:40px; height:46px; flex-shrink:0; display:inline-block; filter:drop-shadow(0 2px 2px rgba(0,0,0,.4));}
+.msgavatar svg{width:100%; height:100%; display:block; overflow:visible;}
+@media (max-width:360px){ .msgavatar{width:32px; height:37px;} .avatar{width:64px; height:74px;} .header .name{font-size:17px;} }
 .msgrow .msg{margin:0; max-width:100%;}
-.msgrow .card{margin:0;}
 .msg.in{background:var(--bubble-in); align-self:flex-start; border-top-left-radius:2px;}
 .msg.out{background:var(--bubble-out); align-self:flex-end; border-top-right-radius:2px; color:var(--text);}
 .msg .time{display:block; text-align:right; font-size:10px; color:var(--muted); margin-top:4px;}
+.typing{display:flex; gap:4px; align-items:center; padding:10px 12px; background:var(--bubble-in); border-radius:10px; border-top-left-radius:2px; width:fit-content;}
+.typing span{width:6px; height:6px; border-radius:50%; background:var(--muted); display:inline-block; animation:tbounce 1.2s infinite ease-in-out;}
+.typing span:nth-child(2){animation-delay:.15s;}
+.typing span:nth-child(3){animation-delay:.3s;}
+@keyframes tbounce{ 0%,60%,100%{transform:translateY(0); opacity:.5;} 30%{transform:translateY(-4px); opacity:1;} }
 
-.card{background:var(--card-bg); border:1px solid var(--line); border-radius:12px; border-top-left-radius:2px; padding:12px; width:92%; max-width:340px; align-self:flex-start; font-size:13px; overflow-wrap:break-word; word-break:break-word;}
-.card.rag-tint-Green{background:linear-gradient(180deg, rgba(0,194,136,.14), var(--card-bg) 70px); border-color:rgba(0,194,136,.35);}
-.card.rag-tint-Amber{background:linear-gradient(180deg, rgba(255,194,75,.16), var(--card-bg) 70px); border-color:rgba(255,194,75,.4);}
-.card.rag-tint-Red{background:linear-gradient(180deg, rgba(255,107,107,.18), var(--card-bg) 70px); border-color:rgba(255,107,107,.45);}
-.card .rag-strip{height:5px; border-radius:3px; margin-bottom:10px;}
-.card .rag-Green{background:var(--green);} .card .rag-Amber{background:var(--amber);} .card .rag-Red{background:var(--red);}
-.card .name-ar{direction:rtl; text-align:right; font-weight:bold; font-size:14.5px; line-height:1.4; margin-bottom:6px; overflow-wrap:break-word; word-break:break-word;}
-.card .meta{color:var(--muted); font-size:11.5px; margin-bottom:10px;}
-.card .row{display:flex; justify-content:space-between; padding:4px 0; border-top:1px solid var(--line); font-size:12.5px;}
-.card .row:first-of-type{border-top:none;}
-.card .row .l{color:var(--muted);}
-.card .row .v{font-weight:bold; text-align:right; overflow-wrap:break-word; word-break:break-word; max-width:65%;}
-.card .comp{display:flex; gap:6px; margin:8px 0;}
-.card .comp .pill{flex:1; text-align:center; padding:5px 2px; border-radius:7px; font-size:11px;}
-.card .comp .pill .n{font-weight:bold; font-size:14px; display:block;}
-.pill-good{background:rgba(0,194,136,.15); color:var(--green);}
-.pill-bad{background:rgba(255,107,107,.15); color:var(--red);}
-.card .health{display:flex; align-items:center; gap:10px; margin:8px 0; padding:8px; border-radius:8px; background:rgba(255,255,255,.03);}
-.card .health .num{font-size:26px; font-weight:bold;}
-.card .attn{margin-top:10px; padding:8px 10px; border-radius:8px; font-size:11.5px; line-height:1.5;}
-.attn-Green{background:rgba(0,194,136,.12); color:var(--green);}
-.attn-Amber{background:rgba(255,194,75,.12); color:var(--amber);}
-.attn-Red{background:rgba(255,107,107,.12); color:var(--red);}
-.attn-ar{direction:rtl; display:inline;}
+/* ---------- project control card ---------- */
+.card{--st:#4DA3FF; --st-a:rgba(77,163,255,.15); --st-b:rgba(77,163,255,.45);
+  flex:1; min-width:0; background:linear-gradient(180deg, var(--st-a), var(--card-bg) 110px); border:1px solid var(--st-b);
+  border-radius:12px; border-top-left-radius:2px; padding:12px; font-size:13px; overflow-wrap:anywhere;}
+.card.st-ahead  {--st:#2ED39B; --st-a:rgba(46,211,155,.15);  --st-b:rgba(46,211,155,.45);}
+.card.st-ontrack{--st:#4DA3FF; --st-a:rgba(77,163,255,.15);  --st-b:rgba(77,163,255,.45);}
+.card.st-delay  {--st:#FFB020; --st-a:rgba(255,176,32,.16);  --st-b:rgba(255,176,32,.5);}
+.card.st-trouble{--st:#FF5C5C; --st-a:rgba(255,92,92,.17);   --st-b:rgba(255,92,92,.5);}
+.card.st-susp   {--st:#B58CFF; --st-a:rgba(181,140,255,.17); --st-b:rgba(181,140,255,.5);}
+.card.st-completed{--st:#8FA3B3; --st-a:rgba(143,163,179,.16); --st-b:rgba(143,163,179,.45);}
+.card.pf{--st:#C9A96A; --st-a:rgba(201,169,106,.14); --st-b:rgba(201,169,106,.45);}
+.card .strip{height:5px; border-radius:3px; margin-bottom:10px; background:var(--st);}
+.chead{display:flex; justify-content:space-between; align-items:center; gap:6px 8px; margin-bottom:8px; flex-wrap:wrap;}
+.schip{display:inline-flex; align-items:center; gap:6px; padding:4px 10px; border-radius:999px; background:var(--st-a); color:var(--st); border:1px solid var(--st-b); font-weight:700; font-size:12px; white-space:nowrap;}
+.schip .dotc{width:8px; height:8px; border-radius:50%; background:var(--st);}
+.po{font-size:11px; color:var(--muted); text-align:right; line-height:1.25; margin-left:auto; white-space:nowrap; flex-shrink:0;}
+.po b{display:block; color:var(--text); font-size:13.5px; letter-spacing:.4px;}
+.po small{display:block; font-size:10px; opacity:.85;}
+.name-ar{direction:rtl; text-align:right; font-weight:700; font-size:15px; line-height:1.5; margin:2px 0 4px;}
+.meta{color:var(--muted); font-size:11px; margin-bottom:8px; display:flex; gap:6px; flex-wrap:wrap; align-items:center;}
+.meta .sep{opacity:.5;}
+.lbl small,.sh small,.tile .ta{font-family:inherit;}
+.prow{display:flex; justify-content:space-between; gap:10px; padding:7px 0; border-top:1px solid var(--line); font-size:12.5px;}
+.prow .l{color:var(--muted); flex-shrink:0; max-width:40%; line-height:1.3;}
+.prow .l small{display:block; font-size:10px; opacity:.85; direction:rtl; text-align:left;}
+.prow .v{font-weight:600; text-align:right; direction:rtl; flex:1; line-height:1.45;}
+.dates{display:grid; grid-template-columns:1fr 1fr; gap:6px; margin:8px 0 6px;}
+.dtile{background:rgba(255,255,255,.04); border:1px solid var(--line); border-radius:8px; padding:7px 9px; min-width:0;}
+.dtile .dv{font-weight:700; font-size:13px; margin-bottom:2px;}
+.dtile .dl{font-size:9.5px; color:var(--text); opacity:.85; line-height:1.25;}
+.dtile .da{font-size:9px; color:var(--muted); line-height:1.25; direction:rtl; text-align:right;}
+.grid{display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin:6px 0 4px;}
+.tile{background:rgba(255,255,255,.04); border:1px solid var(--line); border-radius:8px; padding:7px 7px 6px; display:flex; flex-direction:column; min-width:0;}
+.tile .tv{font-weight:800; font-size:15px; line-height:1.2; margin-bottom:3px; min-height:18px;}
+.tile .tv.ar{direction:rtl; text-align:right; font-size:12px; font-weight:700; line-height:1.35;}
+.tile .tl{font-size:9.5px; color:var(--text); opacity:.85; line-height:1.25;}
+.tile .ta{font-size:9px; color:var(--muted); line-height:1.3; direction:rtl; text-align:right; margin-top:1px; flex:1;}
+.tile .bar{height:3px; border-radius:2px; background:rgba(255,255,255,.1); margin-top:5px; overflow:hidden;}
+.tile .bar i{display:block; height:100%; background:var(--bc,var(--st)); border-radius:2px;}
+.neg{color:#FF8E8E;} .pos{color:#4EE0A8;} .warn{color:#FFB020;} .bad{color:#FF6B6B;} .good{color:#4EE0A8;} .mute{color:var(--muted);}
+.sec{margin-top:10px; padding-top:9px; border-top:1px solid var(--line);}
+.sh{display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:6px;}
+.sh b{font-size:11.5px; color:var(--gold); line-height:1.25;}
+.sh small{font-size:10px; color:var(--muted); direction:rtl; text-align:right; line-height:1.25;}
+.sb{direction:rtl; text-align:right; font-size:12.5px; line-height:1.7;}
+.sb ol{margin:0; padding:0; list-style:none;}
+.sb li{display:flex; gap:7px; margin:0 0 6px; align-items:flex-start;}
+.sb li .n{flex-shrink:0; width:18px; height:18px; border-radius:50%; background:var(--st-a); color:var(--st); border:1px solid var(--st-b); font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; margin-top:3px;}
+.sb p{margin:0;}
+.sb .none{color:var(--muted);}
+.clamp{max-height:10.2em; overflow:hidden; position:relative;}
+.clamp.open{max-height:none;}
+.clamp.has-more:not(.open)::after{content:''; position:absolute; left:0; right:0; bottom:0; height:2.6em; background:linear-gradient(rgba(15,26,32,0), var(--card-bg));}
+.more{display:none; background:none; border:0; color:var(--accent); font-size:11.5px; padding:5px 0 0; cursor:pointer; font-family:inherit;}
+.clamp.has-more + .more{display:inline-block;}
 
+
+/* ---------- last-update list (newest first) ---------- */
+.subnote{font-size:10px; color:var(--muted); margin:-2px 0 6px; direction:ltr; text-align:left;}
+.dchip{display:block; width:fit-content; direction:ltr; font-size:10px; font-weight:700; color:var(--st); background:var(--st-a); border:1px solid var(--st-b); border-radius:999px; padding:0 8px; margin:2px 0 3px; line-height:1.55;}
+.sb li .ut{flex:1; min-width:0;}
+.older[hidden]{display:none;}
+.older{margin-top:2px;}
+.olderbtn{background:none; border:0; color:var(--accent); font-size:11.5px; padding:2px 0 0; cursor:pointer; font-family:inherit;}
+
+/* ---------- portfolio dashboard ---------- */
+.pfhead .t{display:flex; justify-content:space-between; align-items:baseline; gap:8px;}
+.pfhead b{font-size:15px;}
+.pfhead small{font-size:11px; color:var(--muted); direction:rtl; text-align:right;}
+.pfhead .d{font-size:10.5px; color:var(--muted); margin:2px 0 10px;}
+.totalbox{display:flex; align-items:center; gap:14px; background:rgba(255,255,255,.05); border:1px solid var(--st-b); border-radius:10px; padding:10px 14px; margin-bottom:8px;}
+.totalbox .tn{font-size:36px; font-weight:800; line-height:1; color:var(--gold);}
+.totalbox .tt b{display:block; font-size:12.5px;}
+.totalbox .tt small{display:block; font-size:10.5px; color:var(--muted); direction:rtl; text-align:left;}
+.brow{display:block; width:100%; text-align:left; background:none; border:0; padding:6px 4px; color:var(--text); cursor:pointer; font-family:inherit; border-radius:6px;}
+.brow:hover:not(:disabled){background:rgba(255,255,255,.06);}
+.brow:disabled{cursor:default; opacity:.7;}
+.btop{display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:4px;}
+.bl b{font-size:12px;} .bl small{font-size:10.5px; color:var(--muted); margin-left:6px; direction:rtl;}
+.bn b{font-size:15px; color:var(--bc);}
+.btrack{height:10px; border-radius:5px; background:rgba(255,255,255,.08); overflow:hidden;}
+.btrack i{display:block; height:100%; border-radius:5px; background:var(--bc);}
+.c-ahead{--bc:#2ED39B;} .c-ontrack{--bc:#4DA3FF;} .c-delay{--bc:#FFB020;} .c-trouble{--bc:#FF5C5C;} .c-susp{--bc:#B58CFF;} .c-completed{--bc:#8FA3B3;}
+.bhint{font-size:10px; color:var(--muted); margin:2px 4px 0;}
+.pfsec{margin-top:12px; padding-top:10px; border-top:1px solid var(--line);}
+.grid.g2{grid-template-columns:1fr 1fr;}
+.tile .tv.big{font-size:20px; margin-bottom:4px;}
+.tile .tv .u{font-size:11px; font-weight:700; opacity:.8; margin-left:3px;}
+.v-blue{color:#6FB7FF;}
+.quickchip.hl{border-color:var(--gold); color:#fff; background:rgba(201,169,106,.18);}
+
+/* ---------- option lists ---------- */
 .optlist{margin-top:6px;}
-.optbtn{display:block; width:100%; text-align:right; direction:rtl; background:rgba(255,255,255,.04); border:1px solid var(--line); color:var(--text); padding:8px 10px; border-radius:8px; margin-top:5px; font-size:12.5px; cursor:pointer;}
+.optbtn{display:block; width:100%; text-align:left; background:rgba(255,255,255,.04); border:1px solid var(--line); color:var(--text); padding:8px 10px; border-radius:8px; margin-top:5px; font-size:12.5px; cursor:pointer; font-family:inherit;}
 .optbtn:hover{background:rgba(255,255,255,.09);}
-.optbtn .n{direction:ltr; display:inline-block; color:var(--accent); font-weight:bold; margin-left:6px;}
+.optbtn .on{display:block; direction:rtl; text-align:right; line-height:1.45; margin-bottom:3px;}
+.optbtn .oi{display:flex; align-items:center; gap:6px; font-size:10.5px; color:var(--muted);}
+.optbtn .oi b{color:var(--accent);}
+.optmore{font-size:11px; color:var(--muted); margin-top:6px; line-height:1.4;}
 
+/* ---------- voice + input ---------- */
+.quickrow{display:flex; gap:6px; padding:0 10px 8px; overflow-x:auto; flex-shrink:0; -webkit-overflow-scrolling:touch;}
+.quickchip{background:var(--wa-header); color:#fff; border:1px solid rgba(255,255,255,.15); padding:6px 12px; border-radius:16px; font-size:11.5px; white-space:nowrap; cursor:pointer;}
 .voicebar{display:flex; align-items:center; gap:8px; padding:6px 10px; background:var(--wa-header); flex-shrink:0; border-top:1px solid rgba(255,255,255,.08);}
 .voicebtn{background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.15); color:#fff; width:30px; height:30px; border-radius:50%; font-size:14px; cursor:pointer; flex-shrink:0; display:flex; align-items:center; justify-content:center; padding:0;}
 .voicebtn.active{background:var(--accent); border-color:var(--accent);}
@@ -125,16 +180,10 @@ body{margin:0; background:var(--wa-panel); font-family:Calibri,Arial,sans-serif;
 .voicebtn.unsupported{opacity:.3; cursor:not-allowed;}
 .langbtn{border-radius:8px; width:34px; font-size:10px; font-weight:bold;}
 .voicehint{flex:1; font-size:10.5px; color:var(--muted); text-align:center;}
-@keyframes pulse{
-  0%{ box-shadow:0 0 0 0 rgba(0,168,132,.5); }
-  70%{ box-shadow:0 0 0 8px rgba(0,168,132,0); }
-  100%{ box-shadow:0 0 0 0 rgba(0,168,132,0); }
-}
+@keyframes pulse{ 0%{box-shadow:0 0 0 0 rgba(0,168,132,.5);} 70%{box-shadow:0 0 0 8px rgba(0,168,132,0);} 100%{box-shadow:0 0 0 0 rgba(0,168,132,0);} }
 .inputbar{display:flex; gap:8px; padding:10px; padding-bottom:calc(10px + env(safe-area-inset-bottom,0px)); background:var(--wa-header); flex-shrink:0;}
-.inputbar input{flex:1; border:none; border-radius:20px; padding:10px 14px; font-size:14px; background:var(--card-bg); color:var(--text);}
+.inputbar input{flex:1; border:none; border-radius:20px; padding:10px 14px; font-size:16px; background:var(--card-bg); color:var(--text); min-width:0;}
 .inputbar button{background:var(--accent); border:none; color:#fff; width:40px; height:40px; border-radius:50%; font-size:16px; cursor:pointer; flex-shrink:0;}
-.quickrow{display:flex; gap:6px; padding:0 10px 8px; overflow-x:auto; flex-shrink:0;}
-.quickchip{background:var(--wa-header); color:#fff; border:1px solid rgba(255,255,255,.15); padding:6px 12px; border-radius:16px; font-size:11.5px; white-space:nowrap; cursor:pointer;}
 </style>
 </head>
 <body>
@@ -143,7 +192,7 @@ body{margin:0; background:var(--wa-panel); font-family:Calibri,Arial,sans-serif;
     <div class="avatar" aria-hidden="true" id="headerAvatarSlot"></div>
     <div class="headtext">
       <div class="name">PMO Bot</div>
-      <div class="status">online &middot; Northwestern Cluster</div>
+      <div class="status">online &middot; Northwestern Cluster &middot; data to 1 Oct 2026</div>
     </div>
   </div>
   <div class="logobar">
@@ -154,9 +203,13 @@ body{margin:0; background:var(--wa-panel); font-family:Calibri,Arial,sans-serif;
   <div class="geopattern" aria-hidden="true"></div>
   <div class="thread" id="thread" role="log" aria-live="polite"></div>
   <div class="quickrow">
+    <div class="quickchip hl" data-q="portfolio" role="button" tabindex="0">📊 portfolio</div>
     <div class="quickchip" data-q="help" role="button" tabindex="0">help</div>
-    <div class="quickchip" data-q="red" role="button" tabindex="0">red projects</div>
-    <div class="quickchip" data-q="amber" role="button" tabindex="0">amber projects</div>
+    <div class="quickchip" data-q="critical" role="button" tabindex="0">critical</div>
+    <div class="quickchip" data-q="troubled" role="button" tabindex="0">troubled</div>
+    <div class="quickchip" data-q="delayed" role="button" tabindex="0">delayed</div>
+    <div class="quickchip" data-q="zero progress" role="button" tabindex="0">zero progress</div>
+    <div class="quickchip" data-q="partially suspended" role="button" tabindex="0">partially suspended</div>
     <div class="quickchip" data-q="Tabuk" role="button" tabindex="0">Tabuk</div>
     <div class="quickchip" data-q="Madinah" role="button" tabindex="0">Madinah</div>
   </div>
@@ -167,391 +220,576 @@ body{margin:0; background:var(--wa-panel); font-family:Calibri,Arial,sans-serif;
     <button id="speakToggleBtn" class="voicebtn" aria-label="Toggle spoken replies" title="Read replies aloud">🔇</button>
   </div>
   <div class="inputbar">
-    <input type="text" id="inp" placeholder="Type project number, name, or city..." aria-label="Ask the PMO Bot">
+    <input type="text" id="inp" placeholder="PO, project, contractor, status or area..." aria-label="Ask the PMO Bot" autocomplete="off">
     <button id="sendBtn" aria-label="Send">&#10148;</button>
   </div>
 </div>
 
 <script>
-const AVATAR_SVG = `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg"><circle cx="60" cy="60" r="60" fill="#F4E4C9"/><path class="avatar-robe" d="M16,124 C16,94 33,85 60,85 C87,85 104,94 104,124 Z" fill="#FBFBFB" stroke="#E3DCCB" stroke-width="1"/><rect x="50" y="75" width="20" height="18" rx="6" fill="#C98A5E"/><ellipse cx="60" cy="65" rx="20" ry="22" fill="#D9A579"/><path d="M33,62 C30,36 43,20 60,20 C77,20 90,36 87,62 C85,49 77,42 60,42 C43,42 35,49 33,62 Z" fill="#FFFFFF" stroke="#ECE4D4" stroke-width="0.5"/><g class="avatar-drape-l"><path d="M33,48 C24,55 18,78 21,110 L41,101 C36,83 36,63 41,48 Z" fill="#FFFFFF" stroke="#E3DCCB" stroke-width="1"/><path d="M23,88 L40,80 M22,95 L39,87 M21,102 L38,94 M20,109 L37,101" stroke="#C0392B" stroke-width="2.4" stroke-linecap="round"/></g><g class="avatar-drape-r"><path d="M87,48 C96,55 102,78 99,110 L79,101 C84,83 84,63 79,48 Z" fill="#FFFFFF" stroke="#E3DCCB" stroke-width="1"/><path d="M97,88 L80,80 M98,95 L81,87 M99,102 L82,94 M100,109 L83,101" stroke="#C0392B" stroke-width="2.4" stroke-linecap="round"/></g><ellipse cx="60" cy="26" rx="19" ry="5" fill="none" stroke="#1A1A1A" stroke-width="4"/><ellipse cx="60" cy="31.5" rx="19.5" ry="5" fill="none" stroke="#1A1A1A" stroke-width="4"/><path d="M47,58 Q51,55 55,58" stroke="#3A2A1C" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M65,58 Q69,55 73,58" stroke="#3A2A1C" stroke-width="1.6" fill="none" stroke-linecap="round"/><ellipse class="avatar-eye" cx="51.5" cy="64" rx="3.2" ry="4" fill="#2B1B12"/><ellipse class="avatar-eye" cx="68.5" cy="64" rx="3.2" ry="4" fill="#2B1B12"/><path d="M51,74 Q60,80 69,74" stroke="#8A4A2E" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
-const PROJECTS = [{"num": "O138", "name": "استكمال إنشاء أشياب مع ملحقاتها ومحطة تنقية للمياه في مناطق مختلفة بمحافظة الحناكية", "type": "Works", "region": "Madinah", "city": "الحناكية", "contractorName": "شركة بنون و فنون للمقاولات", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "Distressed", "physical": 46.9, "planned": 100.0, "sv": 53.1, "elapsed": 102.6, "value": 4.94, "remaining": 2.62, "reason": "تأخر البرنامج الزمني مايزيد عن 25%", "health": 47.4, "rag": "Red", "scheduleScore": 46.9, "statusScore": 15.0, "overrunScore": 97.4, "attention": "Attention required — status is Distressed, running 53.1 pts behind schedule. Reported cause: تأخر البرنامج الزمني مايزيد عن 25%."}, {"num": "AP269", "name": "شبكات مياه في الحناكية و الصميد", "type": "Works", "region": "Madinah", "city": "الحناكية", "contractorName": "شركة خالد سليم الأحمدي للمقاولات شركة شخص واحد", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "Ahead of Schedule", "physical": 27.3, "planned": 19.4, "sv": -7.9, "elapsed": 31.4, "value": 30.43, "remaining": 22.13, "reason": null, "health": 98.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Ahead of Schedule. Running 7.9 pts ahead of schedule."}, {"num": "O394", "name": "استكمال خطوط الصرف الصحي لمدينة العلا (خطوط رئيسية وشبكات)", "type": "Works", "region": "Madinah", "city": "العلا", "contractorName": "شركة تاج العزيزية", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Provisional Acceptance In Progress", "projectStatus": "Delayed", "physical": 80.9, "planned": 100.0, "sv": 19.1, "elapsed": 106.6, "value": 18.95, "remaining": 3.62, "reason": null, "health": 72.6, "rag": "Amber", "scheduleScore": 80.9, "statusScore": 45.0, "overrunScore": 93.4, "attention": "Monitor closely — status is Delayed. Running 19.1 pts behind schedule."}, {"num": "AP264", "name": "مشروع انشاء شبكات مياه بقريتي المعتدل وقاع الحاج", "type": "Works", "region": "Madinah", "city": "العلا", "contractorName": "مؤسسه اشغال النهار للمقاولات", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "Ahead of Schedule", "physical": 26.4, "planned": 16.5, "sv": -9.8, "elapsed": 34.7, "value": 20.79, "remaining": 15.31, "reason": null, "health": 98.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Ahead of Schedule. Running 9.8 pts ahead of schedule."}, {"num": "AP246", "name": "مشروع انشاء شبكات مياه بمدائن صالح", "type": "Works", "region": "Madinah", "city": "العلا", "contractorName": "شركة ركن المواثيق للمقاولات شركة شخص واحد", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "On Track", "physical": 0.6, "planned": 5.2, "sv": 4.6, "elapsed": 21.4, "value": 21.79, "remaining": 21.67, "reason": null, "health": 93.2, "rag": "Green", "scheduleScore": 95.4, "statusScore": 85.0, "overrunScore": 100.0, "attention": "On track — status is On Track."}, {"num": "AP243", "name": "تنفيذ خطوط وشبكات توزيع المياه لمحافظة العيص ( المرحلة الأولى )", "type": "Works", "region": "Madinah", "city": "العيص", "contractorName": "شركة الركائز الثابتة المحدودة", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "Ahead of Schedule", "physical": 48.0, "planned": 41.4, "sv": -6.6, "elapsed": 47.5, "value": 58.22, "remaining": 30.28, "reason": null, "health": 98.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Ahead of Schedule. Running 6.6 pts ahead of schedule."}, {"num": "AP1039-10", "name": "اتفاقية الخدمات الهندسية والاستشارية لتقديم خدمات الإشراف على تنفيذ مشاريع المياه والصرف الصحي بالقطاع الشمالي الغربي عقد (2)", "type": "Consultancy", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة دورش هولدنج جى ام بي اتش السعودية", "consultantName": null, "contractStatus": "Under Execution", "projectStatus": "Consultancy - Ongoing", "physical": 6.7, "planned": 9.7, "sv": 2.9, "elapsed": 37.7, "value": 336.54, "remaining": 313.86, "reason": null, "health": 94.0, "rag": "Green", "scheduleScore": 97.1, "statusScore": 85.0, "overrunScore": 100.0, "attention": "On track — status is Consultancy - Ongoing."}, {"num": "P878", "name": "احلال شبكات وخطوط مياه بالمدينة المنورة", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة بيان الانشاء للمقاولات", "consultantName": "شركة دورش هولدنج جي إم بي إتش السعودية", "contractStatus": "Under Execution", "projectStatus": "Ahead of Schedule", "physical": 27.6, "planned": 19.5, "sv": -8.1, "elapsed": 56.1, "value": 24.83, "remaining": 17.98, "reason": "V.Order", "health": 98.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Ahead of Schedule. Running 8.1 pts ahead of schedule. Reported cause: V.Order."}, {"num": "P898-1", "name": "استكمال تنفيذ الخطوط الرئيسية والشبكات الفرعية لمخططات شوران (المرحلة الأولى)", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة   اضواء الخليل  للمقاولات", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "Ahead of Schedule", "physical": 56.5, "planned": 50.5, "sv": -6.0, "elapsed": 54.5, "value": 111.77, "remaining": 48.68, "reason": null, "health": 98.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Ahead of Schedule. Running 6.0 pts ahead of schedule."}, {"num": "O855", "name": "استكمال تنفيذ الخطوط الرئيسية وشبكات الصرف الصحي بأحياء شوران", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة عوده مبارك البلادي و أبنائه للمقاولات المحدودة", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "Delayed", "physical": 7.5, "planned": 24.6, "sv": 17.1, "elapsed": 55.6, "value": 11.96, "remaining": 11.06, "reason": null, "health": 75.0, "rag": "Green", "scheduleScore": 82.9, "statusScore": 45.0, "overrunScore": 100.0, "attention": "On track — status is Delayed."}, {"num": "1142", "name": "استكمال تنفيذ الخطوط الرئيسية وشبكات المياه بالمدينة المنورة", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة الصخرة العربية للمقاولات", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Provisional Acceptance", "projectStatus": "Provisional Handover", "physical": 96.0, "planned": 100.0, "sv": 4.0, "elapsed": 166.3, "value": 59.55, "remaining": 2.38, "reason": "ضعف الامكانيات", "health": 83.2, "rag": "Green", "scheduleScore": 96.0, "statusScore": 95.0, "overrunScore": 33.7, "attention": "On track — status is Provisional Handover. Reported cause: ضعف الامكانيات."}, {"num": "O192", "name": "استكمال تنفيذ خطوط وشبكات المياه بأحياء شرق المدينة المنورة والعاقول", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة دقة الابعاد للمقاولات", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "Delayed", "physical": 13.2, "planned": 34.2, "sv": 21.0, "elapsed": 80.4, "value": 44.88, "remaining": 38.96, "reason": "V.Order", "health": 73.0, "rag": "Amber", "scheduleScore": 79.0, "statusScore": 45.0, "overrunScore": 100.0, "attention": "Monitor closely — status is Delayed. Running 21.0 pts behind schedule. Reported cause: V.Order."}, {"num": "10277", "name": "استكمال تنفيذ شبكات الصرف الصحي بالأماكن المتضررة بالمدينة المنورة", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة البنايات العربية للمقاولات العامة", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Partial Suspension", "projectStatus": "Delayed", "physical": 75.0, "planned": 100.0, "sv": 25.0, "elapsed": 106.9, "value": 26.02, "remaining": 6.5, "reason": "Permissions", "health": 69.6, "rag": "Amber", "scheduleScore": 75.0, "statusScore": 45.0, "overrunScore": 93.1, "attention": "Monitor closely — status is Delayed. Running 25.0 pts behind schedule. Reported cause: Permissions."}, {"num": "O1003", "name": "انشاء خزانين للمياه بجنوب المدينة المنورة وملحقاتهما بسعة 250 الف م3 لكل خزان", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة   اضواء الخليل  للمقاولات", "consultantName": "شركة دورش هولدنج جي إم بي إتش السعودية", "contractStatus": "Under Execution", "projectStatus": "Ahead of Schedule", "physical": 34.1, "planned": 23.2, "sv": -10.9, "elapsed": 29.6, "value": 198.87, "remaining": 131.02, "reason": null, "health": 98.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Ahead of Schedule. Running 10.9 pts ahead of schedule."}, {"num": "P832", "name": "ترحيل خطوط وتنفيذ شبكات بمناطق متفرقة (المرحلة الاولى)", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة خالد سليم الأحمدي للمقاولات شركة شخص واحد", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "On Track", "physical": 0.8, "planned": 2.7, "sv": 1.9, "elapsed": 22.7, "value": 68.35, "remaining": 67.78, "reason": null, "health": 94.6, "rag": "Green", "scheduleScore": 98.2, "statusScore": 85.0, "overrunScore": 100.0, "attention": "On track — status is On Track."}, {"num": "P848-1", "name": "تنفيذ خط الصرف الصحي بالدعيثة", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة ابداع الحياة للاستثمار", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Provisional Acceptance", "projectStatus": "Provisional Handover", "physical": 81.6, "planned": 100.0, "sv": 18.4, "elapsed": 131.8, "value": 20.94, "remaining": 3.86, "reason": null, "health": 82.9, "rag": "Green", "scheduleScore": 81.6, "statusScore": 95.0, "overrunScore": 68.2, "attention": "On track — status is Provisional Handover."}, {"num": "P824", "name": "تنفيذ خط المياه الرئيسي الخاص من موقع الخزانات الاستراتيجية الى المسجد النبوي ومنطقة التطوير", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة مطلق الغويري للمقاولات  مساهمه مقفله", "consultantName": "شركة دورش هولدنج جي إم بي إتش السعودية", "contractStatus": "Under Execution", "projectStatus": "Ahead of Schedule", "physical": 14.4, "planned": 8.2, "sv": -6.2, "elapsed": 25.3, "value": 342.21, "remaining": 293.0, "reason": null, "health": 98.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Ahead of Schedule. Running 6.2 pts ahead of schedule."}, {"num": "P829", "name": "تنفيذ خط المياه الرئيسي لتغذية توسعة المطار", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة دقة الابعاد للمقاولات", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "Distressed", "physical": 17.7, "planned": 100.0, "sv": 82.3, "elapsed": 116.4, "value": 20.81, "remaining": 17.12, "reason": "تأخر البرنامج الزمني مايزيد عن 25%", "health": 30.1, "rag": "Red", "scheduleScore": 17.7, "statusScore": 15.0, "overrunScore": 83.6, "attention": "Attention required — status is Distressed, running 82.3 pts behind schedule. Reported cause: تأخر البرنامج الزمني مايزيد عن 25%."}, {"num": "AP249", "name": "تنفيذ خط مياه رئيسي وخزان  وشبكة توزيع رئيسية لوادي الريم وقراها", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة أعمال متكاملة للمقاولات", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Full Suspension", "projectStatus": "Fully Suspended", "physical": 0.0, "planned": 1.9, "sv": 1.9, "elapsed": 25.9, "value": 58.78, "remaining": 58.78, "reason": "Other Projects Interference", "health": 72.1, "rag": "Amber", "scheduleScore": 98.1, "statusScore": 10.0, "overrunScore": 100.0, "attention": "Monitor closely — status is Fully Suspended. Running 1.9 pts behind schedule. Reported cause: Other Projects Interference."}, {"num": "10203", "name": "تنفيذ خطوط الصرف الصحي الرئيسية بمخططات الرانوناء واحياء جنوب المدينة", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة روابط الحمرور المحدودة", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "Ahead of Schedule", "physical": 52.5, "planned": 50.4, "sv": -2.1, "elapsed": 68.4, "value": 117.21, "remaining": 55.65, "reason": null, "health": 98.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Ahead of Schedule. Running 2.1 pts ahead of schedule."}, {"num": "P861", "name": "تنفيذ خطوط وشبكات الصرف الصحي مخطط جبل عير", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة سماء التشييد والبناء للتجارة والمقاولات", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "Ahead of Schedule", "physical": 11.5, "planned": 8.7, "sv": -2.7, "elapsed": 28.1, "value": 82.86, "remaining": 73.37, "reason": null, "health": 98.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Ahead of Schedule. Running 2.7 pts ahead of schedule."}, {"num": "10137", "name": "تنفيذ شبكات الصرف الصحي بمخططات الرانوناء واحياء جنوب المدينة (المرحلة الأولى)", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "الشركة الوطنية لاعمال المياه", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "On Track", "physical": 55.6, "planned": 61.6, "sv": 6.0, "elapsed": 91.4, "value": 37.84, "remaining": 16.79, "reason": "ضعف الامكانيات", "health": 92.5, "rag": "Green", "scheduleScore": 94.0, "statusScore": 85.0, "overrunScore": 100.0, "attention": "On track — status is On Track. Reported cause: ضعف الامكانيات."}, {"num": "NA-00034", "name": "تنفيذ شبكات صرف صحي متفرقة بالمدينة المنورة (الجزء الأول)", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة ابداع الحياة للاستثمار", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "Ahead of Schedule", "physical": 30.0, "planned": 24.9, "sv": -5.1, "elapsed": 64.0, "value": 50.22, "remaining": 35.15, "reason": null, "health": 98.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Ahead of Schedule. Running 5.1 pts ahead of schedule."}, {"num": "10245", "name": "تنفيذ شبكات وخطوط المياه بالصويدرة بمنطقة المدينة المنورة", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة خالد سليم الأحمدي للمقاولات شركة شخص واحد", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "On Track", "physical": 40.7, "planned": 43.9, "sv": 3.2, "elapsed": 62.1, "value": 43.64, "remaining": 25.88, "reason": "V.Order", "health": 93.9, "rag": "Green", "scheduleScore": 96.8, "statusScore": 85.0, "overrunScore": 100.0, "attention": "On track — status is On Track. Reported cause: V.Order."}, {"num": "P908", "name": "تنفيذ شبكات وخطوط المياه بمنطقة جنوب المدينة المنورة", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة عبد المحسن شعبان القحطانى للمقاولات", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "On Track", "physical": 21.0, "planned": 24.5, "sv": 3.5, "elapsed": 53.3, "value": 83.91, "remaining": 66.29, "reason": "Permissions", "health": 93.7, "rag": "Green", "scheduleScore": 96.5, "statusScore": 85.0, "overrunScore": 100.0, "attention": "On track — status is On Track. Reported cause: Permissions."}, {"num": "10101", "name": "تنفيذ شبكات وخطوط مياه بالعوينة والعاقول بالمدينة المنورة", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة إعمار السعودية للإنشاء والتطوير", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "On Track", "physical": 50.1, "planned": 50.2, "sv": 0.1, "elapsed": 72.0, "value": 56.75, "remaining": 28.31, "reason": null, "health": 95.4, "rag": "Green", "scheduleScore": 99.9, "statusScore": 85.0, "overrunScore": 100.0, "attention": "On track — status is On Track."}, {"num": "AP251", "name": "تنفيذ مشاريع إيصال خدمات الصرف الصحي لمخططات الإسكان بالمدينة المنورة ( 4 مواقع )", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة آشي وبشناق للمقاولات المحدودة", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "Ahead of Schedule", "physical": 8.1, "planned": 4.4, "sv": -3.6, "elapsed": 25.0, "value": 72.45, "remaining": 66.61, "reason": null, "health": 98.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Ahead of Schedule. Running 3.6 pts ahead of schedule."}, {"num": "P917-3", "name": "تنقيذ شبكات وخطوط مياه قرى المدينة المنورة ( الجزء الثالث )", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة خالد سليم الأحمدي للمقاولات شركة شخص واحد", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "Ahead of Schedule", "physical": 6.8, "planned": 5.3, "sv": -1.4, "elapsed": 24.6, "value": 37.93, "remaining": 35.37, "reason": null, "health": 98.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Ahead of Schedule. Running 1.4 pts ahead of schedule."}, {"num": "O1006", "name": "توريد وتركيب وحدات معالجة الحمأة ميكانيكيا بالمدينة المنورة", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة البنايات العربية للمقاولات العامة", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "Delayed", "physical": 82.0, "planned": 100.0, "sv": 18.0, "elapsed": 101.6, "value": 18.57, "remaining": 3.34, "reason": "اخرى", "health": 74.2, "rag": "Amber", "scheduleScore": 82.0, "statusScore": 45.0, "overrunScore": 98.4, "attention": "Monitor closely — status is Delayed. Running 18.0 pts behind schedule. Reported cause: اخرى."}, {"num": "P825", "name": "خط المياه الرئيسي بالدائري الأوسط بالمدينة المنورة", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "فرع شركة شبه الجزيرة للمقاولات", "consultantName": "شركة دورش هولدنج جي إم بي إتش السعودية", "contractStatus": "Under Execution", "projectStatus": "Ahead of Schedule", "physical": 11.1, "planned": 7.9, "sv": -3.1, "elapsed": 28.9, "value": 116.76, "remaining": 103.81, "reason": null, "health": 98.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Ahead of Schedule. Running 3.1 pts ahead of schedule."}, {"num": "NA-00033", "name": "خطوط مياه متفرقة بالمدينة المنورة (الجزء الاول)", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة دقة الابعاد للمقاولات", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "Ahead of Schedule", "physical": 15.1, "planned": 13.6, "sv": -1.5, "elapsed": 48.1, "value": 28.95, "remaining": 24.58, "reason": null, "health": 98.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Ahead of Schedule. Running 1.5 pts ahead of schedule."}, {"num": "P802", "name": "شبكات المياه لإيصال الخدمة لمستشفى التخصصي بحمراء الأسد", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة بيان الانشاء للمقاولات", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "Ahead of Schedule", "physical": 41.2, "planned": 41.1, "sv": -0.1, "elapsed": 60.6, "value": 32.08, "remaining": 18.85, "reason": null, "health": 98.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Ahead of Schedule. Running 0.1 pts ahead of schedule."}, {"num": "P921", "name": "عبارة تصريف مياه الفائض لمحطة معالجة الصرف الصحي بالمدينة المنورة", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة مسعود بالعيد حيدر ال حيدر وشركاه للتجاره والمقاولات العامه", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "On Track", "physical": 0.0, "planned": 7.3, "sv": 7.3, "elapsed": 46.3, "value": 14.4, "remaining": 14.4, "reason": "Permissions", "health": 91.8, "rag": "Green", "scheduleScore": 92.7, "statusScore": 85.0, "overrunScore": 100.0, "attention": "On track — status is On Track. Reported cause: Permissions."}, {"num": "P898-2", "name": "مشروع إستكمال تنفيذ الخطوط الرئيسية والشبكات الفرعية لمخططات شوران ( المرحلة الثانية )", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة آفاق الدولية للإستثمار", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "On Track", "physical": 7.0, "planned": 9.1, "sv": 2.1, "elapsed": 47.5, "value": 15.46, "remaining": 14.37, "reason": null, "health": 94.4, "rag": "Green", "scheduleScore": 97.9, "statusScore": 85.0, "overrunScore": 100.0, "attention": "On track — status is On Track."}, {"num": "NA-00112", "name": "مشروع استبدال خطوط وشبكات المياه المتهالكة بالمدينة المنورة", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة ثروات المجد للمقاولات العامة", "consultantName": "شركة دورش هولدنج جي إم بي إتش السعودية", "contractStatus": "Under Execution", "projectStatus": "On Track", "physical": 3.2, "planned": 9.6, "sv": 6.4, "elapsed": 43.3, "value": 26.59, "remaining": 25.75, "reason": null, "health": 92.3, "rag": "Green", "scheduleScore": 93.6, "statusScore": 85.0, "overrunScore": 100.0, "attention": "On track — status is On Track."}, {"num": "P852", "name": "مشروع استكمال شبكات الصرف الصحى لحى البرماوية", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة الرخيص للمقاولات", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "On Track", "physical": 19.0, "planned": 21.0, "sv": 2.0, "elapsed": 49.6, "value": 14.1, "remaining": 11.42, "reason": null, "health": 94.5, "rag": "Green", "scheduleScore": 98.0, "statusScore": 85.0, "overrunScore": 100.0, "attention": "On track — status is On Track."}, {"num": "10278", "name": "مشروع انشاء شبكات وخطوط الصرف الصحي بحي الأصيفرين بالمدينة المنورة", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "مجموعة سعد علي العيسى للمقاولات (شركة شخص واحد)", "consultantName": "شركة دورش هولدنج جي إم بي إتش السعودية", "contractStatus": "Under Execution", "projectStatus": "On Track", "physical": 14.8, "planned": 15.3, "sv": 0.5, "elapsed": 52.3, "value": 63.67, "remaining": 54.26, "reason": null, "health": 95.2, "rag": "Green", "scheduleScore": 99.5, "statusScore": 85.0, "overrunScore": 100.0, "attention": "On track — status is On Track."}, {"num": "P894-1", "name": "مشروع تنفيذ خط المياه الرئيسي في الدائري الثالث شرق المدينة المنورة", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة الأولات للصناعة والإنشاء المحدودة", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "Ahead of Schedule", "physical": 59.8, "planned": 59.2, "sv": -0.7, "elapsed": 75.9, "value": 26.15, "remaining": 10.5, "reason": null, "health": 98.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Ahead of Schedule. Running 0.7 pts ahead of schedule."}, {"num": "10129", "name": "مشروع تنفيذ شبكات الصرف الصحي باحياء الجرف بالمدينة المنورة", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة البنايات العربية للمقاولات العامة", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Partial Suspension", "projectStatus": "On Track", "physical": 22.5, "planned": 28.6, "sv": 6.1, "elapsed": 70.3, "value": 78.22, "remaining": 60.62, "reason": "ضعف الامكانيات", "health": 92.5, "rag": "Green", "scheduleScore": 93.9, "statusScore": 85.0, "overrunScore": 100.0, "attention": "On track — status is On Track. Reported cause: ضعف الامكانيات."}, {"num": "10280", "name": "مشروع تنفيذ شبكة توزيع المياه في حي المحاميد بالمدينة المنورة", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة خزام ناصر سعيد الشهراني للمقاولاتت", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Partial Suspension", "projectStatus": "On Track", "physical": 19.0, "planned": 24.2, "sv": 5.2, "elapsed": 64.7, "value": 29.43, "remaining": 23.85, "reason": "V.Order", "health": 92.9, "rag": "Green", "scheduleScore": 94.8, "statusScore": 85.0, "overrunScore": 100.0, "attention": "On track — status is On Track. Reported cause: V.Order."}, {"num": "NA-00023", "name": "مشروع خطوط وشبكات المياه بمنطقة شمال وشرق المدينة المنورة", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركة كيان المملكة كاك المحدودة", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "On Track", "physical": 9.8, "planned": 14.6, "sv": 4.8, "elapsed": 49.0, "value": 35.89, "remaining": 32.37, "reason": null, "health": 93.1, "rag": "Green", "scheduleScore": 95.2, "statusScore": 85.0, "overrunScore": 100.0, "attention": "On track — status is On Track."}, {"num": "NA-00220", "name": "ﻣﺸﺮﻭﻉ ﺇﻳﺼﺎﻝ ﺧﺪﻣﺔ ﺍﻟﺼﺮﻑ ﺍﻟﺼﺤﻲ ﻟﻤﺸﺮﻭﻉ ﺑﻮﺍﻳﺔ ﺳﻤﻮ ﺍﻟﻤﻄﻞ ﻋﻠﻰ ﺗﻘﺎﻃﻊ ﻃﺮﻳﻘﻲ ﺍﻟﻤﻠﻚ ﻓﻴﺼﻞ ﻭﺍﻟﻤﻠﻚ ﻓﻬﺪ ﺍﻟﻜﺎﺋﻦ ﺑﺤﻲ ﺍﻟﻤﺼﺎﻧﻊ ﺑﺎﻟﻤﺪﻳﻨﺔ ﺍﻟﻤﻨﻮﺭ ﺓ", "type": "Works", "region": "Madinah", "city": "المدينة المنورة", "contractorName": "شركه اعمال المحترفون للتجارة والمقاولات", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "On Track", "physical": 0.0, "planned": 0.0, "sv": 0.0, "elapsed": 15.3, "value": 3.76, "remaining": 3.76, "reason": null, "health": 95.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 85.0, "overrunScore": 100.0, "attention": "On track — status is On Track."}, {"num": "O1005", "name": "استكمال إنشاء خزان مياه تجميعي 10,000م3 ببيضان محافظة المهد", "type": "Works", "region": "Madinah", "city": "المهد", "contractorName": "مؤسسة سنام للمقاولات", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Provisional Acceptance", "projectStatus": "Provisional Handover", "physical": 89.6, "planned": 100.0, "sv": 10.4, "elapsed": 139.8, "value": 8.6, "remaining": 0.65, "reason": "V.Order", "health": 85.4, "rag": "Green", "scheduleScore": 89.6, "statusScore": 95.0, "overrunScore": 60.2, "attention": "On track — status is Provisional Handover. Reported cause: V.Order."}, {"num": "P862", "name": "تنفيذ خطوط وشبكات الصرف الصحي بمحافظة المهد ( الجزء الاول )", "type": "Works", "region": "Madinah", "city": "المهد", "contractorName": "شركة المشروعات المتقدمة المحدودة", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "Ahead of Schedule", "physical": 14.5, "planned": 10.3, "sv": -4.2, "elapsed": 28.9, "value": 47.03, "remaining": 40.19, "reason": null, "health": 98.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Ahead of Schedule. Running 4.2 pts ahead of schedule."}, {"num": "O267", "name": "استكمال الخطوط الرئيسية وشبكات الصرف الصحي بمدينة بدر", "type": "Works", "region": "Madinah", "city": "بدر", "contractorName": "شركة ركن المواثيق للمقاولات شركة شخص واحد", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Provisional Acceptance In Progress", "projectStatus": "Distressed", "physical": 52.0, "planned": 100.0, "sv": 48.0, "elapsed": 131.6, "value": 11.47, "remaining": 5.51, "reason": "تأخر البرنامج الزمني مايزيد عن 25%", "health": 44.2, "rag": "Red", "scheduleScore": 52.0, "statusScore": 15.0, "overrunScore": 68.4, "attention": "Attention required — status is Distressed, running 48.0 pts behind schedule. Reported cause: تأخر البرنامج الزمني مايزيد عن 25%."}, {"num": "P871", "name": "تنفيذ خطوط وشبكات الصرف الصحي بمحافظة بدر ( الجزء الأول )", "type": "Works", "region": "Madinah", "city": "بدر", "contractorName": "شركة العاذرية المحدودة للتجارة", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "On Track", "physical": 5.0, "planned": 5.3, "sv": 0.3, "elapsed": 26.7, "value": 25.75, "remaining": 24.47, "reason": null, "health": 95.4, "rag": "Green", "scheduleScore": 99.7, "statusScore": 85.0, "overrunScore": 100.0, "attention": "On track — status is On Track."}, {"num": "AP247", "name": "تنفيذ خطوط وشبكات توزيع المياه بمحافظة بدر", "type": "Works", "region": "Madinah", "city": "بدر", "contractorName": "سماء الرس للمقاولات", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "Ahead of Schedule", "physical": 62.3, "planned": 43.2, "sv": -19.1, "elapsed": 39.0, "value": 29.65, "remaining": 11.18, "reason": null, "health": 98.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Ahead of Schedule. Running 19.1 pts ahead of schedule."}, {"num": "NA-00031", "name": "مشروع إحلال خطوط الإسبستوس ببدر", "type": "Works", "region": "Madinah", "city": "بدر", "contractorName": "شركة آفاق الدولية للإستثمار", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "On Track", "physical": 48.1, "planned": 51.4, "sv": 3.3, "elapsed": 61.5, "value": 24.99, "remaining": 12.97, "reason": null, "health": 93.9, "rag": "Green", "scheduleScore": 96.7, "statusScore": 85.0, "overrunScore": 100.0, "attention": "On track — status is On Track."}, {"num": "P918", "name": "مشروع إنشاء خط مياه رئيسي من المسيجيد الى هبت مع محطة ضخ في المسيجيد ومحطة أخرى في بئر الروحاء", "type": "Works", "region": "Madinah", "city": "بدر", "contractorName": "شركة ميلاف السعودية", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "Ahead of Schedule", "physical": 25.0, "planned": 14.7, "sv": -10.3, "elapsed": 28.1, "value": 43.41, "remaining": 32.56, "reason": null, "health": 98.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Ahead of Schedule. Running 10.3 pts ahead of schedule."}, {"num": "NA-00197", "name": "مشروع إيصال خدمة المياه لمرفأ الرايس بمحافظة بدر", "type": "Works", "region": "Madinah", "city": "بدر", "contractorName": "شركة بيان الانشاء للمقاولات", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Provisional Acceptance", "projectStatus": "Provisional Handover", "physical": 65.2, "planned": 100.0, "sv": 34.8, "elapsed": 189.0, "value": 0.3, "remaining": 0.1, "reason": null, "health": 63.3, "rag": "Amber", "scheduleScore": 65.2, "statusScore": 95.0, "overrunScore": 11.0, "attention": "Monitor closely — status is Provisional Handover. Running 34.8 pts behind schedule."}, {"num": "AP1038-10", "name": "اتفاقية الخدمات الاستشارية للدراسات والتصاميم والهندسة القيمية لمشاريع القطاع الشمالي الغربي عقد (2)", "type": "Consultancy", "region": "Madinah", "city": "مناطق متعددة", "contractorName": "شركة دار الهندسة للتصميم و الإستشارات الهندسية", "consultantName": null, "contractStatus": "Under Execution", "projectStatus": "Consultancy - Ongoing", "physical": 53.9, "planned": 90.1, "sv": 36.2, "elapsed": 88.5, "value": 221.14, "remaining": 101.97, "reason": "اخرى", "health": 77.4, "rag": "Green", "scheduleScore": 63.8, "statusScore": 85.0, "overrunScore": 100.0, "attention": "On track — status is Consultancy - Ongoing. Reported cause: اخرى."}, {"num": "AP1038-9", "name": "اتفاقية الخدمات الهندسية الاستشارية لإعداد الدراسات والتصاميم لمشاريع المياه والصرف الصحي بالقطاع الشمالي الغربي عقد (1)", "type": "Consultancy", "region": "Madinah", "city": "مناطق متعددة", "contractorName": "فرع شركة أياسا انخيريا إي اركيتوركورا اس ايه", "consultantName": null, "contractStatus": "Under Execution", "projectStatus": "Consultancy - Ongoing", "physical": 49.2, "planned": 87.8, "sv": 38.6, "elapsed": 88.6, "value": 122.82, "remaining": 62.43, "reason": "اخرى", "health": 76.2, "rag": "Green", "scheduleScore": 61.4, "statusScore": 85.0, "overrunScore": 100.0, "attention": "On track — status is Consultancy - Ongoing. Reported cause: اخرى."}, {"num": "AP1039-9", "name": "اتفاقية الخدمات الهندسية والاستشارية لتقديم خدمات الإشراف على تنفيذ مشاريع المياه والصرف الصحي بالقطاع الشمالي الغربي عقد (1)", "type": "Consultancy", "region": "Madinah", "city": "مناطق متعددة", "contractorName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "consultantName": null, "contractStatus": "Under Execution", "projectStatus": "Consultancy - Ongoing", "physical": 53.2, "planned": 58.0, "sv": 4.8, "elapsed": 61.5, "value": 98.67, "remaining": 46.14, "reason": "لا يوجد تأخير", "health": 93.1, "rag": "Green", "scheduleScore": 95.2, "statusScore": 85.0, "overrunScore": 100.0, "attention": "On track — status is Consultancy - Ongoing. Reported cause: لا يوجد تأخير."}, {"num": "P877-1", "name": "اعمال الرفع المساحي لأراضي واصول المياه والصرف الصحي المستقبلية بمنطقة المدينة المنورة", "type": "Consultancy", "region": "Madinah", "city": "مناطق متعددة", "contractorName": "العماد العربى للاستشارات الهندسية", "consultantName": null, "contractStatus": "Under Execution", "projectStatus": "Consultancy - Ongoing", "physical": 36.1, "planned": 85.3, "sv": 49.2, "elapsed": 87.9, "value": 0.82, "remaining": 0.52, "reason": "لا يوجد تأخير", "health": 70.9, "rag": "Amber", "scheduleScore": 50.8, "statusScore": 85.0, "overrunScore": 100.0, "attention": "Monitor closely — status is Consultancy - Ongoing. Running 49.2 pts behind schedule. Reported cause: لا يوجد تأخير."}, {"num": "10128", "name": "عقد تنفيذ شبكات الصرف الصحي بمحافظات منطقة المدينة المنورة الخطوط الرئيسية", "type": "Works", "region": "Madinah", "city": "مناطق متعددة", "contractorName": "مجموعة  الموسى المحدودة", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "Ahead of Schedule", "physical": 96.5, "planned": 95.4, "sv": -1.0, "elapsed": 97.4, "value": 44.27, "remaining": 1.56, "reason": null, "health": 98.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Ahead of Schedule. Running 1.0 pts ahead of schedule."}, {"num": "AP248", "name": "تنفيذ خطوط وشبكات توزيع المياه بمحافظة وادي الفرع", "type": "Works", "region": "Madinah", "city": "وادي الفرع", "contractorName": "شركة ركن المواثيق للمقاولات شركة شخص واحد", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "Ahead of Schedule", "physical": 16.5, "planned": 5.3, "sv": -11.2, "elapsed": 24.1, "value": 21.8, "remaining": 18.21, "reason": null, "health": 98.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Ahead of Schedule. Running 11.2 pts ahead of schedule."}, {"num": "10204", "name": "إحلال شبكات وخطوط مياه بمدينة ينبع", "type": "Works", "region": "Madinah", "city": "ينبع", "contractorName": "شركة شبكة الإنشاء للمقاولات", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Partial Suspension", "projectStatus": "Distressed", "physical": 19.6, "planned": 55.6, "sv": 36.0, "elapsed": 90.9, "value": 26.81, "remaining": 21.55, "reason": "تأخر البرنامج الزمني مايزيد عن 25%", "health": 56.5, "rag": "Amber", "scheduleScore": 64.0, "statusScore": 15.0, "overrunScore": 100.0, "attention": "Monitor closely — status is Distressed. Running 36.0 pts behind schedule. Reported cause: تأخر البرنامج الزمني مايزيد عن 25%."}, {"num": "10281", "name": "استكمال مشروع شبكات الصرف الصحي والتوصيلات المنزلية بينبع", "type": "Works", "region": "Madinah", "city": "ينبع", "contractorName": "مؤسسة ابراهيم عتيق الفزي للمقاولات", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Partial Suspension", "projectStatus": "Distressed", "physical": 26.0, "planned": 64.2, "sv": 38.1, "elapsed": 95.0, "value": 25.75, "remaining": 19.05, "reason": "تأخر البرنامج الزمني مايزيد عن 25%", "health": 55.4, "rag": "Amber", "scheduleScore": 61.9, "statusScore": 15.0, "overrunScore": 100.0, "attention": "Monitor closely — status is Distressed. Running 38.1 pts behind schedule. Reported cause: تأخر البرنامج الزمني مايزيد عن 25%."}, {"num": "10136", "name": "تنفيذ خطوط فرعية وتوصيلات منزلية للصرف الصحي مع اعادة تأهيل محطة الضخ بينبع", "type": "Works", "region": "Madinah", "city": "ينبع", "contractorName": "شركة العزم للانشاء والتعمير", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Partial Suspension", "projectStatus": "On Track", "physical": 53.1, "planned": 62.1, "sv": 9.0, "elapsed": 87.6, "value": 48.38, "remaining": 22.71, "reason": "V.Order", "health": 91.0, "rag": "Green", "scheduleScore": 91.0, "statusScore": 85.0, "overrunScore": 100.0, "attention": "On track — status is On Track. Reported cause: V.Order."}, {"num": "10279", "name": "تنفيذ شبكات الصرف الصحي بمحافظة ينبع", "type": "Works", "region": "Madinah", "city": "ينبع", "contractorName": "مؤسسه منصور محمد علي آل محمود الغامدي للمقاولات العامة", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Partial Suspension", "projectStatus": "Delayed", "physical": 46.5, "planned": 63.1, "sv": 16.7, "elapsed": 90.2, "value": 22.68, "remaining": 12.14, "reason": "V.Order", "health": 75.2, "rag": "Green", "scheduleScore": 83.3, "statusScore": 45.0, "overrunScore": 100.0, "attention": "On track — status is Delayed. Reported cause: V.Order."}, {"num": "O1014", "name": "استكمال مشروع توسعة محطة المعالجة بأملج إلى المرحلة الثلاثية", "type": "Works", "region": "Tabuk", "city": "أملج", "contractorName": "شركة زهران للصيانة والتشغيل", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Provisional Acceptance", "projectStatus": "Provisional Handover", "physical": 95.6, "planned": 100.0, "sv": 4.4, "elapsed": 132.6, "value": 42.71, "remaining": 1.68, "reason": null, "health": 89.8, "rag": "Green", "scheduleScore": 95.6, "statusScore": 95.0, "overrunScore": 67.4, "attention": "On track — status is Provisional Handover."}, {"num": "AP242", "name": "أعمال ربط الخطوط الرئيسية ومحطات الضخ لشبكات مدينة تبوك بالمشروع الشامل والخطوط الناقلة من محطة التحلية الساحلية والخزانات الاستراتيجة", "type": "Works", "region": "Tabuk", "city": "تبوك", "contractorName": "شركة نفود العاذرية للمقاولات شركة شخص واحد", "consultantName": "شركة دورش هولدنج جي إم بي إتش السعودية", "contractStatus": "Under Execution", "projectStatus": "Ahead of Schedule", "physical": 2.8, "planned": 0.6, "sv": -2.2, "elapsed": 17.4, "value": 85.65, "remaining": 83.22, "reason": null, "health": 98.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Ahead of Schedule. Running 2.2 pts ahead of schedule."}, {"num": "P1465-2", "name": "احلال وتجديد  شبكات المياه بمنطقة تبوك المرحلة الأولى", "type": "Works", "region": "Tabuk", "city": "تبوك", "contractorName": "شركه اثمار التشييد والبناء للمقاولات", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "Ahead of Schedule", "physical": 3.3, "planned": 2.4, "sv": -0.9, "elapsed": 29.7, "value": 46.5, "remaining": 44.96, "reason": null, "health": 98.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Ahead of Schedule. Running 0.9 pts ahead of schedule."}, {"num": "AP1189", "name": "استكمال إنشاء خطوط رئيسية وشبكات الصرف الصحي بتبوك المرحلة الثالثة عشر", "type": "Works", "region": "Tabuk", "city": "تبوك", "contractorName": "شركة كنان العربية للمقاولات العامة", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "Ahead of Schedule", "physical": 72.4, "planned": 60.9, "sv": -11.5, "elapsed": 50.1, "value": 47.36, "remaining": 13.07, "reason": null, "health": 98.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Ahead of Schedule. Running 11.5 pts ahead of schedule."}, {"num": "P1474", "name": "انشاء خطوط رئيسية وشبكات الصرف الصحي بتبوك المرحلة الخامسة عشر", "type": "Works", "region": "Tabuk", "city": "تبوك", "contractorName": "شركة أكواا العربية للمياه", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "Ahead of Schedule", "physical": 25.0, "planned": 15.1, "sv": -9.9, "elapsed": 33.1, "value": 19.03, "remaining": 14.27, "reason": null, "health": 98.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Ahead of Schedule. Running 9.9 pts ahead of schedule."}, {"num": "AP244", "name": "انشاء مصبات الصهاريج بمحطات معالجة الصرف الصحي بمنطقة تبوك", "type": "Works", "region": "Tabuk", "city": "تبوك", "contractorName": "شركة الاداء المتوازن للمقاولات", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "On Track", "physical": 33.6, "planned": 34.0, "sv": 0.4, "elapsed": 50.8, "value": 18.2, "remaining": 12.08, "reason": null, "health": 95.3, "rag": "Green", "scheduleScore": 99.6, "statusScore": 85.0, "overrunScore": 100.0, "attention": "On track — status is On Track."}, {"num": "P1475-3", "name": "تنفيذ شبكة صرف صحي لاحياء شمال تبوك ( المرحلة الأولى )", "type": "Works", "region": "Tabuk", "city": "تبوك", "contractorName": "شركة الأولات للصناعة والإنشاء المحدودة", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "On Track", "physical": 21.7, "planned": 23.8, "sv": 2.1, "elapsed": 48.4, "value": 21.86, "remaining": 17.12, "reason": null, "health": 94.5, "rag": "Green", "scheduleScore": 97.9, "statusScore": 85.0, "overrunScore": 100.0, "attention": "On track — status is On Track."}, {"num": "P1475-4", "name": "تنفيذ شبكة صرف صحي لاحياء شمال تبوك ( المرحلة الثانية )", "type": "Works", "region": "Tabuk", "city": "تبوك", "contractorName": "شركة موارد الالات للتجارة والمقاولات المحدودة", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Partial Suspension", "projectStatus": "On Track", "physical": 0.4, "planned": 0.5, "sv": 0.1, "elapsed": 29.7, "value": 43.34, "remaining": 43.17, "reason": "Permissions", "health": 95.5, "rag": "Green", "scheduleScore": 99.9, "statusScore": 85.0, "overrunScore": 100.0, "attention": "On track — status is On Track. Reported cause: Permissions."}, {"num": "P1498", "name": "شبكات المياه بأحياء النظيم وجنوب تبوك", "type": "Works", "region": "Tabuk", "city": "تبوك", "contractorName": "شركة بصمة التشييد للمقاولات", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Provisional Acceptance", "projectStatus": "Provisional Handover", "physical": 83.1, "planned": 87.5, "sv": 4.4, "elapsed": 99.3, "value": 5.72, "remaining": 0.97, "reason": "V.Order", "health": 96.3, "rag": "Green", "scheduleScore": 95.6, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Provisional Handover. Reported cause: V.Order."}, {"num": "P1515", "name": "مشروع إعادة تأهيل شبكات المياه بمنطقة تبوك", "type": "Works", "region": "Tabuk", "city": "تبوك", "contractorName": "شركة رواسي البناء للإستثمار القابضة", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "Ahead of Schedule", "physical": 17.1, "planned": 14.7, "sv": -2.3, "elapsed": 36.7, "value": 23.66, "remaining": 19.62, "reason": null, "health": 98.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Ahead of Schedule. Running 2.3 pts ahead of schedule."}, {"num": "10296", "name": "مشروع إنشاء شبكات مياه الشرب لحي الرايس بمدينة تبوك", "type": "Works", "region": "Tabuk", "city": "تبوك", "contractorName": "شركة نفود العاذرية للمقاولات شركة شخص واحد", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Partial Suspension", "projectStatus": "Ahead of Schedule", "physical": 41.7, "planned": 37.7, "sv": -4.0, "elapsed": 59.5, "value": 12.47, "remaining": 7.28, "reason": "Permissions", "health": 98.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Ahead of Schedule. Running 4.0 pts ahead of schedule. Reported cause: Permissions."}, {"num": "10081", "name": "مشروع استكمال شبكات المياه وأعمال الربط للخطوط الرئيسية وأعمال مواقع المياه بمدينة تبوك", "type": "Works", "region": "Tabuk", "city": "تبوك", "contractorName": "شركة ابداع الحياة للاستثمار", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Provisional Acceptance", "projectStatus": "Provisional Handover", "physical": 99.3, "planned": 100.0, "sv": 0.7, "elapsed": 110.8, "value": 44.01, "remaining": 0.31, "reason": "ضعف الامكانيات", "health": 96.0, "rag": "Green", "scheduleScore": 99.3, "statusScore": 95.0, "overrunScore": 89.2, "attention": "On track — status is Provisional Handover. Reported cause: ضعف الامكانيات."}, {"num": "O922", "name": "مشروع استكمال شبكات مياه المرحلة التاسعة في مدينة تبوك احياء النخيل والتعاون وغرناطة", "type": "Works", "region": "Tabuk", "city": "تبوك", "contractorName": "شركه اعمال المحترفون للتجارة والمقاولات", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Partial Suspension", "projectStatus": "On Track", "physical": 55.5, "planned": 55.5, "sv": 0.0, "elapsed": 74.7, "value": 14.76, "remaining": 6.57, "reason": "Other Projects Interference", "health": 95.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 85.0, "overrunScore": 100.0, "attention": "On track — status is On Track. Reported cause: Other Projects Interference."}, {"num": "P1488", "name": "مشروع انشاء محطة تنقية مياه الشرب لفجر  بمنطقة تبوك سعة 500 م3\يوم", "type": "Works", "region": "Tabuk", "city": "تبوك", "contractorName": "شركة وبرا للمقاولات", "consultantName": "شركة دورش هولدنج جي إم بي إتش السعودية", "contractStatus": "Under Execution", "projectStatus": "Ahead of Schedule", "physical": 28.9, "planned": 26.6, "sv": -2.3, "elapsed": 47.9, "value": 26.37, "remaining": 18.74, "reason": null, "health": 98.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Ahead of Schedule. Running 2.3 pts ahead of schedule."}, {"num": "AP256", "name": "مشروع ايصال المياه لمنفذ حالة عمار الحدودي", "type": "Works", "region": "Tabuk", "city": "تبوك", "contractorName": "شركة فهد ماضي جمعان المجول للمقاولات المعمارية", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "Ahead of Schedule", "physical": 4.7, "planned": 4.1, "sv": -0.6, "elapsed": 27.2, "value": 42.91, "remaining": 40.9, "reason": null, "health": 98.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Ahead of Schedule. Running 0.6 pts ahead of schedule."}, {"num": "P1469", "name": "استكمال شبكات الصرف الصحي في حي الرحمانية بتيماء المرحلة السادسة", "type": "Works", "region": "Tabuk", "city": "تيماء", "contractorName": "شركة الاسس الاولى للمقاولات", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "On Track", "physical": 30.1, "planned": 32.9, "sv": 2.8, "elapsed": 41.1, "value": 37.88, "remaining": 26.49, "reason": null, "health": 94.1, "rag": "Green", "scheduleScore": 97.2, "statusScore": 85.0, "overrunScore": 100.0, "attention": "On track — status is On Track."}, {"num": "O1021", "name": "استكمال مشروع انشاء شبكات مياه الشرب بقرية المعظم بتبوك", "type": "Works", "region": "Tabuk", "city": "تيماء", "contractorName": "شركة الرصف والبناء السعودية للتجارة والصناعة والمقاولات", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Provisional Acceptance", "projectStatus": "Provisional Handover", "physical": 90.1, "planned": 100.0, "sv": 9.9, "elapsed": 141.3, "value": 9.3, "remaining": 0.62, "reason": "V.Order", "health": 85.3, "rag": "Green", "scheduleScore": 90.1, "statusScore": 95.0, "overrunScore": 58.7, "attention": "On track — status is Provisional Handover. Reported cause: V.Order."}, {"num": "10256", "name": "تنفيذ الاعمال لإنشاء محطة تنقية مياه الشرب بنظام الحاوية المدمجة للقليبة بمنطقة تبوك سعة 1000 م3\يوم", "type": "Works", "region": "Tabuk", "city": "تيماء", "contractorName": "شركة وبرا للمقاولات", "consultantName": "شركة دورش هولدنج جي إم بي إتش السعودية", "contractStatus": "Under Execution", "projectStatus": "Ahead of Schedule", "physical": 46.9, "planned": 46.8, "sv": -0.1, "elapsed": 51.7, "value": 39.5, "remaining": 20.99, "reason": null, "health": 98.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Ahead of Schedule. Running 0.1 pts ahead of schedule."}, {"num": "AP257", "name": "تنفيذ نظام لنقل مياه الصرف الصحي لمنفذ الدرة بحقل", "type": "Works", "region": "Tabuk", "city": "حقل", "contractorName": "شركة الأولات للصناعة والإنشاء المحدودة", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "On Track", "physical": 0.8, "planned": 3.0, "sv": 2.3, "elapsed": 33.8, "value": 13.77, "remaining": 13.67, "reason": null, "health": 94.4, "rag": "Green", "scheduleScore": 97.7, "statusScore": 85.0, "overrunScore": 100.0, "attention": "On track — status is On Track."}, {"num": "P1502", "name": "مشروع إنشاء خطوط ناقلة وموقع أعمال مياه ومحطة ضخ بمدينة حقل", "type": "Works", "region": "Tabuk", "city": "حقل", "contractorName": "شركه بن ماضي المحدوده للمقاولات العامه", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "Ahead of Schedule", "physical": 54.6, "planned": 48.0, "sv": -6.7, "elapsed": 58.1, "value": 51.43, "remaining": 23.34, "reason": null, "health": 98.5, "rag": "Green", "scheduleScore": 100.0, "statusScore": 95.0, "overrunScore": 100.0, "attention": "On track — status is Ahead of Schedule. Running 6.7 pts ahead of schedule."}, {"num": "O918", "name": "إنشاء شبكات الصرف الصحي بالاحياء الجنوبية بمدينة ضباء", "type": "Works", "region": "Tabuk", "city": "ضباء", "contractorName": "شركه اثمار التشييد والبناء للمقاولات", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Partial Suspension", "projectStatus": "On Track", "physical": 0.0, "planned": 5.4, "sv": 5.4, "elapsed": 36.7, "value": 33.34, "remaining": 33.34, "reason": "Permissions", "health": 92.8, "rag": "Green", "scheduleScore": 94.6, "statusScore": 85.0, "overrunScore": 100.0, "attention": "On track — status is On Track. Reported cause: Permissions."}, {"num": "P877-2", "name": "مشروع اعمال الرفع المساحي لأراضي وأصول المياه والصرف الصحي المستقلة بمنطقة تبوك", "type": "Consultancy", "region": "Tabuk", "city": "مناطق متعددة", "contractorName": "مكتب عبدالرحمن عبداللطيف جزار للاستشارات الهندسيه", "consultantName": "شركة فيوتشر كونسلت للاستشارات الهندسية", "contractStatus": "Under Execution", "projectStatus": "Consultancy - Ongoing", "physical": 0.0, "planned": 44.0, "sv": 44.0, "elapsed": 83.5, "value": 0.22, "remaining": 0.22, "reason": "اخرى", "health": 73.5, "rag": "Amber", "scheduleScore": 56.0, "statusScore": 85.0, "overrunScore": 100.0, "attention": "Monitor closely — status is Consultancy - Ongoing. Running 44.0 pts behind schedule. Reported cause: اخرى."}];
+const AVATAR_SVG = `<svg viewBox="14 16 92 106" xmlns="http://www.w3.org/2000/svg" overflow="visible"><path class="avatar-robe" d="M16,112 C16,94 33,85 60,85 C87,85 104,94 104,112 Q104,119 97,119 L23,119 Q16,119 16,112 Z" fill="#FBFBFB" stroke="#E3DCCB" stroke-width="1"/><ellipse cx="60" cy="62" rx="27.5" ry="31" fill="#E9E3D6"/><rect x="50" y="75" width="20" height="18" rx="6" fill="#C98A5E"/><ellipse cx="60" cy="65" rx="20" ry="22" fill="#D9A579"/><path d="M33,62 C30,36 43,20 60,20 C77,20 90,36 87,62 C85,49 77,42 60,42 C43,42 35,49 33,62 Z" fill="#FFFFFF" stroke="#ECE4D4" stroke-width="0.5"/><g class="avatar-drape-l"><path d="M33,48 C24,55 18,78 21,110 L41,101 C36,83 36,63 41,48 Z" fill="#FFFFFF" stroke="#E3DCCB" stroke-width="1"/><path d="M23,88 L40,80 M22,95 L39,87 M21,102 L38,94 M20,109 L37,101" stroke="#C0392B" stroke-width="2.4" stroke-linecap="round"/></g><g class="avatar-drape-r"><path d="M87,48 C96,55 102,78 99,110 L79,101 C84,83 84,63 79,48 Z" fill="#FFFFFF" stroke="#E3DCCB" stroke-width="1"/><path d="M97,88 L80,80 M98,95 L81,87 M99,102 L82,94 M100,109 L83,101" stroke="#C0392B" stroke-width="2.4" stroke-linecap="round"/></g><ellipse cx="60" cy="26" rx="19" ry="5" fill="none" stroke="#1A1A1A" stroke-width="4"/><ellipse cx="60" cy="31.5" rx="19.5" ry="5" fill="none" stroke="#1A1A1A" stroke-width="4"/><path d="M47,58 Q51,55 55,58" stroke="#3A2A1C" stroke-width="1.6" fill="none" stroke-linecap="round"/><path d="M65,58 Q69,55 73,58" stroke="#3A2A1C" stroke-width="1.6" fill="none" stroke-linecap="round"/><ellipse class="avatar-eye" cx="51.5" cy="64" rx="3.2" ry="4" fill="#2B1B12"/><ellipse class="avatar-eye" cx="68.5" cy="64" rx="3.2" ry="4" fill="#2B1B12"/><path d="M51,74 Q60,80 69,74" stroke="#8A4A2E" stroke-width="2" fill="none" stroke-linecap="round"/></svg>`;
+const REPORT_DATE = '1 Oct 2026';
+const PROJECTS = [{"po":"901250436","pno":"AP249","name":"تنفيذ خط مياه رئيسي وخزان وشبكة توزيع رئيسية لوادي الريم وقراها","contractor":"شركة أعمال متكاملة للمقاولات","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"Water 1","status":"ايقاف كلي","sk":"susp","statusEn":"Fully Suspended","zero":0,"start":"2026-01-11","end":"2028-08-30","planned":1.9,"actual":0,"variance":-1.9,"elapsed":27.3,"plannedOct":4.2,"susp":0,"expDelay":{"d":"2027-01-15"},"expTroubled":{"d":"2027-04-20"},"mgmt":["معاملة تغيير نطاق العقد وجدول الكميات المعدل رقم (1)"],"upd":[{"t":"تحديث طلب الموافقة على مسار المشروع : تم الاجتماع مع المدير التنفيذي بوزارة النقل بتاريخ 29/9/2026 وذألك للتأكيد على أهمية واستعجال تنسيق الاجتماع المحدد لمناقشة مسار المشروع.","d":"2026-09-29"},{"t":"تحديث التصميم الابتدائي: بناءً على اعتماد موقع محطة الضخ داخل بوابة الشلايل، لاستكمال اعمال التصميم داخليا من قبل فريق الدعم.","d":null},{"t":"تحديث الموافقة على تخصيص الأرض : تم استلام المخططات القائمة لموقع بوابة الشلايل من شركة نقل المياه بتاريخ 29/9/2026 ، ومراجعة المخططات من قبل فريق الدعم الفني لاستكمال اعمال التصميم.","d":"2026-09-29"}],"tech":["لا يوجد اجراء فني"],"ord":0},{"po":"901240386","pno":"P829","name":"تنفيذ خط المياه الرئيسي لتغذية توسعة المطار","contractor":"شركة دقة الابعاد للمقاولات","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"Water 1","status":"متعثر","sk":"trouble","statusEn":"Troubled","zero":7,"start":"2025-02-20","end":"2026-06-28","planned":100,"actual":17.7,"variance":-82.3,"elapsed":119.3,"plannedOct":100,"susp":0,"expDelay":{"t":"متعثر"},"expTroubled":{"t":"متعثر"},"mgmt":["إستكمال اجرءات سحب المشروع (انهاء التعاقد)"],"upd":[{"t":"تم احالة الطلب من المراجعة و التدقيق-مكتب الرئيس الي ادارة مكتب الرئيس بتاريخ 29/09/2026م لإصدار خطاب انهاء التعاقد","d":"2026-09-29"}],"tech":["لا يوجد اجراء فني"],"ord":1},{"po":"901250110","pno":"O138","name":"استكمال إنشاء أشياب مع ملحقاتها ومحطة تنقية للمياه في مناطق مختلفة بمحافظة الحناكية","contractor":"شركة بنون و فنون للمقاولات","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"Water 2","status":"متعثر","sk":"trouble","statusEn":"Troubled","zero":5,"start":"2025-04-27","end":"2026-10-09","planned":100,"actual":46.9,"variance":-53.1,"elapsed":98.5,"plannedOct":100,"susp":0,"expDelay":{"t":"متعثر"},"expTroubled":{"t":"متعثر"},"mgmt":["إستكمال اجرءات سحب المشروع (انهاء التعاقد)"],"upd":[{"t":"تم اصدار خطاب الإنذار النهائي بتاريخ 28/09/2026م و يوجد مهلة 15 يوم لإتخاذ الإجراءات التصحيحية من جانب المقاول","d":"2026-09-28"}],"tech":["لا يوجد اجراء فني"],"ord":2},{"po":"901240123","pno":"10281","name":"استكمال مشروع شبكات الصرف الصحي والتوصيلات المنزلية بينبع","contractor":"مؤسسة إبراهيم عتيق الفزي للمقاولات","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"Coastal","status":"متعثر","sk":"trouble","statusEn":"Troubled","zero":0,"start":"2024-08-18","end":"2026-10-27","planned":76.7,"actual":27.4,"variance":-49.3,"elapsed":96.8,"plannedOct":100,"susp":14.2,"expDelay":{"t":"متعثر"},"expTroubled":{"t":"متعثر"},"mgmt":["معاملة إنهاء العقد"],"upd":[{"t":"تم الانتهاء من المراجعة من قبل ادارة الجدولة و التحكم بتاريخ 29/09/2026م و توجية ادارة الإنشاءات بالقطاع باستكمال التوقيعات و الرفع","d":"2026-09-29"},{"t":"تم ارسال معاملة الإنهاء طبقا للمادة 50 أولا الفقرة رقم 2-ب الي ادارة الجدولة و التحكم بتاريخ 28/09/2026م للمراجعة","d":"2026-09-28"}],"tech":["تم الاجتماع مع المقاول بتاريخ 28/09/2026 وتوجيهه بالانتهاء من الاعمال المتاحة بطول 500 متر في ينبع النخل لإنهاء الاعمال المتاحة"],"ord":3},{"po":"901230253","pno":"10204","name":"إحلال شبكات وخطوط مياه بمدينة ينبع","contractor":"شبكة الإنشاء للمقاولات","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"Coastal","status":"متعثر","sk":"trouble","statusEn":"Troubled","zero":0,"start":"2024-01-25","end":"2026-12-23","planned":60.6,"actual":21,"variance":-39.6,"elapsed":92.2,"plannedOct":68,"susp":28.2,"expDelay":{"t":"متعثر"},"expTroubled":{"t":"متعثر"},"mgmt":["إستكمال اجرءات سحب المشروع(انهاء التعاقد)"],"upd":[{"t":"تم ارسال الرد علي معاملة السحب الجزئي من جانب ادارة الانشاءات بتاريخ 30/09/2026و تم المراجعة من الجدولة و التحكم بالقطاع بالافادة بانه لا مانع من الرفع بعد استكمال التوقيعات","d":"2026-09-30"},{"t":"تم تقديم معاملة السحب الجزئي للاعمال التي قصر بها المقاول بتاريخ 30-09-2026","d":"2026-09-30"},{"t":"تم توجية ادارة الإنشاءات بتاريخ 29/09/2026م باعداد معاملة سحب جزئي للأعمال التي قصر فيها المقاول","d":"2026-09-29"},{"t":"تم اعداد معاملة سحب المشروع بتاريخ 24/08/2026م وتم رفضها من قبل ادارة الجدولة و التحكم لوجود ايقاف جزئي بالمشروع بنسبة 28.20%","d":"2026-08-24"},{"t":"تم إصدار خطاب الانذار النهائي الالحاقي رقم (1448/515/22299) بتاريخ 22/08/2026م","d":"2026-08-22"}],"tech":["لا يوجد اجراء فني"],"ord":4},{"po":"901240075","pno":"O192","name":"استكمال تنفيذ خطوط وشبكات المياه بأحياء شرق المدينة المنورة والعاقول","contractor":"شركة دقة الابعاد للمقاولات","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"Water 1","status":"متعثر","sk":"trouble","statusEn":"Troubled","zero":5,"start":"2024-06-25","end":"2027-04-03","planned":42.3,"actual":13.2,"variance":-29.1,"elapsed":81.8,"plannedOct":49.8,"susp":22.6,"expDelay":{"t":"متعثر"},"expTroubled":{"t":"متعثر"},"mgmt":["معاملة جدول كميات معدل (تخفيض)","إستكمال اجرءات سحب المشروع (انهاء التعاقد)"],"upd":[{"t":"تم اصدار طلب خطاب انذار نهائي إلي ادارة الجدولة والتحكم بالمركز الرئيسي بتاريخ 01/10/2026م","d":"2026-10-01"},{"t":"تم مراجعة طلب اصدار خطاب الانذار النهائي من قبل ادارة الجدولة والتحكم بالقطاع بتاريخ 30/09/2026م و توجيه ادارة الانشاءات لاستكمال التوقيعات","d":"2026-09-30"},{"t":"تم طلب اعادة ارسال معاملة التخفيض الي ادارة الخدمات الفنية بتاريخ 30/09/2026م","d":"2026-09-30"},{"t":"تم اعادة معاملة التخفيض من قبل ادارة الخدمات الفنية لوجود ملاحظات بالكميات بتاريخ 28/09/2026م","d":"2026-09-28"},{"t":"تم الانتهاء من مراجعة معامله التخفيض من قبل ادارة الجدولة و التحكم بتاريخ 21/09/2026م","d":"2026-09-21"},{"t":"تم تقديم معاملة جدول كميات معدل (تخفيض) بتاريخ 20/09/2026م","d":"2026-09-20"},{"t":"تم اصدار خطاب انذار أول للمقاول لتدني نسب الانجاز بتاريخ 01/09/2026","d":"2026-09-01"}],"tech":["لا يوجد اجراء فني"],"ord":5},{"po":"901250275","pno":"O855","name":"استكمال تنفيذ الخطوط الرئيسية وشبكات الصرف الصحي بأحياء شوران","contractor":"شركة عوده مبارك البلادي و أبنائه للمقاولات المحدودة","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"WW","status":"متعثر","sk":"trouble","statusEn":"Troubled","zero":3,"start":"2025-11-18","end":"2027-05-17","planned":35.6,"actual":7.5,"variance":-28.1,"elapsed":58.2,"plannedOct":46.3,"susp":4,"expDelay":{"t":"متعثر"},"expTroubled":{"t":"متعثر"},"mgmt":["استكمال اجراءات السحب (انهاء التعاقد)"],"upd":[{"t":"تم طلب اصدار خطاب الانذار النهائي إلي ادارة الجدولة والتحكم بالمركز الرئيسي بتاريخ 30/09/2026 م","d":"2026-09-30"},{"t":"تم إصدار خطاب الانذار الأول للمقاول بتاريخ 30/08/2026 نظرا لتجاوز التباين 20% طبقا لدليل إدارة المشروعات PMM rev.03","d":"2026-08-30"}],"tech":["تم الاجتماع مع مالك الشركة بتاريخ 09/09/2026م، حيث أفاد بعدم البدء في أعمال جديدة أو إصدار تصاريح إضافية لحين البت في مطالباته المتعلقة بتعويض أعمال تأهيل المشروع المسحوب، وكميات الأسفلت الإضافية، واستكمال نطاق الأعمال.","تم توجيه المقاول بسرعه اغلاق وسفلته التصاريح المتبقيه و تم سفلته عدد 3 تصاريح و لم يتم الاخلاء حتي 01/10/2026 م"],"ord":6},{"po":"901240141","pno":"10277","name":"إستكمال تنفيذ شبكات الصرف الصحي بالأماكن المتضررة بالمدينة المنورة","contractor":"شركة البنايات العربية للمقاولات العامة","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"WW","status":"متأخر","sk":"delay","statusEn":"Delayed","zero":2,"start":"2024-08-06","end":"2026-07-29","planned":100,"actual":75,"variance":-25,"elapsed":108.9,"plannedOct":100,"susp":7.1,"expDelay":{"t":"متأخر"},"expTroubled":{"t":"غير متوقع تعثره"},"mgmt":["الإستلام الإبتدائي للمشروع او","إستكمال اجرءات سحب المشروع (انهاء التعاقد)"],"upd":[{"t":"تم الرد من ادارة الجدولة و التحكم بالقطاع إلي ادارة المشتريات بتاريخ 28/09/2026م مع ارفاق صورة من النظام توضح ان المعاملة طلب اصدار خطاب انذار نهائي لازالت قيد الدراسة لدي ادارة الموردين-المركز الرئيسي","d":"2026-09-28"},{"t":"تم الافادة من ادارة المشتريات الي ادارة الجدولة و التحكم بالقطاع بتاريخ 28/09/2026م انه لا يوجد خطاب حث معتمد من المديرالعام وتم اعاده طلب اصدار خطاب الانذار النهائي في تاريخ 20-07-2026م","d":"2026-09-28"}],"tech":["تم عقد اجتماع مع مالك الشركة بتاريخ 23/09/2026م، وأفاد بتجديد شهادة تصنيف المقاول في ذات اليوم والبدء في إجراءات إصدار التصاريح، وجارٍ رفع التصاريح اللازمة لتنفيذ الأعمال المتبقية بطول يقارب 1,700 متر.","تم جدوله اجتماع متابعة يومي مع المقاول اعتباراً من 29/09/2026م لمتابعة إصدار التصاريح وتنفيذ الأعمال المتبقية.","تم ترشيح مقاول معتمد لدى شركة المياه الوطنية (شركة المشروعات المتقدمة ) للعمل كمقاول باطن بالمشروع لدعم وتسريع إنجاز الأعمال المتبقية .","تم التواصل مع شركه الكهرباء بتاريخ 30-9-2026 لاستكمال إيصال التيار الكهربائي لمحطة الضخ بالميقات"],"ord":7},{"po":"901240102","pno":"O1006","name":"توريد وتركيب وحدات معالجة الحمأة ميكانيكيا بالمدينة المنورة","contractor":"شركة البنايات العربية","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"WW","status":"متأخر","sk":"delay","statusEn":"Delayed","zero":3,"start":"2024-07-08","end":"2026-09-04","planned":100,"actual":82,"variance":-18,"elapsed":103.4,"plannedOct":100,"susp":0,"expDelay":{"t":"متأخر"},"expTroubled":{"t":"غير متوقع تعثره"},"mgmt":["الاستلام الابتدائي للمشروع"],"upd":[{"t":"متابعة طلب إصدار خطاب طلب الإستلام الإبتدائي من المقاول المخطط بتاريخ 10/10/2026 بعد اعتماد تقريراعمال الأختبار التشغيلي المخطط الإنتهاء منه في 07/10/2026","d":null}],"tech":["تم الاجتماع مع مالك الشركة بتاريخ 23/09/2026م، وأفاد بالالتزام بإنهاء الاختبار التشغيلي خلال الأسبوع الجاري واستكمال جميع المتطلبات والملاحظات اللازمة للجنة الاختبار التشغيلي.","تم الانتهاء من تشغيل مرحله التجفيف الاولي باستخدام الطرد المركزي بتاريخ 20 -9-2026","تم تشغيل المجففات الحراريه بتاريخ 22-9-2026 و يتم حاليا اعمال المعايره و الضبط للوصول للمنتج النهائي المطابقا للمواصفات"],"ord":8},{"po":"901230191","pno":"10136","name":"تنفيذ خطوط فرعية وتوصيلات منزلية للصرف الصحي مع اعادة تأهيل محطة الضخ بينبع","contractor":"شركة العزم للإنشاء والتعمير","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"Coastal","status":"متأخر","sk":"delay","statusEn":"Delayed","zero":3,"start":"2023-11-07","end":"2027-02-12","planned":67.6,"actual":53.6,"variance":-14,"elapsed":88.8,"plannedOct":69.6,"susp":24.2,"expDelay":{"t":"متأخر"},"expTroubled":{"d":"2027-02-05"},"mgmt":["معاملة تمديد العقد بمدة (25) يوم نتيجة تأخر صرف المستخلصات","معاملة فتح نطاق جديد"],"upd":[{"t":"تم الافادة من قبل المدير العام للمشتريات بالمركز الرئيسي بتاريخ 28/09/2026م انه تم التصعيد لدي ادارة التقنية وجاري حل المشكلة بالنظام للإنتهاء من معاملة التمديد الحالية و الرفع بمعاملة فتح النطاق.","d":"2026-09-28"},{"t":"تم ارسال ايميل التصعيد من قبل المدير العام المشاريع بالقطاع الي المدير العام للمشتريات بالمركز الرئيسي بتاريخ 28/09/2026م","d":"2026-09-28"},{"t":"تم اعادة الرفع من فريق التشييد بتاريخ 08/09/2026م","d":"2026-09-08"}],"tech":["تم الاجتماع مع المقاول بتاريخ 24/09/2026 وتوجيهه لتقديم خطة عاجلة للاعمال المتاحة فقط","تم التوجيه للمقاول بسرعة تقديم المخططات التنفيذية للنطاق البديل لحي المروج بتاريخ 27/09/2026 م","تم التوجيه المقاول بانهاء الاعمال المتاحة و المتبقية بحي الحوراء لتسليمها جزئيا في نهاية شهر أكتوبر 2026"],"ord":9},{"po":"901230176","pno":"10137","name":"تنفيذ شبكات الصرف الصحي بمخططات الرانوناء واحياء جنوب المدينة (المرحلة الأولى)","contractor":"الشركة الوطنية لأعمال المياه","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"WW","status":"متأخر","sk":"delay","statusEn":"Delayed","zero":0,"start":"2023-11-19","end":"2026-12-23","planned":69.4,"actual":55.9,"variance":-13.6,"elapsed":92.7,"plannedOct":80.3,"susp":0,"expDelay":{"t":"متأخر"},"expTroubled":{"d":"2026-11-05"},"mgmt":["تم اعتماد الخطة التصحيحية المقدمة من المقاول بتاريخ 21/09/2026 و متابعة تقدم الاعمال وفقا للخطة المعتمدة","الإستلام الإبتدائي للمشروع"],"upd":[{"t":"لا يوجد","d":null}],"tech":["تم الاجتماع مع مدير المشروع ومدير المشاريع لدى المقاول بتاريخ 24/09/2026م لمناقشة جدولة سداد مستحقات ورسوم التصاريح المتأخرة للأمانة، واستكمال أعمال التصوير التلفزيوني اللازمة للاستلام الجزئي., و طلب خطه لانهاء المشروع بموعده التعاقدي","أفاد المقاول بوجود تحديات في التدفقات النقدية نتيجة تأخر صرف المستخلصات، مما أثر على قدرته على الالتزام بجدوله سداد كامل رسوم التصاريح المتأخرة في الوقت الحالي. كما أفاد المقاول بوجود استحقاقات لتمديدات زمنية مرتبطة بتأخر صرف المستخلصات"],"ord":10},{"po":"901250499","pno":"P921","name":"عبارة تصريف مياه الفائض لمحطة معالجة الصرف الصحي بالمدينة المنورة","contractor":"شركة مسعود بالعيد حيدر ال حيدر وشركاه للتجاره والمقاولات العامه","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"WW","status":"متأخر","sk":"delay","statusEn":"Delayed","zero":0,"start":"2026-01-13","end":"2027-07-01","planned":12.9,"actual":0,"variance":-12.9,"elapsed":48.9,"plannedOct":16.3,"susp":0,"expDelay":{"t":"متأخر"},"expTroubled":{"d":"2027-01-15"},"mgmt":["معاملة التمديد الزمني نتيجة الإستئناف بعد الإيقاف الكلي بمدة 255 يوم"],"upd":[{"t":"تم رفع معاملة التمديد 255 يوم من إدارة الانشاءات الي ادارة المشتريات بتاريخ 29/09/2026م للمراجعة والإعتماد","d":"2026-09-29"}],"tech":["تم الاجتماع مع المقاول بتاريخ 30/09/2026م لمراجعة متطلبات البدء والتنفيذ بالمشروع ووضع مواعيد محددة لاستكمال المتطلبات الفنية والتجهيزية.","تم توجيه المقاول خلال الاجتماع بإنهاء أعمال الرفع المساحي واستكمال إعداد واعتماد المخططات التنفيذية (Shop Drawings) قبل 7/10/2026 .","تم توجيه المقاول خلال الاجتماع باستكمال تقديم واعتماد المواد اللازمة للمشروع وفق المواصفات والاعتمادات الفنية قبل 7/10/2026 .","تم توجيه المقاول خلال الاجتماع بسرعة استكمال إجراءات التعاقد مع مقاول متخصص لأعمال الثقب الأفقي تمهيداً للبدء في تنفيذ الأعمال المرتبطة به واستكمال تجهيز مكاتب الموقع وتوفير المتطلبات اللازمة لبدء ومتابعة الأعمال بالمشروع"],"ord":11},{"po":"901240091","pno":"10279","name":"تنفيذ شبكات الصرف الصحي بمحافظة ينبع","contractor":"مؤسسة منصور الغامدي للمقاولات العامة","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"Coastal","status":"منتظم","sk":"ontrack","statusEn":"On Schedule","zero":0,"start":"2024-07-17","end":"2027-01-24","planned":55.5,"actual":47.6,"variance":-7.9,"elapsed":87.5,"plannedOct":63.6,"susp":0,"expDelay":{"d":"2026-10-15"},"expTroubled":{"d":"2026-12-03"},"mgmt":["جدول الكميات المعدل رقم (1)"],"upd":[{"t":"تم متابعة حاله الرفع علي النظام واخر افادة من قبل ادارة الانشاءات بتاريخ 27/09/2026م ان مازال هناك مشكلة تقنية ولا يمكن رفع المعاملة وجاري المتابعة مع ادارة التقنية","d":"2026-09-27"},{"t":"تم مراجعة معاملة جدول الكميات المعدل من قبل ادارة الجدولة والتحكم بتاريخ 31/08/2026م","d":"2026-08-31"}],"tech":["تم الاجتماع مع المقاول بتاريخ 27/09/2026 والتوجيه بضرورة تقديم خطة تصحيحية عاجلة حسب دليل ادارة المشاريع","تم التوجيه للمقاول بسرعة التعاقد مع مدير مشروع في خلال اسبوع والا سيتم الخصم من مستحقاته","تم التوجيه للمقاول بتاريخ 28/09/2026 برفع تصاريح بمنطقة رقم 1 بعد اتمام التصاريح المفتوحة في المنطقة مع زيادة عدد الفرق"],"ord":12},{"po":"901260326","pno":"NA-00220","name":"مشروع ايصال خدمة الصرف الصحي لمشروع بوابة سمو المطل علي تقاطع طريقيالملك فيصل و الملك فهد الكائن بحي المصانع بالمدينة المنورة","contractor":"شركه اعمال المحترفون للتجارة والمقاولات","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"WW","status":"منتظم","sk":"ontrack","statusEn":"On Schedule","zero":2,"start":"2026-08-11","end":"2027-04-11","planned":2.2,"actual":0,"variance":-2.2,"elapsed":21,"plannedOct":10.6,"susp":0,"expDelay":{"d":"2026-10-21"},"expTroubled":{"d":"2026-11-12"},"mgmt":["لا يوجد معاملة جارية"],"upd":[{"t":"لا يوجد","d":null}],"tech":["لا يوجد اجراء فني"],"ord":13},{"po":"901240095","pno":"10280","name":"مشروع تنفيذ شبكة توزيع المياه في حي المحاميد بالمدينة المنورة","contractor":"شركة خزام ناصر سعيد الشهراني للمقاولات","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"Water 2","status":"منتظم","sk":"ontrack","statusEn":"On Schedule","zero":9,"start":"2024-08-22","end":"2027-11-03","planned":26.1,"actual":19,"variance":-7.2,"elapsed":65.9,"plannedOct":28.3,"susp":19.1,"expDelay":{"d":"2026-11-05"},"expTroubled":{"d":"2027-02-16"},"mgmt":["إستكمال اجرءات سحب المشروع(انهاء التعاقد)"],"upd":[{"t":"تم تقديم خطه تصحيحية من قبل المقاول بتاريخ 15/09/2026م و تم اعتمادها بتاريخ 21/09/2026م واخفق المقاول في تحقيق النسبة المخططة بالخطة المعتمدة (21.08%) حتي 01/10/2026 م","d":"2026-10-01"},{"t":"تم اصدار خطاب انذار نهائي للمقاول لتوقف الاعمال لمدة 15 يوم متصلة بتاريخ 01/09/2026","d":"2026-09-01"}],"tech":["التوجيه للمقاول بالتواصل مع صاحب الشركة بتاريخ 17/09/2026 ، 24/09/2026 بتعيين مدير مشروع وتواجد الطاقم الفني بالمشروع مع سداد الغرامات واغلاق التصاريح المفوحة مع الامانة","تم اعطاء مهلة للمقاول حتي نهاية سبتمبر 2026 لغلق التصاريح المفتوحة ولكن لم يتم اغلاق غير عدد 1 تصريح من 5 تصاريح مفتوحة."],"ord":14},{"po":"901240282","pno":"NA-00112","name":"مشروع استبدال خطوط وشبكات المياه المتهالكة بالمدينة المنورة","contractor":"شركة ثروات المجد للمقاولات العامة","consultant":"دورش","area":"المدينة المنورة","areaEn":"Madinah","cls":"Water 1","status":"منتظم","sk":"ontrack","statusEn":"On Schedule","zero":9,"start":"2024-12-22","end":"2029-01-09","planned":11,"actual":3.2,"variance":-7.8,"elapsed":43.8,"plannedOct":12.2,"susp":0,"expDelay":{"d":"2026-12-02"},"expTroubled":{"d":"2027-12-25"},"mgmt":["اجرءات سحب المشروع (انهاء التعاقد)","معاملة تمديد تأخر صرف مستخلصات (14) يوم"],"upd":[{"t":"تم رفع طلب اصدار الانذار النهائي للمقاول الى الجدولة والتحكم بالمركز الرئيسي( لتوقف الاعمال اكثر من 15 يوم عن العمل) بتاريخ 29/09/2026","d":"2026-09-29"},{"t":"تم اصدار امر الشراء بتمديد زمني 14 يوم و تم توجيه المقاول بتقديم البرنامج الزمني حتي 15/09/2026 و لكن رفض المقاول الرد بتقديم الخطة المطلوبة وفقا لإتجاهه للقضاء","d":"2026-09-15"}],"tech":["لا يوجد اجراء فني"],"ord":15},{"po":"601250198","pno":"O918","name":"استكمال انشاء شبكات الصرف الصحي بالأحياء الجنوبية بمدينة ضبا","contractor":"شركة اثمار التشييد للبناء والمقاولات","consultant":"فيوتشر","area":"تبوك","areaEn":"Tabuk","cls":"WW","status":"منتظم","sk":"ontrack","statusEn":"On Schedule","zero":2,"start":"2025-12-23","end":"2027-12-22","planned":5.5,"actual":0,"variance":-5.5,"elapsed":37.3,"plannedOct":6.3,"susp":49,"expDelay":{"d":"2026-12-05"},"expTroubled":{"d":"2027-05-05"},"mgmt":["لا توجد معاملة جارية"],"upd":[{"t":"لا يوجد","d":null}],"tech":["تم عمل زيارة ميدانية للموقع بتاريخ 15/09/2026 بحضور المدير التنفيذى لوحدة اعمال تبوك و ادرة المحمية وبحضور استشارى ادارة المشاريع و استشارى الاشراف و المقاول لمناقشة إمكانية إصدار التصاريح و بدء العمل.","تم عمل اجتماع بين وحدة أعما ل تبوك و إدارة المحمية و استشارى الاشراف لمناقشة متطلبات المحمية بتاريخ 6/9/2026 و محاولة البدء في التنفيذ الشبكات اثناء تنفيذ الدراسات المطلوبة لمحطة الرفع.","التواصل المستمر مع الدراسات الفية لسرعة إصدار الرسومات المعدلة بناءاً على الموقع الجديد للمحطة.","حث المقاول على استكمال الطاقم الفنى و و سرعة اصدار التصاريح لبدء العمل."],"ord":16},{"po":"901240327","pno":"P898-2","name":"مشروع إستكمال تنفيذ الخطوط الرئيسية والشبكات الفرعية لمخططات شوران ( المرحلة الثانية )","contractor":"شركه أفاق الدولية","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"Water 1","status":"منتظم","sk":"ontrack","statusEn":"On Schedule","zero":6,"start":"2025-04-06","end":"2028-04-23","planned":9.8,"actual":7,"variance":-2.8,"elapsed":48.8,"plannedOct":12.2,"susp":0,"expDelay":{"d":"2026-12-10"},"expTroubled":{"d":"2027-03-20"},"mgmt":["إستكمال اجرءات سحب المشروع (انهاء التعاقد)"],"upd":[{"t":"تم توجية ادارة الإنشاءات من قبل ادارة الجدولة و التحكم بسرعة تعديل الطلب إلي انهاء بتاريخ 29/09/2026م","d":"2026-09-29"},{"t":".تم إحالة الطلب من ادارة المشتريات بالقطاع الي ادارة الإنشاءات بالقطاع بتاريخ 29/09/2026م لتعديل طلب السحب الي طلب الإنهاء","d":"2026-09-29"}],"tech":["تم عقد عده اجتماعات دورية مع المقاول وتوجيهه لسرعة استكمال الاعمال .","المقاول رفع دعوى قضائية ضد الشركة لفسخ العقد نتيجة عدم التعويض عن زيادة كميات الاسفلت","نظرا لعدم اغلاق التصاريح المفتوحة وشكوى المواطنين المتكررة تم تطبيق الاجراءات النظامية وتغريم المقاول 29 الف ريال نظير مخالفات الامن والسلامة بمواقع العمل المفتوحة حتي 01/10/2026 م"],"ord":17},{"po":"901230177","pno":"10129","name":"مشروع تنفيذ شبكات الصرف الصحي باحياء الجرف بالمدينة المنورة","contractor":"شركة البنايات العربية","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"WW","status":"منتظم","sk":"ontrack","statusEn":"On Schedule","zero":9,"start":"2023-10-25","end":"2027-12-09","planned":29.3,"actual":22.5,"variance":-6.8,"elapsed":71.2,"plannedOct":30.6,"susp":18,"expDelay":{"d":"2027-01-05"},"expTroubled":{"d":"2027-04-05"},"mgmt":["معاملة تمديد تأخر صرف مستخلصات - معاملة مؤجلة"],"upd":[{"t":"لا يوجد","d":null}],"tech":["تم الاجتماع مع مالك الشركة بتاريخ 23/09/2026م، وأفاد بتجديد شهادة تصنيف المقاول في ذات اليوم والبدء في إجراءات إصدار التصاريح.و زياده عدد الفرق و العماله و مقاولي الباطن","تم رفع تصاريح خط مطبعة المصحف وفقاً لخطة موسم الحج و تصريح الثقب الافقي .بتاريخ 30 -9 -2026 تحت الاصدار حاليا"],"ord":18},{"po":"901240144","pno":"NA-00031","name":"مشروع إحلال خط الاسبستوس ببدر","contractor":"شركة افاق الدولية","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"Coastal","status":"منتظم","sk":"ontrack","statusEn":"On Schedule","zero":7,"start":"2024-09-24","end":"2027-12-13","planned":52.3,"actual":48.1,"variance":-4.2,"elapsed":62.7,"plannedOct":53.4,"susp":0,"expDelay":{"d":"2027-01-15"},"expTroubled":{"d":"2027-05-10"},"mgmt":["إستكمال اجرءات سحب المشروع (انهاء التعاقد)"],"upd":[{"t":"تم إرسال بريد الكتروني من ادارة الجدولة إلي ادارة الانشاءات بتاريخ 30/09/2026 بالإفادة بالإجراءات المتخذه حيال المشروع طبقا لدليل ادارة المشروعات","d":"2026-09-30"},{"t":"تم اصدار الانذار النهائي نتيجة توقف الاعمال ل 15 يوم بتاريخ 15-09-2026 من سلاسل الامداد. و يوجد مهلة 15 يوم لإتخاذ الإجراءات التصحيحية من جانب المقاول","d":"2026-09-15"}],"tech":["لا يوجد اجراء فني"],"ord":19},{"po":"901240391","pno":"P852","name":"مشروع استكمال شبكات الصرف الصحى لحى البرماوية","contractor":"شركة الرخيص للمقاولات","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"WW","status":"متقدم","sk":"ahead","statusEn":"Ahead of Schedule","zero":0,"start":"2025-03-16","end":"2028-03-29","planned":21.2,"actual":21.5,"variance":0.3,"elapsed":50.9,"plannedOct":21.9,"susp":0,"expDelay":{"d":"2027-03-05"},"expTroubled":{"d":"2027-04-20"},"mgmt":["معاملة تمديد تأخر صرف المستخلصات - معاملة مستهدفة"],"upd":[{"t":"لا يوجد","d":null}],"tech":["لا يوجد اجراء فني"],"ord":20},{"po":"901240210","pno":"P802","name":"شبكات المياه لايصال الخدمة لمستشفى التخصصي بحمراء الأسد","contractor":"شركه بيان الإنشاء للمقاولات","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"Water 2","status":"متقدم","sk":"ahead","statusEn":"Ahead of Schedule","zero":0,"start":"2024-10-17","end":"2027-12-16","planned":42.2,"actual":42.4,"variance":0.2,"elapsed":61.8,"plannedOct":43.7,"susp":0,"expDelay":{"d":"2027-03-10"},"expTroubled":{"d":"2027-07-02"},"mgmt":["معاملة تمديد تأخر صرف مستخلصات - معاملة مؤجلة"],"upd":[{"t":"لا يوجد","d":null}],"tech":["لا يوجد اجراء فني"],"ord":21},{"po":"601240224","pno":"O922","name":"استكمال شبكات مياه المرحلة التاسعة في مدينة تبوك احياء النخيل و التعاون و غرناطة","contractor":"شركة أعمال المحترفون للتجارة والمقاولات","consultant":"فيوتشر","area":"تبوك","areaEn":"Tabuk","cls":"Water","status":"منتظم","sk":"ontrack","statusEn":"On Schedule","zero":0,"start":"2025-03-09","end":"2027-03-25","planned":57.8,"actual":56.8,"variance":-1,"elapsed":75.6,"plannedOct":61.3,"susp":24,"expDelay":{"d":"2027-03-14"},"expTroubled":{"d":"2027-03-22"},"mgmt":["لا يوجد معاملة جارية"],"upd":[{"t":"لا يوجد","d":null}],"tech":["التواصل مع الأمانة لحل مشكلة الاعمال القديمة ولم يتم التوصل لحل وتم البدء فى إجراءات التقاضى.","توجيه المقاول بسرعة إغلاق التصاريح."],"ord":22},{"po":"901230273","pno":"P894-1","name":"مشروع تنفيذ خط المياه الرئيسي في الدائري الثالث شرق المدينة المنورة","contractor":"شركة الأولات للصناعة والإنشاء المحدودة","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"Water 1","status":"متقدم","sk":"ahead","statusEn":"Ahead of Schedule","zero":0,"start":"2024-02-18","end":"2027-07-13","planned":59.4,"actual":62,"variance":2.6,"elapsed":77,"plannedOct":60.1,"susp":0,"expDelay":{"d":"2027-04-05"},"expTroubled":{"d":"2027-05-07"},"mgmt":["معاملة تمديد العقد بمدة (49) يوم لتأخر صرف المستخلصات"],"upd":[{"t":"تم اصدار امر الشراء ومخطط رفع البرنامج الزمني المعدل علي النظام بتاريخ 03/10/2026","d":"2026-10-03"}],"tech":["لا يوجد اجراء فني"],"ord":23},{"po":"901240105","pno":"10278","name":"مشروع انشاء شبكات وخطوط الصرف الصحي بحي الأصيفرين بالمدينة المنورة","contractor":"مجموعة سعد على العيسى للمقاولات","consultant":"دورش","area":"المدينة المنورة","areaEn":"Madinah","cls":"WW","status":"منتظم","sk":"ontrack","statusEn":"On Schedule","zero":0,"start":"2024-07-17","end":"2028-09-08","planned":16,"actual":15.4,"variance":-0.6,"elapsed":53.2,"plannedOct":16.6,"susp":0,"expDelay":{"d":"2027-04-10"},"expTroubled":{"d":"2027-09-15"},"mgmt":["معاملة تمديد تأخر صرف مستخلصات - معاملة مؤجلة"],"upd":[{"t":"تم توجيه الإستشاري دورش بمتابعة تنفيذ الخطة الخاصة بأعمال موسم الحج بشكل يومي بمتابعة تنفيذ الكميات المخططة بالفعلية بالإضافة إلي متابعة رفع الموارد الحالية من جانب المقاول و فقا للخطة الحالية بتاريخ 28/09/2026","d":"2026-09-28"}],"tech":["تم جدولة اجتماع مع الإدارة العليا للمقاول يوم الأحد الموافق 04/10/2026م لمناقشة تدني نسب الإنجاز وأداء المقاول، والإجراءات المطلوبة لرفع معدلات التنفيذ ومعالجة التأخير.","تم الاجتماع مع الاستشاري والمقاول بتاريخ 29/09/2026م لمتابعة نسب إنجاز خطة خدمة موسم الحج وخطة الشبكيات، مع التوجيه بضرورة إصدار تصاريح جديدة لاستكمال شبكية مبنى الأدلاء والشبكيات المتبقية وربط الخطوط المنفذة، بما يحقق الاستفادة من الأعمال المنجزة.","تم توجيه الاستشاري والمقاول خلال الاجتماع بضرورة استكمال الحصر النهائي للأعمال غير المتاحة وتقديمه لإدارة المشروع خلال الأسبوع الجاري لاتخاذ الإجراءات اللازمة وتحديد نطاق الأعمال المتاح للتنفيذ بدقة"],"ord":24},{"po":"901240018","pno":"P908","name":"تنفيذ شبكات وخطوط المياه بمنطقة جنوب المدينة المنورة","contractor":"شركة عبدالمحسن شعبان القحطاني للمقاولات","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"Water 2","status":"منتظم","sk":"ontrack","statusEn":"On Schedule","zero":0,"start":"2024-05-19","end":"2028-10-03","planned":25.3,"actual":21.4,"variance":-4,"elapsed":54.1,"plannedOct":25.3,"susp":0,"expDelay":{"d":"2027-04-15"},"expTroubled":{"d":"2027-11-10"},"mgmt":["معاملة تمديد تأخر صرف المستخلصات - معاملة مؤجلة"],"upd":[{"t":"لا يوجد","d":null}],"tech":["تم التوجيه للمقاول بزيادة عدد التصاريح وعدد الفرق وتم رفع عدد 3 تصاريح بطول 1.50 كم 27/09/2026 علي المنصة وحاليا قيد التنسيق","تم تركيب 450 متر طولي في حي السكب حتي تاريخه"],"ord":25},{"po":"901240136","pno":"NA-00023","name":"مشروع خطوط وشبكات المياه بمنطقة شمال وشرق المدينة المنورة","contractor":"شركة كيان كاك المملكة","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"Water 1","status":"منتظم","sk":"ontrack","statusEn":"On Schedule","zero":0,"start":"2024-09-09","end":"2028-11-17","planned":12.1,"actual":10.2,"variance":-1.9,"elapsed":49.2,"plannedOct":14,"susp":0,"expDelay":{"d":"2027-05-10"},"expTroubled":{"d":"2027-11-15"},"mgmt":["لا يوجد معاملة جارية"],"upd":[{"t":"لا يوجد","d":null}],"tech":["تم الاجتماع مع المقاول بتاريخ 20/09/2026 والضغط عليه لاستكمال الاعمال وتم الاتفاق على بدء اعمال اثقب الافقي - استجاب المقاول وقام بالانتهاء من غرفة الارسال","تم الانتهاء من اعمال الثقب الافقي بتاريخ 28/09/2026"],"ord":26},{"po":"601240159","pno":"P1488","name":"مشروع إنشاء محطة تنقية مياه الشرب لفجر بمنطقة تبوك سعة 500 م3/ اليوم","contractor":"مؤسسة وبرا للمقاولات","consultant":"دورش","area":"تبوك","areaEn":"Tabuk","cls":"Water","status":"متقدم","sk":"ahead","statusEn":"Ahead of Schedule","zero":0,"start":"2025-02-10","end":"2028-03-27","planned":29.5,"actual":32,"variance":2.5,"elapsed":48.9,"plannedOct":29.9,"susp":0,"expDelay":{"d":"2027-05-10"},"expTroubled":{"d":"2028-08-10"},"mgmt":["لا يوجد معاملة جارية"],"upd":[{"t":"لا يوجد","d":null}],"tech":["لا يوجد اجراء فني"],"ord":27},{"po":"601250143","pno":"P1465-2","name":"احلال وتجديد شبكات المياه بمنطقة تبوك المرحلة الأولى","contractor":"إثمار التشييد للمقاولات","consultant":"فيوتشر","area":"تبوك","areaEn":"Tabuk","cls":"Water","status":"متقدم","sk":"ahead","statusEn":"Ahead of Schedule","zero":0,"start":"2025-12-07","end":"2028-07-21","planned":3.4,"actual":3.7,"variance":0.4,"elapsed":30.1,"plannedOct":4.5,"susp":0,"expDelay":{"d":"2027-05-15"},"expTroubled":{"d":"2027-09-25"},"mgmt":["لا توجد معاملة جارية"],"upd":[{"t":"لا يوجد","d":null}],"tech":["لا يوجد اجراء فني"],"ord":28},{"po":"601240160","pno":"P1469","name":"استكمال شبكات الصرف الصحي في حي الرحمانية بتيماء المرحلة السادسة","contractor":"مؤسسة الأسس الاولى للمقاولات","consultant":"فيوتشر","area":"تبوك","areaEn":"Tabuk","cls":"WW","status":"منتظم","sk":"ontrack","statusEn":"On Schedule","zero":0,"start":"2024-10-16","end":"2028-12-24","planned":33.9,"actual":30.1,"variance":-3.7,"elapsed":46.1,"plannedOct":34.9,"susp":0,"expDelay":{"d":"2027-05-18"},"expTroubled":{"d":"2027-10-15"},"mgmt":["معاملة تمديد العقد"],"upd":[{"t":"تم اصدار امر الشراء PO تمديد العقد (175) يوم رقم (601240160) بتاريخ 22/08/2026 و تم تقديم البرنامج للاستشاري للمراجعة و ابداء الملاحظات 27/9/2026","d":"2026-09-27"}],"tech":["التنسيق مع الامانه لاصدار التصاريح اللآزمة وخاصة للمناطق الخدمية في حي الرحمانية.","الاجتماع مع إدارة المقاول لمناقشة ضعف الأداء و الحث على زيادة معدلات الانتاج و سرعة إغلاق التصاريح في مواقع المشروع بتاريخ (25/08/2026).","تشكيل لجنه من قبل القطاع لدراسة مشكلة الاسفلت."],"ord":29},{"po":"901230145","pno":"10101","name":"تنفيذ شبكات وخطوط مياه بالعوينة والعاقول بالمدينة المنورة","contractor":"مؤسسة اعمار الجنوب للمقاولات","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"Water 2","status":"منتظم","sk":"ontrack","statusEn":"On Schedule","zero":0,"start":"2023-09-21","end":"2027-11-15","planned":50.5,"actual":50.4,"variance":-0.1,"elapsed":73,"plannedOct":50.8,"susp":0,"expDelay":{"d":"2027-05-20"},"expTroubled":{"d":"2027-10-30"},"mgmt":["معاملة جدول الكميات المعدل الجاري رقم (2)"],"upd":[{"t":"تم ارسال بريد الكتروني من قبل ادارة الانشاءات بتاريخ 28/09/2026م الي المقاول لاعداد جدول الكميات المعدل مع ادراج متطلبات التشغيل و الصيانة.","d":"2026-09-28"},{"t":"تم الاجتماع مع التشغيل و الصيانه و نتيجة طلبهم الي اضافة محابس PRV و تم ارسال بريد الكتروني من قبلهم بالمتطلبات بتاريخ 28/09/2026م","d":"2026-09-28"},{"t":"تم الافادة من قبل الاستشاري بتاريخ 14/09/2026م انه تمت إعادة الإرسال إلى الخدمات الفنية من قبل مدير المشروع بشركة المياه الوطنية للمراجعة و الإعتماد","d":"2026-09-14"}],"tech":["لا يوجد اجراء فني"],"ord":30},{"po":"601240239","pno":"P1475-3","name":"تنفيذ شبكة صرف صحي لاحياء شمال تبوك ( المرحلة الأولى )","contractor":"شركة الاولات للصناعة و الانشاء المحدودة","consultant":"فيوتشر","area":"تبوك","areaEn":"Tabuk","cls":"WW","status":"منتظم","sk":"ontrack","statusEn":"On Schedule","zero":0,"start":"2025-04-06","end":"2028-04-04","planned":25.1,"actual":22.3,"variance":-2.8,"elapsed":48.7,"plannedOct":26.4,"susp":0,"expDelay":{"d":"2027-05-23"},"expTroubled":{"d":"2027-08-30"},"mgmt":["لا يوجد معاملة جارية"],"upd":[{"t":"لا يوجد","d":null}],"tech":["توجيه المقاول بالالتزام بمتطلبات الامن و السلامة و تم توفير بعض الموارد الخاصة بامور السلامة العامة و سند الجوانب و التحكم المرورى، وتطبيق الغرامات الرادعة على المقاول من جانب قسم الأمن والسلامة التابع لإدارة المشروعات، وتم الاجتماع مع الإدارة العليا للمقاول بتاريخ 03/09/2026.","توجيه المقاول بتوفير الموارد اللازمة بما يحقق نسب الإنجاز المطلوبة حسب الجدول الزمنى المعتمد.."],"ord":31},{"po":"601250095","pno":"P1475-4","name":"موقع تنفيذ شبكة صرف صحي لأخياء شمال تبوك ( المرحلة الثانية )","contractor":"موارد الالات","consultant":"فيوتشر","area":"تبوك","areaEn":"Tabuk","cls":"WW","status":"منتظم","sk":"ontrack","statusEn":"On Schedule","zero":0,"start":"2025-07-28","end":"2029-05-30","planned":0.8,"actual":0.4,"variance":-0.4,"elapsed":30,"plannedOct":1.5,"susp":19.2,"expDelay":{"d":"2027-05-23"},"expTroubled":{"d":"2027-12-19"},"mgmt":["لا توجد معاملة جارية"],"upd":[{"t":"لا يوجد","d":null}],"tech":["التواصل المستمر مع الامانه للحصول للحث على اعمال الردم للمناطق 4 و 5","حث المقاول على استكمال متطلبات إصدار الرخص.","عقد اجتماع تنسيقى مع المقاول المنفذ بمبنى شركة المياه الوطنيه بتاريخ 26/07/2026 و تم التوجيه ببدء العمل فى الشوارع المنتهية ردم.","ارسال طلب إستفسار للدراسات الفنية بخصوص تجاوز تكلفة العقد للقيمة الاصلية بسبب إعادة التصميم."],"ord":32},{"po":"901250291","pno":"P861","name":"تنفيذ خطوط وشبكات الصرف الصحي مخطط جبل عير","contractor":"شركة سماء التشييد والبناء للتجارة والمقاولات","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"WW","status":"متقدم","sk":"ahead","statusEn":"Ahead of Schedule","zero":0,"start":"2025-09-02","end":"2029-05-14","planned":8.9,"actual":12.3,"variance":3.4,"elapsed":29.2,"plannedOct":9.4,"susp":0,"expDelay":{"d":"2027-06-05"},"expTroubled":{"d":"2027-10-15"},"mgmt":["جدول الكميات المعدل رقم (1)"],"upd":[{"t":"تم اعداد مسودة الخطاب الموجه لهيئة تطوير المدينة بتاريخ 28/09/2026 بخصوص الموافقة على المسار وبانتظار اعتماد الخطاب.","d":"2026-09-28"}],"tech":["لا يوجد اجراء فني"],"ord":33},{"po":"601240142","pno":"P1502","name":"مشروع انشاء خطوط ناقلة وموقع اعمال مياه ومحطة ضخ بمدينة حقل","contractor":"شركة بن ماضي المحدودة (شركة شخص واحد)","consultant":"فيوتشر","area":"تبوك","areaEn":"Tabuk","cls":"Water","status":"متقدم","sk":"ahead","statusEn":"Ahead of Schedule","zero":0,"start":"2024-11-18","end":"2028-01-11","planned":49.5,"actual":55.2,"variance":5.7,"elapsed":58.5,"plannedOct":50.9,"susp":0,"expDelay":{"d":"2027-06-28"},"expTroubled":{"d":"2027-10-02"},"mgmt":["لا يوجد معاملة جارية"],"upd":[{"t":"لا يوجد","d":null}],"tech":["لا يوجد اجراء فني"],"ord":34},{"po":"901240072","pno":"NA-00034","name":"تنفيذ شبكات صرف صحي متفرقة بالمدينة المنورة ( الجزء الاول )","contractor":"شركة ابداع الحياة للاستثمار","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"WW","status":"متقدم","sk":"ahead","statusEn":"Ahead of Schedule","zero":0,"start":"2024-09-30","end":"2027-10-25","planned":25.7,"actual":32.1,"variance":6.4,"elapsed":65.3,"plannedOct":26.2,"susp":0,"expDelay":{"d":"2027-07-05"},"expTroubled":{"d":"2027-10-10"},"mgmt":["معاملة جدول الكميات المعدل الجاري رقم (1)"],"upd":[{"t":"تم الافادة من قبل المدير العام للمشتريات بالمركز الرئيسي بتاريخ 28/09/2026م انه تم التصعيد لدي ادارة التقنية وجاري حل المشكلة بالنظام","d":"2026-09-28"},{"t":"تم ارسال ايميل التصعيد من قبل المدير العام المشاريع بالقطاع الي المدير العام للمشتريات بالمركز الرئيسي بتاريخ 28/09/2026م","d":"2026-09-28"},{"t":"تم اعادة رفع المعامله الي ادارة المشتريات بتاريخ 09/09/2026م بناءا علي البريد الكتروني المستلم منهم باعادة رفع المعاملات","d":"2026-09-09"}],"tech":["لا يوجد اجراء فني"],"ord":35},{"po":"601250132","pno":"AP257","name":"تنفيذ نظام لنقل مياه الصرف الصحي لمنفذ الدرة بحقل","contractor":"الاولات","consultant":"فيوتشر","area":"تبوك","areaEn":"Tabuk","cls":"WW","status":"منتظم","sk":"ontrack","statusEn":"On Schedule","zero":0,"start":"2025-10-07","end":"2028-07-23","planned":3.8,"actual":1.3,"variance":-2.5,"elapsed":34.2,"plannedOct":4.5,"susp":0,"expDelay":{"d":"2027-07-12"},"expTroubled":{"d":"2027-11-16"},"mgmt":["لا توجد معاملة جارية"],"upd":[{"t":"لا يوجد","d":null}],"tech":["المتابعة المستمرة من قبل ادارة المشاريع مع المشتريات لترسية المشروع و اصدار امر الشراء.","الإجتماعات الدورية مع إدارة الشركة لحل مشاكل المشروع و سرعة تقديم المتطلبات العقدية المطلوبة من المقاول.","تمت التوصية للاستشاري بتطبيق الغرامات التعاقدية على المقاول بخصوص تأخيرات اعتماد الطاقم الفني للمشروع."],"ord":36},{"po":"901240137","pno":"NA-00033","name":"خطوط مياه متفرقة بالمدينة المنورة ( الجزء الاول )","contractor":"شركة دقة الابعاد للمقاولات","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"Water 1","status":"متقدم","sk":"ahead","statusEn":"Ahead of Schedule","zero":6,"start":"2024-09-30","end":"2028-10-31","planned":14.4,"actual":15.1,"variance":0.7,"elapsed":49,"plannedOct":15,"susp":0,"expDelay":{"d":"2027-07-20"},"expTroubled":{"d":"2027-12-02"},"mgmt":["إستكمال اجرءات سحب المشروع(انهاء التعاقد)"],"upd":[{"t":"تم الافادة من ادارة المشتريات بتاريخ 28/09/2026م ان الطلب تحت الإجراء","d":"2026-09-28"},{"t":"تم طلب الدعم من سلاسل الامداد لسرعة اصدار خطاب الانذار النهائي لاستكمال اجراءات السحب","d":null},{"t":"تم اصدار طلب خطاب الانذار النهائي لتوقف الاعمال لمدة 15 يوم متصلة بتاريخ 07/09/2026م","d":"2026-09-07"}],"tech":["تم عقد اجتماع مع المقاول وسلاسل الامداد لطلب خطة تصحيحية قبل اصدار للانذار النهائي بتاريخ 29/09/2026"],"ord":37},{"po":"901250200","pno":"P871","name":"تنفيذ خطوط وشبكات الصرف الصحي بمحافظة بدر ( الجزء الأول )","contractor":"شركة العاذرية المحدودة للتجارة","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"Coastal","status":"منتظم","sk":"ontrack","statusEn":"On Schedule","zero":0,"start":"2025-09-10","end":"2029-07-06","planned":6.2,"actual":5.2,"variance":-1,"elapsed":27.7,"plannedOct":6.8,"susp":0,"expDelay":{"d":"2027-07-25"},"expTroubled":{"d":"2028-01-25"},"mgmt":["لا يوجد معاملة جارية"],"upd":[{"t":"لا يوجد","d":null}],"tech":["لا يوجد اجراء فني"],"ord":38},{"po":"601240064","pno":"10256","name":"تنفيذ الاعمال لإنشاء محطة تنقية مياه الشرب بنظام الحاوية المدمجة للقليبة بمنطقة تبوك سعة 1000 م3\\يوم","contractor":"مؤسسة وبرا للمقاولات","consultant":"دورش","area":"تبوك","areaEn":"Tabuk","cls":"Water","status":"متقدم","sk":"ahead","statusEn":"Ahead of Schedule","zero":0,"start":"2024-06-10","end":"2028-11-01","planned":47,"actual":47.2,"variance":0.2,"elapsed":52.4,"plannedOct":47.4,"susp":0,"expDelay":{"d":"2027-08-08"},"expTroubled":{"d":"2028-01-28"},"mgmt":["لا يوجد معاملة جارية"],"upd":[{"t":"لا يوجد","d":null}],"tech":["لا يوجد اجراء فني"],"ord":39},{"po":"901230317","pno":"10245","name":"تنفيذ شبكات وخطوط المياه بالصويدرة بمنطقة المدينة المنورة","contractor":"شركة خالد سليم الأحمدي للمقاولات","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"Water 1","status":"منتظم","sk":"ontrack","statusEn":"On Schedule","zero":0,"start":"2024-02-20","end":"2028-04-13","planned":44.1,"actual":41.9,"variance":-2.2,"elapsed":63,"plannedOct":44.9,"susp":24.3,"expDelay":{"d":"2027-09-10"},"expTroubled":{"d":"2027-12-15"},"mgmt":["معاملة تمديد العقد بمدة (93) يوم لتأخر صرف المستخلصات"],"upd":[{"t":"تم الافادة من قبل المدير العام للمشتريات بالمركز الرئيسي بتاريخ 28/09/2026م انه تم التصعيد لدي ادارة التقنية وجاري حل المشكلة بالنظام","d":"2026-09-28"},{"t":"تم ارسال ايميل التصعيد من قبل المدير العام المشاريع بالقطاع الي المدير العام للمشتريات بالمركز الرئيسي بتاريخ 28/09/2026م","d":"2026-09-28"},{"t":"تم اعادة رفع طلب التمديد الي ادارة المشتريات بتاريخ 10/09/2026م","d":"2026-09-10"}],"tech":["لا يوجد اجراء فني"],"ord":40},{"po":"901250461","pno":"AP246","name":"مشروع انشاء شبكات مياه بمدائن صالح","contractor":"شركة ركن المواثيق للمقاولات شركة شخص واحد","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"Coastal","status":"منتظم","sk":"ontrack","statusEn":"On Schedule","zero":0,"start":"2026-03-16","end":"2028-07-27","planned":5.4,"actual":1.4,"variance":-4,"elapsed":23,"plannedOct":5.9,"susp":0,"expDelay":{"d":"2027-09-15"},"expTroubled":{"d":"2028-02-20"},"mgmt":["لا توجد معاملة جارية"],"upd":[{"t":"لا يوجد","d":null}],"tech":["تم الاجتماع مع ممثلي الهيئة الملكية بالعلا بتاريخ 27/09/2026 بخصوص التعارضات مع المخططات التنظيمية والطبيعة في حي العزيزية وتم تقديم مقترح من المقاول بترحيل بعض المسارات المتعارضة مع الاصول القائمة وجاري دراسته من قبل الهيئة.","تم الاجتماع مع المقاول بتاريخ 28 / 09 / 2026 وتم توجيه الاستشاري بدراسة الايقاف جزئي للمناطق الغير متاحة ( ثربه - الحجر) من قبل الهيئة الملكية بالعلا"],"ord":41},{"po":"901230202","pno":"10203","name":"تنفيذ خطوط الصرف الصحي الرئيسية بمخططات الرانوناء واحياء جنوب المدينة","contractor":"شركة روابط الحمرور المحدودة","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"WW","status":"متقدم","sk":"ahead","statusEn":"Ahead of Schedule","zero":0,"start":"2023-12-28","end":"2027-12-20","planned":50.4,"actual":53.4,"variance":2.9,"elapsed":69.4,"plannedOct":50.9,"susp":0,"expDelay":{"d":"2027-09-15"},"expTroubled":{"d":"2027-11-15"},"mgmt":["معاملة تمديد تأخر صرف المستخلصات - معاملة مؤجلة"],"upd":[{"t":"لا يوجد","d":null}],"tech":["لا يوجد اجراء فني"],"ord":42},{"po":"601250165","pno":"AP256","name":"مشروع إيصال المياه لمنفذ عمار الحدودي","contractor":"شركة فهد ماضي جمعان المجول للمقاولات المعمارية","consultant":"فيوتشر","area":"تبوك","areaEn":"Tabuk","cls":"Water","status":"متقدم","sk":"ahead","statusEn":"Ahead of Schedule","zero":0,"start":"2025-12-30","end":"2028-08-14","planned":4.8,"actual":5.5,"variance":0.6,"elapsed":27.7,"plannedOct":6.1,"susp":0,"expDelay":{"d":"2027-09-15"},"expTroubled":{"d":"2028-01-23"},"mgmt":["لا توجد معاملة جارية"],"upd":[{"t":"لا يوجد","d":null}],"tech":["لا يوجد اجراء فني"],"ord":43},{"po":"601250007","pno":"AP244","name":"انشاء مصبات الصهاريج بمحطات معالجة الصرف الصحي بمنطقة تبوك","contractor":"شركة الأداء المتوازن للمقاولات","consultant":"فيوتشر","area":"تبوك","areaEn":"Tabuk","cls":"WW","status":"منتظم","sk":"ontrack","statusEn":"On Schedule","zero":0,"start":"2025-03-10","end":"2028-03-08","planned":35.9,"actual":35.8,"variance":-0.1,"elapsed":51.2,"plannedOct":37.4,"susp":0,"expDelay":{"d":"2027-09-30"},"expTroubled":{"d":"2027-12-24"},"mgmt":["معاملة تمديد العقد بمدة (174) تأخر صرف المستخلصات"],"upd":[{"t":"تم توجية ادارة التشييد بتاريخ 27/09/2026م بسرعة استيفاء الملاحظات وإعادة الرفع","d":"2026-09-27"},{"t":"تم رفض معاملة التمديد بتاريخ 24/09/2026م لاستكمال بيانات أمر التغيير علي شاشة النظام","d":"2026-09-24"},{"t":"تم إعادة رفع الطلب علي النظام بتاريخ 16/09/2026م لدي ادارة المشتريات بالقطاع للمراجعة.","d":"2026-09-16"}],"tech":["الاجتماع مع ادارة الشركه لحل مشاكل المشروع و حثه على الإنتهاء من الاعتمادات و عمل خطة التوريدات ، ومناقشة مشكلة عزل البيارة يوم الخميس الموافق 03/09/2026.","حث المقاول على زيادة الموارد و العمل في المواقع المتاخرة مع إعطاء الأولية بموقع الوجه.","تم إرسال RFI لقسم الدراسات و تم الرد بالزام المقاول بتنفيذ البند على الوجة الأكمل طبقاً للمواصفات الفنية و الاشتراطات الخاصة بالمشروع و إعتبارها مشمولة ضمن إجمالى العطاء ."],"ord":44},{"po":"901250253","pno":"P832","name":"ترحيل خطوط وتنفيذ شبكات بمناطق متفرقة (المرحلة الاولى)","contractor":"شركة خالد سليم الأحمدي للمقاولات شركة شخص واحد","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"Water 2","status":"منتظم","sk":"ontrack","statusEn":"On Schedule","zero":0,"start":"2025-11-20","end":"2029-07-08","planned":3.3,"actual":1.3,"variance":-2,"elapsed":23.8,"plannedOct":3.9,"susp":0,"expDelay":{"d":"2027-10-25"},"expTroubled":{"d":"2028-01-12"},"mgmt":["لا يوجد معاملة جارية"],"upd":[{"t":"لا يوجد","d":null}],"tech":["تم الاجتماع مع المقاول 24/09/2026 والتوجيه بسرعة رفع تصريح بطول 450 متر للخط المدرج بخطة الاستلامات الجزئية بحي بني حارثه","تم توجيه المقاول بنفس الاجتماع برفع تصريح علي المنصة بحي الدويخلة والتصريح قيد التنسيق"],"ord":45},{"po":"601240116","pno":"10296","name":"مشروع إنشاء شبكات مياه الشرب لحي الرايس بمدينة تبوك","contractor":"مؤسسة نفود العاذرية للمقاولات","consultant":"فيوتشر","area":"تبوك","areaEn":"Tabuk","cls":"Water","status":"متقدم","sk":"ahead","statusEn":"Ahead of Schedule","zero":0,"start":"2024-08-01","end":"2028-02-26","planned":38,"actual":43,"variance":5,"elapsed":63.4,"plannedOct":38.5,"susp":50,"expDelay":{"d":"2027-11-03"},"expTroubled":{"d":"2027-11-22"},"mgmt":["معاملة جدول الكميات المعدل الجاري رقم (1)"],"upd":[{"t":"تم الافادة من قبل ادارة الانشاءات بتاريخ 27/09/2026م باستمرار مشكلة الرفع علي النظام","d":"2026-09-27"},{"t":"تم استكمال التوقيعات و يوجد مشكله في الرفع علي النظام و تم رفع تذكرة الي ادارة التقنية بتاريخ 21/09/2026م","d":"2026-09-21"},{"t":"جاري استكمال التوقيعات لرفع طلب جدول الكميات المعدل رقم (1) بتاريخ 14/09/2026م","d":"2026-09-14"},{"t":"تم الرد من ادارة الخدمات الفنية بتاريخ 06/09/2026م انه لا يوجد مانع من استكمال الاجراءات.","d":"2026-09-06"},{"t":"تم إحال الطلب من ادارة التشييد بالقطاع إلى إدارة الخدمات الفنية بالقطاع بتاريخ 31/08/2026م للمراجعه الفنية","d":"2026-08-31"}],"tech":["لا يوجد اجراء فني"],"ord":46},{"po":"901250201","pno":"AP264","name":"مشروع انشاء شبكات مياه بقريتي المعتدل وقاع الحاج","contractor":"مؤسسه اشغال النهار للمقاولات","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"Coastal","status":"متقدم","sk":"ahead","statusEn":"Ahead of Schedule","zero":0,"start":"2025-09-01","end":"2028-08-31","planned":16.8,"actual":31,"variance":14.2,"elapsed":36,"plannedOct":17.1,"susp":0,"expDelay":{"d":"2028-01-15"},"expTroubled":{"t":"غير متوقع تعثره"},"mgmt":["معاملة جدول الكميات المعدل رقم (1)"],"upd":[{"t":"تم مراجعة البرنامج الزمني المعدل و مخطط رفع البرنامج الزمني المعدل علي النظام بتاريخ 03/10/2026","d":"2026-10-03"}],"tech":["لا يوجد اجراء فني"],"ord":47},{"po":"901250290","pno":"AP251","name":"تنفيذ مشاريع إيصال خدمات الصرف الصحي لمخططات الإسكان بالمدينة المنورة ( 4 مواقع )","contractor":"شركة آشي وبشناق للمقاولات المحدودة","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"WW","status":"متقدم","sk":"ahead","statusEn":"Ahead of Schedule","zero":0,"start":"2025-10-09","end":"2029-07-10","planned":4.8,"actual":9,"variance":4.2,"elapsed":26.1,"plannedOct":5.4,"susp":0,"expDelay":{"d":"2028-01-25"},"expTroubled":{"d":"2028-06-15"},"mgmt":["معاملة استحداث بنود وتغيير في النطاق الجغرافي للعقد و جدول الكميات المعدل رقم (1) بتمديد زمني 150 يوم"],"upd":[{"t":"تم الافادة من قبل المدير العام للمشتريات بالمركز الرئيسي بتاريخ 28/09/2026م انه تم التصعيد لدي ادارة التقنية لحل المشكلة بالنظام","d":"2026-09-28"},{"t":"تم ارسال ايميل التصعيد من قبل المدير العام المشاريع بالقطاع الي المدير العام للمشتريات بالمركز الرئيسي بتاريخ 28/09/2026م","d":"2026-09-28"},{"t":"طبقا لافادة مدير ادارة المشتريات بالاجتماع بتاريخ 20/09/2026م ان تم رفض المعاملة بالخطأ بدل من الاحالة و تم اعادة الرفع بطلب (استحداث بنود وتغيير النطاق والتمديد) من ادارة التشييد بتاريخ 20/09/2026م","d":"2026-09-20"}],"tech":["لا يوجد اجراء فني"],"ord":48},{"po":"601250001","pno":"P1515","name":"مشروع إعادة تأهيل شبكات المياه بمنطقة تبوك","contractor":"شركة رواسي البناء","consultant":"فيوتشر","area":"تبوك","areaEn":"Tabuk","cls":"Water","status":"متقدم","sk":"ahead","statusEn":"Ahead of Schedule","zero":0,"start":"2025-04-14","end":"2029-03-02","planned":15.1,"actual":17.8,"variance":2.6,"elapsed":37,"plannedOct":15.6,"susp":0,"expDelay":{"d":"2028-02-03"},"expTroubled":{"d":"2028-04-23"},"mgmt":["معاملة جدول الكميات المعدل الجاري رقم (1)"],"upd":[{"t":"تم الافادة من قبل المدير العام للمشتريات بالمركز الرئيسي بتاريخ 28/09/2026م انه تم التصعيد لدي ادارة التقنية وجاري حل المشكلة بالنظام","d":"2026-09-28"},{"t":"تم ارسال ايميل التصعيد من قبل المدير العام المشاريع بالقطاع الي المدير العام للمشتريات بالمركز الرئيسي بتاريخ 28/09/2026م","d":"2026-09-28"},{"t":"تم احالة معاملة التمديد الي ادارة المشتريات بتاريخ 08/09/2026م مع توضيح انه النموذج المرفق معتمد من نائب الرئيس للمشاريع بالقطاع و قد تم الاعتماد مسبقا من الرئيس التنفيذي الكترونيا","d":"2026-09-08"}],"tech":["لا يوجد اجراء فني"],"ord":49},{"po":"901250210","pno":"P825","name":"خط المياه الرئيسي بالدائري الأوسط بالمدينة المنورة","contractor":"شركة شبه الجزيرة للمقاولات","consultant":"دورش","area":"المدينة المنورة","areaEn":"Madinah","cls":"Water 1","status":"متقدم","sk":"ahead","statusEn":"Ahead of Schedule","zero":0,"start":"2025-07-30","end":"2029-07-03","planned":8.6,"actual":12.5,"variance":3.9,"elapsed":29.8,"plannedOct":9.1,"susp":0,"expDelay":{"d":"2028-03-15"},"expTroubled":{"d":"2028-09-02"},"mgmt":["جدول الكميات المعدل رقم (1)","معاملة تمديد تأخر صرف مستخلصات - معاملة مؤجلة"],"upd":[{"t":"تم ارسال بريد الكتروني من ادارة الجدولة و التحكم بتاريخ 24/09/2026م للوقوف علي حاله استيفاء الملاحظات","d":"2026-09-24"},{"t":"يتم استيفاء ملاحظات ادارة الخدمات الفنية المرسلة بتاريخ 13/09/2026م من قبل ادارة الإنشاءات","d":"2026-09-13"}],"tech":["لا يوجد اجراء فني"],"ord":50},{"po":"901250199","pno":"P917-3","name":"تنقيذ شبكات وخطوط مياه قرى المدينة المنورة ( الجزء الثالث )","contractor":"شركة خالد سليم الأحمدي للمقاولات شركة شخص واحد","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"Water 1","status":"متقدم","sk":"ahead","statusEn":"Ahead of Schedule","zero":0,"start":"2025-10-19","end":"2029-07-02","planned":6.3,"actual":8.5,"variance":2.1,"elapsed":25.7,"plannedOct":7.5,"susp":0,"expDelay":{"d":"2028-04-02"},"expTroubled":{"d":"2028-07-20"},"mgmt":["1معاملة تمديد زمني (32) يوم لتأخر صرف المستخلصات"],"upd":[{"t":"تم الافادة من قبل المدير العام للمشتريات بالمركز الرئيسي بتاريخ 28/09/2026م انه تم التصعيد لدي ادارة التقنية لحل المشكلة بالنظام","d":"2026-09-28"},{"t":"تم ارسال ايميل التصعيد من قبل المدير العام المشاريع بالقطاع الي المدير العام للمشتريات بالمركز الرئيسي بتاريخ 28/09/2026م","d":"2026-09-28"},{"t":"تم اعادة رفع طلب التمديد الي ادارة المشتريات بتاريخ 10/09/2026م","d":"2026-09-10"}],"tech":["لا يوجد اجراء فني"],"ord":51},{"po":"901250206","pno":"AP269","name":"شبكات مياه في الحناكية و الصميد","contractor":"شركة خالد سليم الأحمدي للمقاولات شركة شخص واحد","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"Water 2","status":"متقدم","sk":"ahead","statusEn":"Ahead of Schedule","zero":0,"start":"2025-10-22","end":"2028-09-08","planned":20.9,"actual":29.7,"variance":8.9,"elapsed":32.7,"plannedOct":21,"susp":0,"expDelay":{"d":"2028-04-15"},"expTroubled":{"t":"غير متوقع تعثره"},"mgmt":["معاملة جدول الكميات المعدل الجاري رقم (1)"],"upd":[{"t":"تم مراجعة البرنامج الزمني المعدل و مخطط رفع البرنامج الزمني المعدل علي النظام بتاريخ 03/10/2026","d":"2026-10-03"}],"tech":["لا يوجد اجراء فني"],"ord":52},{"po":"901250300","pno":"P824","name":"مشروع تنفيذ خط المياه الرئيسي من الخزانات الاستراتيجية الي المسجد النبوي","contractor":"شركة مطلق القويرى للمقاولات","consultant":"دورش","area":"المدينة المنورة","areaEn":"Madinah","cls":"Water 2","status":"متقدم","sk":"ahead","statusEn":"Ahead of Schedule","zero":0,"start":"2025-10-12","end":"2029-06-17","planned":8.2,"actual":16.1,"variance":7.8,"elapsed":26.3,"plannedOct":8.8,"susp":0,"expDelay":{"d":"2028-06-15"},"expTroubled":{"d":"2028-09-20"},"mgmt":["جدول الكميات المعدل رقم (1)"],"upd":[{"t":"تم الافادة من قبل المدير العام للمشتريات بالمركز الرئيسي بتاريخ 28/09/2026م انه تم التصعيد لدي ادارة التقنية لحل المشكلة بالنظام","d":"2026-09-28"},{"t":"تم ارسال ايميل التصعيد من قبل المدير العام المشاريع بالقطاع الي المدير العام للمشتريات بالمركز الرئيسي بتاريخ 28/09/2026م","d":"2026-09-28"},{"t":"تم اعتماد طلب (جدول معدل) على النظام APPROVED بتاريخ 31/08/20226م","d":"2026-08-31"}],"tech":["لا يوجد اجراء فني"],"ord":53},{"po":"901240021","pno":"P898-1","name":"استكمال تنفيذ الخطوط الرئيسية والشبكات الفرعية لمخططات شوران (المرحلة الأولى)","contractor":"شركة أضواء الخليل للمقاولات","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"Water 1","status":"متقدم","sk":"ahead","statusEn":"Ahead of Schedule","zero":0,"start":"2024-04-22","end":"2028-09-18","planned":50.7,"actual":57.7,"variance":7,"elapsed":55.4,"plannedOct":51.1,"susp":0,"expDelay":{"d":"2028-06-15"},"expTroubled":{"t":"غير متوقع تعثره"},"mgmt":["معاملة تمديد تأخر صرف المستخلصات - معاملة مؤجلة"],"upd":[{"t":"لا يوجد","d":null}],"tech":["لا يوجد اجراء فني"],"ord":54},{"po":"901250150","pno":"P862","name":"تنفيذ خطوط وشبكات الصرف الصحي بمحافظة المهد ( الجزء الاول )","contractor":"شركة المشروعات المتقدمة المحدودة","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"WW","status":"متقدم","sk":"ahead","statusEn":"Ahead of Schedule","zero":0,"start":"2025-07-30","end":"2029-06-30","planned":10.5,"actual":15.1,"variance":4.6,"elapsed":29.9,"plannedOct":10.6,"susp":0,"expDelay":{"d":"2028-06-20"},"expTroubled":{"d":"2029-01-25"},"mgmt":["لا يوجد معاملة جارية"],"upd":[{"t":"لا يوجد","d":null}],"tech":["لا يوجد اجراء فني"],"ord":55},{"po":"901250341","pno":"AP248","name":"تنفيذ خطوط وشبكات توزيع المياه بمحافظة وادي الفرع","contractor":"شركة ركن المواثيق للمقاولات شركة شخص واحد","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"Water 2","status":"متقدم","sk":"ahead","statusEn":"Ahead of Schedule","zero":0,"start":"2025-11-17","end":"2029-05-03","planned":5.6,"actual":17.3,"variance":11.7,"elapsed":25.2,"plannedOct":5.6,"susp":0,"expDelay":{"d":"2028-12-20"},"expTroubled":{"t":"غير متوقع تعثره"},"mgmt":["جدول الكميات المعدل الجاري رقم (1)"],"upd":[{"t":"تم مراجعة البرنامج الزمني المعدل و مخطط رفع البرنامج الزمني المعدل علي النظام بتاريخ 03/10/2026","d":"2026-10-03"}],"tech":["لا يوجد اجراء فني"],"ord":56},{"po":"901250252","pno":"O1003","name":"انشاء خزانين للمياه بجنوب المدينة المنورة و ملحقاتهما بسعة 250 الف م3 لكل خزان","contractor":"شركة اضواء الخليل للمقاولات","consultant":"دورش","area":"المدينة المنورة","areaEn":"Madinah","cls":"Water 2","status":"متقدم","sk":"ahead","statusEn":"Ahead of Schedule","zero":0,"start":"2025-10-28","end":"2028-10-27","planned":26,"actual":37.2,"variance":11.3,"elapsed":30.9,"plannedOct":28.2,"susp":0,"expDelay":{"t":"غير متوقع تأخره"},"expTroubled":{"t":"غير متوقع تعثره"},"mgmt":["معاملة تمديد تأخر صرف مستخلصات - معاملة مؤجلة"],"upd":[{"t":"لا يوجد","d":null}],"tech":["لا يوجد اجراء فني"],"ord":57},{"po":"901250191","pno":"P918","name":"مشروع إنشاء خط مياه رئيسي من المسيجيد الى هبت مع محطة ضخ في المسيجيد ومحطة أخرى في بئر الروحاء","contractor":"شركة ميلاف السعودية","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"Water 2","status":"متقدم","sk":"ahead","statusEn":"Ahead of Schedule","zero":0,"start":"2025-09-08","end":"2029-05-01","planned":14.7,"actual":28.2,"variance":13.5,"elapsed":29.2,"plannedOct":14.8,"susp":0,"expDelay":{"t":"غير متوقع تأخره"},"expTroubled":{"t":"غير متوقع تعثره"},"mgmt":["معاملة جدول الكميات المعدل رقم (1)"],"upd":[{"t":"تم الافادة من قبل المدير العام للمشتريات بالمركز الرئيسي بتاريخ 28/09/2026م انه تم التصعيد لدي ادارة التقنية لحل المشكلة بالنظام","d":"2026-09-28"},{"t":"تم ارسال ايميل التصعيد من قبل المدير العام المشاريع بالقطاع الي المدير العام للمشتريات بالمركز الرئيسي بتاريخ 28/09/2026م","d":"2026-09-28"},{"t":"تم اعتماد طلب (جدول معدل) على النظام APPROVED بتاريخ 31/08/20226م","d":"2026-08-31"}],"tech":["لا يوجد اجراء فني"],"ord":58},{"po":"901250059","pno":"AP243","name":"تنفيذ خطوط وشبكات توزيع المياه لمحافظة العيص ( المرحلة الأولى )","contractor":"شركة الركائز الثابتة المحدودة","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"Coastal","status":"متقدم","sk":"ahead","statusEn":"Ahead of Schedule","zero":0,"start":"2025-04-15","end":"2028-04-14","planned":42.8,"actual":50.6,"variance":7.8,"elapsed":48.8,"plannedOct":44,"susp":0,"expDelay":{"t":"غير متوقع تأخره"},"expTroubled":{"t":"غير متوقع تعثره"},"mgmt":["معاملة تمديد تأخر صرف المستخلصات - معاملة مستهدفة"],"upd":[{"t":"لا يوجد","d":null}],"tech":["لا يوجد اجراء فني"],"ord":59},{"po":"901240355","pno":"AP247","name":"تنفيذ خطوط وشبكات توزيع المياه بمحافظة بدر","contractor":"مؤسسة سماء الرس للمقاولات","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"Coastal","status":"متقدم","sk":"ahead","statusEn":"Ahead of Schedule","zero":0,"start":"2025-01-28","end":"2029-04-09","planned":43.2,"actual":66.9,"variance":23.7,"elapsed":39.9,"plannedOct":43.5,"susp":0,"expDelay":{"t":"غير متوقع تأخره"},"expTroubled":{"t":"غير متوقع تعثره"},"mgmt":["معاملة تمديد تأخر صرف المستخلصات - معاملة مؤجلة"],"upd":[{"t":"لا يوجد","d":null}],"tech":["لا يوجد اجراء فني"],"ord":60},{"po":"901240090","pno":"P878","name":"احلال شبكات وخطوط مياه بالمدينة المنورة","contractor":"شركة بيان الانشاء للمقاولات","consultant":"دورش","area":"المدينة المنورة","areaEn":"Madinah","cls":"Water 1","status":"متقدم","sk":"ahead","statusEn":"Ahead of Schedule","zero":0,"start":"2024-06-04","end":"2028-07-02","planned":20.5,"actual":28.6,"variance":8.1,"elapsed":57,"plannedOct":21.5,"susp":0,"expDelay":{"t":"غير متوقع تأخره"},"expTroubled":{"t":"غير متوقع تعثره"},"mgmt":["معاملة جدول الكميات المعدل رقم (1)"],"upd":[{"t":"تم الافادة من قبل المدير العام للمشتريات بالمركز الرئيسي بتاريخ 28/09/2026م انه تم التصعيد لدي ادارة التقنية وجاري حل المشكلة بالنظام","d":"2026-09-28"},{"t":"تم ارسال ايميل التصعيد من قبل المدير العام المشاريع بالقطاع الي المدير العام للمشتريات بالمركز الرئيسي بتاريخ 28/09/2026م","d":"2026-09-28"},{"t":"تم اعادة رفع معاملة جدول الكميات بس استيفاء الملاحظات بتاريخ 21/09/2026م","d":"2026-09-21"}],"tech":["تم انهاء اعمال الثقب الافقي والمشروع متقدم بنسبة 8% عن البرنامج الزمني","تم الاجتماع مع المقاول بتاريخ 28/09/2026 لمناقشة اعمال الحج وتقديم خطة الربط على الخطوط القائمة","تم رفع طلب اصدار تصريح لاعمال الجسة الاستكشافية للخطوط القائمة بتاريخ 01/10/2026 لتحديد نوع الخط القائم وتحديد نقاط الربط"],"ord":61},{"po":"901230173","pno":"10128","name":"عقد تنفيذ شبكات الصرف الصحي بمحافظات منطقة المدينة المنورة الخطوط الرئيسية","contractor":"مؤسسة عبدالله ناصر الموسى للمقاولات","consultant":"فيوتشر","area":"المدينة المنورة","areaEn":"Madinah","cls":"WW","status":"منتظم","sk":"ontrack","statusEn":"On Schedule","zero":0,"start":"2023-10-16","end":"2026-10-16","planned":99.8,"actual":97.2,"variance":-2.7,"elapsed":98.6,"plannedOct":100,"susp":0,"expDelay":{"t":"غير متوقع تأخره"},"expTroubled":{"t":"غير متوقع تعثره"},"mgmt":["الاستلام الابتدائي للمشروع"],"upd":[{"t":"يتم الإجتماع بشكل دوري مع التشغيل و الصيانة لإنهاء الاستلام الابتدائي الجزئي و للإستلام الإبتدائي الكلي للمشروع قبل 31/10/2026.","d":null}],"tech":["لا يوجد اجراء فني"],"ord":62},{"po":"601240171","pno":"AP1189","name":"استكمال انشاء خطوط رئيسية وشبكات الصرف الصحي بتبوك المرحلة الثالثة عشر","contractor":"مؤسسة كنان العربية للمقاولات العامة","consultant":"فيوتشر","area":"تبوك","areaEn":"Tabuk","cls":"WW","status":"متقدم","sk":"ahead","statusEn":"Ahead of Schedule","zero":0,"start":"2024-10-13","end":"2027-11-27","planned":72.5,"actual":73,"variance":0.5,"elapsed":62.1,"plannedOct":72.6,"susp":0,"expDelay":{"t":"غير متوقع تأخره"},"expTroubled":{"t":"غير متوقع تعثره"},"mgmt":["لا يوجد معاملة جارية"],"upd":[{"t":"لا يوجد","d":null}],"tech":["لا يوجد اجراء فني"],"ord":63},{"po":"601250072","pno":"P1474","name":"انشاء خطوط رئيسية وشبكات الصرف الصحي بتبوك المرحلة الخامسة عشر","contractor":"أكوا العربية للمياه","consultant":"فيوتشر","area":"تبوك","areaEn":"Tabuk","cls":"WW","status":"متقدم","sk":"ahead","statusEn":"Ahead of Schedule","zero":0,"start":"2025-06-15","end":"2029-04-02","planned":15.3,"actual":28.1,"variance":12.8,"elapsed":33.4,"plannedOct":15.4,"susp":0,"expDelay":{"t":"غير متوقع تأخره"},"expTroubled":{"t":"غير متوقع تعثره"},"mgmt":["معاملة تمديد صرف مستخلصات - معاملة مستهدفة"],"upd":[{"t":"لا يوجد","d":null}],"tech":["لا يوجد اجراء فني"],"ord":64},{"po":"601250242","pno":"AP242","name":"مشروع اعمال ربط الخطوط الرئيسية ومحطات الضخ لشبكات مدينة تبوك بالمشروع الشامل","contractor":"شركة نفود العاذرية للمقاولات شركة شخص واحد","consultant":"دورش","area":"تبوك","areaEn":"Tabuk","cls":"Water","status":"متقدم","sk":"ahead","statusEn":"Ahead of Schedule","zero":0,"start":"2026-02-16","end":"2029-06-26","planned":0.8,"actual":3.7,"variance":3,"elapsed":18.4,"plannedOct":1,"susp":0,"expDelay":{"t":"غير متوقع تأخره"},"expTroubled":{"t":"غير متوقع تعثره"},"mgmt":["لا توجد معاملة جارية"],"upd":[{"t":"لا يوجد","d":null}],"tech":["لا يوجد اجراء فني"],"ord":65}];
+const PORTFOLIO = {"reportDate":"2026-10-01","total":66,"budgetM":3070.0,"planned":27.9,"actual":28.1,"variance":0.2,"approvedCount":842,"approvedM":754.3,"paidCount":619,"paidM":574.8,"unpaidCount":223,"unpaidM":179.5,"status":{"susp":1,"trouble":6,"delay":5,"ontrack":23,"ahead":31,"completed":0}};
 
-function timeNow(){
-  const d = new Date();
-  return d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+/* =====================================================================
+   Helpers
+   ===================================================================== */
+const $ = id => document.getElementById(id);
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtDate(iso){ if(!iso) return '—'; const a=iso.split('-'); return `${a[2]} ${MONTHS[+a[1]-1]} ${a[0]}`; }
+function fmtPct(v){ return v==null ? '—' : v+'%'; }
+function fmtSigned(v){ return (v>0?'+':'')+v+'%'; }
+function fmtMsg(t){ return esc(t).replace(/\*(.+?)\*/g,'<b>$1</b>').replace(/\n/g,'<br>'); }
+function timeNow(){ return new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}); }
+
+const ST = {
+  susp:    {ar:'ايقاف كلي', en:'Fully Suspended',   dot:'🟣'},
+  trouble: {ar:'متعثر',     en:'Troubled',          dot:'🔴'},
+  delay:   {ar:'متأخر',     en:'Delayed',           dot:'🟠'},
+  ontrack: {ar:'منتظم',     en:'On Schedule',       dot:'🔵'},
+  ahead:   {ar:'متقدم',     en:'Ahead of Schedule', dot:'🟢'},
+  completed:{ar:'مكتمل التنفيذ', en:'Completed',     dot:'⚪'},
+};
+const ST_ORDER = ['susp','trouble','delay','ontrack','ahead','completed'];
+function countsLine(list){
+  const c = {}; list.forEach(p => c[p.sk] = (c[p.sk]||0)+1);
+  return ST_ORDER.filter(k => c[k]).map(k => `${ST[k].dot} ${c[k]} ${ST[k].en}`).join(' · ');
 }
 
-function scrollBottom(){
-  const t = document.getElementById('thread');
-  t.scrollTop = t.scrollHeight;
+/* Field labels exactly as requested by the client (English / Arabic) */
+const LBL = {
+  po:         ['PO', 'أمر الشراء'],
+  project:    ['Project', 'المشروع'],
+  contractor: ['Contractor', 'المقاول'],
+  consultant: ['Consultant', 'الإستشاري'],
+  start:      ['Project Start Date', 'بداية المشروع التعاقدية'],
+  end:        ['Completion Date', 'نهاية المشروع المعدلة PMO LIVE'],
+  zero:       ['Zero Progress Projects (Month)', 'المشاريع المتوقفة عن العمل بالشهور'],
+  planned:    ['Planned %', 'المخطط % التراكمي'],
+  actual:     ['Performance %', 'المنفذ % التراكمي'],
+  variance:   ['Variance', 'التباين'],
+  elapsed:    ['Elapsed Time %', 'نسبة المدة المنقضية %'],
+  plannedOct: ['Planned % till 31 Oct 2026', 'نسبة المخطط التراكمي حتى 31 أكتوبر 2026'],
+  susp:       ['Suspension %', 'نسبة الإيقاف %'],
+  expDelay:   ['Expected Delay', 'التاريخ المتوقع للتأخر - متوسط نسب انجاز'],
+  expTroubled:['Expected Troubled', 'التاريخ المتوقع للتعثر- متوسط نسب انجاز'],
+  mgmt:       ['Management Action / Treatment Plan', 'الإجراءات الإدارية للمشاريع'],
+  upd:        ['Last Updated Details of Management Action', 'تفاصيل آخر تحديث للإجراءات الإدارية'],
+  tech:       ['Current Technical Action', 'الإجراء الفني الحالي'],
+  pfStatus:   ['Portfolio Updated Status', 'الموقف المحدث للمحفظة'],
+  pfTotal:    ['Total Projects', 'عدد المشاريع'],
+  pfDash:     ['Portfolio Dashboard', 'لوحة المحفظة'],
+  pfBudget:   ['Portfolio Budget with Taxes', 'قيمة العقود المعدلة مع الضريبة'],
+  pfPlanned:  ['Planned %', 'النسبة المخططة %'],
+  pfActual:   ['Performance %', 'النسبة الفعلية %'],
+  pfVariance: ['Variance %', 'التباين %'],
+  pfInv:      ['Invoices', 'المستخلصات'],
+  invApprNo:  ['No. of Approved Invoices', 'عدد المستخلصات المرفوعة'],
+  invApprAmt: ['Approved Invoices Amount', 'قيمة المستخلصات المرفوعة'],
+  invPaidNo:  ['No. of Paid Invoices', 'عدد المستخلصات المصروفة'],
+  invPaidAmt: ['Paid Invoices Amount', 'قيمة المستخلصات المصروفة'],
+};
+
+/* =====================================================================
+   Search: Arabic/English normalisation, filters, aliases, typo tolerance
+   ===================================================================== */
+function nrm(s){
+  s = (s==null ? '' : String(s)).toLowerCase();
+  s = s.replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d));
+  s = s.replace(/[\u064B-\u065F\u0670\u0640]/g, '');                       // diacritics + tatweel
+  s = s.replace(/[إأآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ة/g,'ه').replace(/ؤ/g,'و').replace(/ئ/g,'ي');
+  s = s.replace(/[“”"'`’‘()\[\]{}.,;:!?\/\\|،؛؟_+*=<>~^]/g, ' ');
+  return s.replace(/\s+/g,' ').trim();
+}
+PROJECTS.forEach(p => { p._s = nrm([p.po, p.pno, p.name, p.contractor, p.consultant].join(' ')); });
+
+const VOCAB = (() => {
+  const m = new Set();
+  PROJECTS.forEach(p => nrm([p.name, p.contractor, p.consultant].join(' ')).split(' ').forEach(w => { if(w.length>=3 && !/^\d+$/.test(w)) m.add(w); }));
+  return [...m];
+})();
+
+function reEsc(x){ return x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+function trigRe(phrase, g){
+  const ar = /[\u0600-\u06FF]/.test(phrase);
+  const pre = ar ? '(?:وال|بال|لل|ال|و|ب|ل|ف|ك)?' : '';
+  return new RegExp('(^|\\s)' + pre + reEsc(phrase) + '(?=\\s|$)', g ? 'g' : '');
+}
+
+/* trigger words -> filters (English + Arabic) */
+const TRIG_DEF = [
+  ['status','susp',    ['fully suspended','full suspension','totally suspended','ايقاف كلي','الايقاف الكلي','موقوف كليا']],
+  ['status','trouble', ['troubled','distressed','in trouble','متعثر','متعثره','متعثرين','تعثر']],
+  ['status','delay',   ['delayed','behind schedule','late','متاخر','متاخره','متاخرين','تاخر']],
+  ['status','ontrack', ['on schedule','on track','on-track','regular','normal','منتظم','منتظمه']],
+  ['status','ahead',   ['ahead of schedule','ahead','early','متقدم','متقدمه']],
+  ['status','completed',['completed','finished','done','مكتمل','مكتمله']],
+  ['status','critical',['critical','priority','high risk','at risk','حرج','حرجه','اولويه']],
+  ['flag','partial',   ['partially suspended','partial suspension','partial','ايقاف جزئي','جزئي']],
+  ['flag','suspended', ['suspended','suspension','halted','paused','on hold','ايقاف','موقوف','موقوفه']],
+  ['flag','zero',      ['zero progress','no progress','stalled','stopped','not progressing','متوقف','متوقفه']],
+  ['area','Madinah',   ['al madinah','madinah','medina','madina','al-madinah','المدينه المنوره','المدينه','المنوره']],
+  ['area','Tabuk',     ['tabuk','tabouk','تبوك']],
+  ['cls','WW',         ['ww','waste water']],
+  ['cls','Coastal',    ['coastal','coast']],
+  ['cls','Water 1',    ['water 1','water1']],
+  ['cls','Water 2',    ['water 2','water2']],
+];
+const TRIGS = [];
+TRIG_DEF.forEach(([kind,val,phrases]) => phrases.forEach(ph => { const n = nrm(ph); TRIGS.push({kind, val, n, re:trigRe(n,false), reg:trigRe(n,true)}); }));
+TRIGS.sort((a,b) => b.n.length - a.n.length);
+
+const STATUS_TEST = {
+  susp:      p => p.sk==='susp',
+  trouble:   p => p.sk==='trouble',
+  delay:     p => p.sk==='delay',
+  ontrack:   p => p.sk==='ontrack',
+  ahead:     p => p.sk==='ahead',
+  completed: p => p.sk==='completed',
+  critical:  p => p.sk==='susp' || p.sk==='trouble' || p.sk==='delay',
+};
+const FLAG_TEST = {
+  partial:   p => p.susp>0 && p.sk!=='susp',
+  suspended: p => p.sk==='susp' || p.susp>0,
+  zero:      p => p.zero>0,
+};
+const FLAG_NAME   = {partial:'partially suspended', suspended:'suspended', zero:'zero progress'};
+const STATUS_NAME = {susp:'Fully Suspended', trouble:'Troubled', delay:'Delayed', ontrack:'On Schedule', ahead:'Ahead of Schedule', completed:'Completed', critical:'Critical (delayed, troubled, suspended)'};
+
+/* English words/places -> the Arabic stem used in the project names */
+const ALIAS_DEF = [
+  ['yanbu','ينبع'],['yanbo','ينبع'],['badr','بدر'],['hanakiyah','الحناكية'],['hanakiya','الحناكية'],['hinakiya','الحناكية'],
+  ['al mahd','المهد'],['almahd','المهد'],['mahd','المهد'],['al ais','العيص'],['al ees','العيص'],['ais','العيص'],['ees','العيص'],
+  ['wadi al fara','الفرع'],['wadi alfara','الفرع'],['wadi fara','الفرع'],['fara','الفرع'],
+  ['tayma','تيما'],['taima','تيما'],['tema','تيما'],['haql','حقل'],['hakl','حقل'],['duba','ضبا'],['dhuba','ضبا'],
+  ['shuran','شوران'],['shouran','شوران'],['rannuna','رانون'],['ranuna','رانون'],['ranouna','رانون'],['rannona','رانون'],
+  ['jurf','الجرف'],['al jurf','الجرف'],['asifrin','الاصيفرين'],['usayfirin','الاصيفرين'],
+  ['muhamid','المحاميد'],['mahamid','المحاميد'],['suwaydirah','الصويدرة'],['sowaydira','الصويدرة'],
+  ['uwaynah','العوينة'],['awayna','العوينة'],['aqool','العاقول'],['uqul','العاقول'],['aqul','العاقول'],
+  ['barmawiyah','البرماوية'],['barmawia','البرماوية'],['rahmaniyah','الرحمانية'],['rahmaniya','الرحمانية'],
+  ['rayes','الرايس'],['raees','الرايس'],['rais','الرايس'],['hamra al asad','حمرا'],['hamra','حمرا'],
+  ['mutadil','المعتدل'],['moatadil','المعتدل'],['ammar','عمار'],['amar','عمار'],['durra','الدرة'],['al durra','الدرة'],
+  ['fajr','فجر'],['qulaybah','القليبة'],['qaliba','القليبة'],
+  ['airport','المطار'],['asbestos','الاسبستوس'],['sludge','الحماة'],['mosque','المسجد'],['nabawi','النبوي'],
+  ['hospital','مستشفى'],['specialist hospital','مستشفى'],['border crossing','منفذ'],['border','منفذ'],['crossing','منفذ'],['housing','الاسكان'],
+  ['sewer','الصرف'],['sewage','الصرف'],['sewerage','الصرف'],['wastewater','الصرف'],['sanitary','الصرف'],
+  ['water','مياه'],['network','شبك'],['networks','شبك'],['tank','خزان'],['tanks','خزان'],['reservoir','خزان'],['reservoirs','خزان'],
+  ['pumping','ضخ'],['pump','ضخ'],['treatment','معالجة'],['purification','تنقية'],['plant','محطة'],['station','محطة'],
+  ['replacement','احلال'],['replace','احلال'],['renewal','احلال'],['rehabilitation','تاهيل'],['rehab','تاهيل'],
+  ['phase','المرحلة'],['main line','الرئيسي'],['transmission','الرئيسي'],
+  ['future','فيوتشر'],['dorsch','دورش'],
+];
+const ALIASES = ALIAS_DEF.map(([en,ar]) => ({key:nrm(en), ar:nrm(ar), re:trigRe(nrm(en), true)})).sort((a,b) => b.key.length - a.key.length);
+
+const FILLERS = ['can you show me','could you show me','show me','give me','tell me about','find me','search for','look up','lookup',
+  'what is the status of','what is','what are','status of','list all','pull up','get me','i want to know','i want','i need',
+  'do you have','how many','please'].map(nrm).sort((a,b)=>b.length-a.length);
+const STOP = new Set(['project','projects','in','at','for','of','the','near','with','a','an','me','show','status','all','are','is','that',
+  'and','or','to','by','on','po','no','number','list','any','which','المشاريع','مشاريع','المشروع','مشروع','في','حاله','موقف','كم','عدد','ما','هي','هو'].map(nrm));
+
+function levenshtein(a,b){
+  const m=a.length, n=b.length;
+  if(!m) return n; if(!n) return m;
+  let prev = Array.from({length:n+1}, (_,j)=>j);
+  for(let i=1;i<=m;i++){
+    const cur=[i];
+    for(let j=1;j<=n;j++){
+      cur[j] = a[i-1]===b[j-1] ? prev[j-1] : 1+Math.min(prev[j-1], prev[j], cur[j-1]);
+    }
+    prev = cur;
+  }
+  return prev[n];
+}
+function fixToken(t){
+  if(PROJECTS.some(p => p._s.includes(t))) return t;       // already valid somewhere in the dataset
+  if(t.length < 3) return t;
+  const thr = t.length<=4 ? 1 : t.length<=7 ? 2 : 3;
+  let best=null, bd=1e9;
+  VOCAB.forEach(w => { const d=levenshtein(t,w); if(d<bd){bd=d; best=w;} });
+  ALIASES.forEach(a => { if(a.key.indexOf(' ')<0){ const d=levenshtein(t,a.key); if(d<bd){bd=d; best=a.ar;} } });
+  return bd<=thr ? best : t;
+}
+
+function parseQuery(q){
+  let s = ' ' + q + ' ';
+  FILLERS.forEach(f => { s = s.split(' '+f+' ').join('  '); });
+  const F = {status:new Set(), flag:new Set(), area:new Set(), cls:new Set()};
+  TRIGS.forEach(t => { if(t.re.test(s)){ F[t.kind].add(t.val); s = s.replace(t.reg, ' '); } });
+  ALIASES.forEach(a => { s = s.replace(a.re, '$1' + a.ar); });
+  const tokens = s.split(' ').filter(w => w && !STOP.has(w) && /[\p{L}\p{N}]/u.test(w));
+  return {F, tokens};
+}
+
+function describe(F, tokens){
+  const parts = [];
+  if(F.status.size) parts.push([...F.status].map(k=>STATUS_NAME[k]).join(' / '));
+  if(F.flag.size)   parts.push([...F.flag].map(k=>FLAG_NAME[k]).join(' + '));
+  if(F.area.size)   parts.push('in ' + [...F.area].join(' / '));
+  if(F.cls.size)    parts.push('class ' + [...F.cls].join(' / '));
+  if(tokens.length) parts.push('matching “' + tokens.join(' ') + '”');
+  return parts.join(' · ');
+}
+
+const PF_CORE = new Set(['portfolio','dashboard','summary','overview','overall','kpi','kpis','stats','statistics','invoice','invoices','budget','total','distribution','chart','charts','المحفظه','لوحه','ملخص','المستخلصات','الميزانيه'].map(nrm));
+const PF_EXTRA = new Set(['update','updates','updated','latest','current','weekly','control','report','the','of'].map(nrm));
+function isPortfolioQuery(q){
+  const toks = q.split(' ').filter(w => w && !STOP.has(w));
+  return toks.length > 0 && toks.every(w => PF_CORE.has(w) || PF_EXTRA.has(w)) && toks.some(w => PF_CORE.has(w));
+}
+
+function search(qRaw){
+  const raw = String(qRaw||'').trim();
+  const q = nrm(raw);
+  if(!q) return {type:'none'};
+  if(/^(help|مساعده|عون)$/.test(q) || raw === '?' || raw === '؟') return {type:'help'};
+  if(/^(hi|hello|hey|salam|salaam|مرحبا|اهلا|السلام عليكم|سلام)$/.test(q)) return {type:'help', greeting:true};
+  if(/^(red|amber|green)( projects?)?$/.test(q)) return {type:'raghint'};
+  if(isPortfolioQuery(q)) return {type:'portfolio'};
+
+  // 1) exact PO or project number
+  const compact = q.replace(/\s+/g,'');
+  let hit = PROJECTS.find(p => p.po === compact || nrm(p.pno).replace(/\s+/g,'') === compact);
+  if(!hit){ const m = q.match(/(?:^|\s)(\d{9})(?=\s|$)/); if(m) hit = PROJECTS.find(p => p.po === m[1]); }
+  if(hit) return {type:'one', project:hit, how:'po'};
+
+  // 2) filters + free-text tokens
+  const {F, tokens: tk0} = parseQuery(q);
+  let tokens = tk0.slice();
+  let list = PROJECTS.slice();
+  if(F.status.size) list = list.filter(p => [...F.status].some(k => STATUS_TEST[k](p)));
+  if(F.area.size)   list = list.filter(p => F.area.has(p.areaEn));
+  if(F.cls.size)    list = list.filter(p => F.cls.has(p.cls));
+  if(F.flag.size)   list = list.filter(p => [...F.flag].every(k => FLAG_TEST[k](p)));
+  const hasFilter = F.status.size || F.flag.size || F.area.size || F.cls.size;
+
+  let fuzzy = false;
+  if(tokens.length){
+    let r = list.filter(p => tokens.every(t => p._s.includes(t)));
+    if(!r.length){
+      const fixed = tokens.map(fixToken);
+      if(fixed.some((x,i) => x !== tokens[i])){
+        tokens = fixed; fuzzy = true;
+        r = list.filter(p => tokens.every(t => p._s.includes(t)));
+      }
+    }
+    list = r;
+  }
+  if(!hasFilter && !tokens.length) return {type:'none'};
+
+  const label = describe(F, tokens);
+  if(F.flag.has('zero')) list.sort((a,b) => (b.zero-a.zero) || (a.ord-b.ord)); else list.sort((a,b) => a.ord-b.ord);
+  if(list.length === 1) return {type:'one', project:list[0], how: fuzzy ? 'fuzzy' : 'filter', label};
+  if(list.length === 0) return {type:'none', label, hasFilter:!!hasFilter};
+  return {type:'list', list, label, fuzzy};
+}
+
+/* =====================================================================
+   Rendering
+   ===================================================================== */
+function scrollBottom(){ const t=$('thread'); t.scrollTop = t.scrollHeight; }
+function scrollToTop(el){ const t=$('thread'); t.scrollTop = Math.max(0, el.offsetTop - 8); }
+
+function botRow(inner, wide){
+  const row = document.createElement('div');
+  row.className = 'msgrow' + (wide ? ' wide' : '');
+  row.innerHTML = `<span class="msgavatar">${AVATAR_SVG}</span>`;
+  row.appendChild(inner);
+  $('thread').appendChild(row);
+  return row;
 }
 
 function addText(text, who){
-  const t = document.getElementById('thread');
   const bubble = document.createElement('div');
   bubble.className = 'msg ' + who;
-  bubble.innerHTML = text.replace(/\n/g,'<br>') + `<span class="time">${timeNow()}</span>`;
-  if(who === 'in'){
-    const row = document.createElement('div');
-    row.className = 'msgrow';
-    row.innerHTML = `<span class="msgavatar">${AVATAR_SVG}</span>`;
-    row.appendChild(bubble);
-    t.appendChild(row);
-  } else {
-    t.appendChild(bubble);
-  }
+  bubble.innerHTML = (who==='in' ? fmtMsg(text) : esc(text)) + `<span class="time">${timeNow()}</span>`;
+  if(who==='in') botRow(bubble); else $('thread').appendChild(bubble);
   scrollBottom();
 }
 
 function showTyping(){
-  const t = document.getElementById('thread');
-  const row = document.createElement('div');
-  row.className = 'msgrow';
-  row.id = 'typingIndicator';
-  row.innerHTML = `<span class="msgavatar">${AVATAR_SVG}</span><div class="typing" aria-label="PMO Bot is typing"><span></span><span></span><span></span></div>`;
-  t.appendChild(row);
+  const el = document.createElement('div');
+  el.className = 'typing'; el.setAttribute('aria-label','PMO Bot is typing');
+  el.innerHTML = '<span></span><span></span><span></span>';
+  const row = botRow(el); row.id = 'typingIndicator';
   scrollBottom();
 }
+function hideTyping(){ const e=$('typingIndicator'); if(e) e.remove(); }
 
-function hideTyping(){
-  const el = document.getElementById('typingIndicator');
-  if(el) el.remove();
-}
-
-function addOptions(matches, query){
-  const t = document.getElementById('thread');
-  const row = document.createElement('div');
-  row.className = 'msgrow';
+const MAX_OPTIONS = 8;
+function addOptions(list, intro, total){
   const bubble = document.createElement('div');
   bubble.className = 'msg in';
-  let html = `I found ${matches.length} projects matching "${query}". Which one?<div class="optlist">`;
-  matches.slice(0,8).forEach((p,i)=>{
-    html += `<button class="optbtn" data-num="${p.num}">${p.name} <span class="n">${p.num}</span></button>`;
+  let html = fmtMsg(intro) + '<div class="optlist">';
+  list.slice(0, MAX_OPTIONS).forEach(p => {
+    html += `<button class="optbtn" data-po="${p.po}"><span class="on">${esc(p.name)}</span>` +
+            `<span class="oi"><span>${ST[p.sk].dot}</span><span>${esc(p.status)}</span><span>·</span><b>PO ${p.po}</b>` +
+            (p.zero>0 ? `<span>· ${p.zero} mo zero progress</span>` : '') + `</span></button>`;
   });
-  html += `</div><span class="time">${timeNow()}</span>`;
+  html += '</div>';
+  if(total > MAX_OPTIONS) html += `<div class="optmore">Showing the first ${MAX_OPTIONS} of ${total} (highest priority first). Add a status or area to narrow it down — e.g. “delayed in Madinah”.</div>`;
+  html += `<span class="time">${timeNow()}</span>`;
   bubble.innerHTML = html;
-  row.innerHTML = `<span class="msgavatar">${AVATAR_SVG}</span>`;
-  row.appendChild(bubble);
-  t.appendChild(row);
-  bubble.querySelectorAll('.optbtn').forEach(b=>{
-    b.addEventListener('click', ()=>{ handleQuery(b.dataset.num, true); });
-  });
+  botRow(bubble);
+  bubble.querySelectorAll('.optbtn').forEach(b => b.addEventListener('click', () => handleQuery(b.dataset.po)));
   scrollBottom();
 }
 
-function ragEmoji(rag){ return rag==='Green' ? '🟢' : rag==='Amber' ? '🟠' : '🔴'; }
-function pillClass(v){ return v>=90 ? 'pill-good' : 'pill-bad'; }
+function tile(o){
+  const bar = o.bar==null ? '' : `<div class="bar"><i style="width:${Math.max(0,Math.min(100,o.bar))}%;${o.bc ? '--bc:'+o.bc+';' : ''}"></i></div>`;
+  return `<div class="tile"><div class="tv ${o.cls||''} ${o.ar?'ar':''} ${o.big?'big':''}">${o.v}</div><div class="tl">${o.l[0]}</div><div class="ta">${o.l[1]}</div>${bar}</div>`;
+}
+function forecastCell(f){
+  if(f.d) return {v: fmtDate(f.d), cls:'', ar:false};
+  const t = f.t || '—';
+  if(t.indexOf('غير متوقع') >= 0) return {v: esc(t), cls:'good', ar:true};
+  if(t.indexOf('متعثر') >= 0)     return {v: esc(t), cls:'bad',  ar:true};
+  return {v: esc(t), cls:'warn', ar:true};
+}
+function section(l, items){
+  const none = items.length===1 && /^لا (يوجد|توجد)/.test(items[0]);
+  let body;
+  if(!items.length)            body = '<p class="none">—</p>';
+  else if(items.length===1)    body = `<p class="${none?'none':''}">${esc(items[0])}</p>`;
+  else body = '<ol>' + items.map((x,i) => `<li><span class="n">${i+1}</span><span>${esc(x)}</span></li>`).join('') + '</ol>';
+  return `<div class="sec"><div class="sh"><b>${l[0]}</b><small>${l[1]}</small></div>` +
+         `<div class="sb"><div class="clamp">${body}</div><button class="more" aria-expanded="false">Show more ▾</button></div></div>`;
+}
+
+const UPD_VISIBLE = 3;      // latest updates shown by default; older ones sit behind a toggle
+function updSection(items){
+  const l = LBL.upd;
+  const chip = x => x.d ? `<span class="dchip">${fmtDate(x.d)}</span>` : '';
+  const li = (x,i) => `<li><span class="n">${i+1}</span><span class="ut">${chip(x)}${esc(x.t)}</span></li>`;
+  let body, note = '';
+  if(!items.length){
+    body = '<p class="none">—</p>';
+  } else if(items.length === 1){
+    const none = /^لا (يوجد|توجد)/.test(items[0].t);
+    body = `<p class="${none?'none':''}">${chip(items[0])}${esc(items[0].t)}</p>`;
+  } else {
+    const vis = items.slice(0, UPD_VISIBLE), old = items.slice(UPD_VISIBLE);
+    body = '<ol>' + vis.map(li).join('') + '</ol>';
+    if(old.length){
+      body += `<div class="older" hidden><ol>${old.map((x,i) => li(x, i+UPD_VISIBLE)).join('')}</ol></div>` +
+              `<button class="olderbtn" data-n="${old.length}" aria-expanded="false">Show ${old.length} earlier update${old.length>1?'s':''} ▾</button>`;
+    }
+    note = `Newest first${old.length ? ` · latest ${UPD_VISIBLE} of ${items.length}` : ''}`;
+  }
+  return `<div class="sec"><div class="sh"><b>${l[0]}</b><small>${l[1]}</small></div>${note ? `<div class="subnote">${note}</div>` : ''}<div class="sb">${body}</div></div>`;
+}
+
+function cardHtml(p){
+  const s = ST[p.sk];
+  const zc = p.zero>=3 ? 'bad' : p.zero>=1 ? 'warn' : '';
+  const vc = p.variance<0 ? 'neg' : p.variance>0 ? 'pos' : 'mute';
+  const ed = forecastCell(p.expDelay), et = forecastCell(p.expTroubled);
+  const tiles = [
+    tile({v:p.zero, cls:zc, l:LBL.zero}),
+    tile({v:fmtPct(p.planned), l:LBL.planned, bar:p.planned, bc:'#7FA7D9'}),
+    tile({v:fmtPct(p.actual), l:LBL.actual, bar:p.actual}),
+    tile({v:fmtSigned(p.variance), cls:vc, l:LBL.variance}),
+    tile({v:fmtPct(p.elapsed), cls:p.elapsed>100?'bad':'', l:LBL.elapsed, bar:p.elapsed, bc:p.elapsed>100?'#FF5C5C':'#8696A0'}),
+    tile({v:fmtPct(p.plannedOct), l:LBL.plannedOct, bar:p.plannedOct, bc:'#7FA7D9'}),
+    tile({v:fmtPct(p.susp), cls:p.susp>0?'warn':'', l:LBL.susp, bar:p.susp, bc:'#FFB020'}),
+    tile({v:ed.v, cls:ed.cls, ar:ed.ar, l:LBL.expDelay}),
+    tile({v:et.v, cls:et.cls, ar:et.ar, l:LBL.expTroubled}),
+  ].join('');
+  return `<div class="strip"></div>
+    <div class="chead">
+      <span class="schip"><span class="dotc"></span>${esc(p.status)} · ${s.en}</span>
+      <span class="po">${LBL.po[0]} · ${LBL.po[1]}<b>${p.po}</b><small>Project no. ${esc(p.pno)}</small></span>
+    </div>
+    <div class="meta"><span>${LBL.project[0]} · ${LBL.project[1]}</span></div>
+    <div class="name-ar">${esc(p.name)}</div>
+    <div class="meta"><span>📍 ${esc(p.area)} · ${p.areaEn}</span><span class="sep">|</span><span>${esc(p.cls)}</span></div>
+    <div class="prow"><span class="l">👷 ${LBL.contractor[0]}<small>${LBL.contractor[1]}</small></span><span class="v">${esc(p.contractor)||'—'}</span></div>
+    <div class="prow"><span class="l">🧭 ${LBL.consultant[0]}<small>${LBL.consultant[1]}</small></span><span class="v">${esc(p.consultant)||'—'}</span></div>
+    <div class="dates">
+      <div class="dtile"><div class="dv">${fmtDate(p.start)}</div><div class="dl">${LBL.start[0]}</div><div class="da">${LBL.start[1]}</div></div>
+      <div class="dtile"><div class="dv">${fmtDate(p.end)}</div><div class="dl">${LBL.end[0]}</div><div class="da">${LBL.end[1]}</div></div>
+    </div>
+    <div class="grid">${tiles}</div>
+    ${section(LBL.mgmt, p.mgmt)}${updSection(p.upd)}${section(LBL.tech, p.tech)}`;
+}
 
 function addCard(p){
-  const t = document.getElementById('thread');
-  const row = document.createElement('div');
-  row.className = 'msgrow';
-  const div = document.createElement('div');
-  div.className = `card rag-tint-${p.rag}`;
-  const primaryLabel = p.type==='Works' ? 'Contractor' : 'Consultant';
-  const primaryIcon = p.type==='Works' ? '👷' : '🧑‍💼';
-  const showSecondary = p.consultantName && p.consultantName !== p.contractorName;
-  const secondaryLabel = p.type==='Works' ? 'Consultant' : 'Supervising Consultant';
-  const svLabel = p.sv>0 ? `+${p.sv} pts (behind plan)` : p.sv<0 ? `${p.sv} pts (ahead of plan)` : `0 (on plan)`;
-  div.innerHTML = `
-    <div class="rag-strip rag-${p.rag}"></div>
-    <div class="meta">${ragEmoji(p.rag)} ${p.projectStatus} &nbsp;·&nbsp; No. ${p.num} &nbsp;·&nbsp; ${p.type}</div>
-    <div class="name-ar">${p.name}</div>
-    <div class="meta">📍 ${p.region} — <span style="direction:rtl;display:inline">${p.city}</span></div>
-
-    <div class="health">
-      <div class="num" style="color:${p.rag==='Green'?'var(--green)':p.rag==='Amber'?'var(--amber)':'var(--red)'}">${p.health}</div>
-      <div>Health Score /100<br><span style="color:var(--muted);font-size:11px;">${p.contractStatus}</span></div>
-    </div>
-    <div class="comp">
-      <div class="pill ${pillClass(p.scheduleScore)}"><span class="n">${p.scheduleScore}</span>Schedule</div>
-      <div class="pill ${pillClass(p.statusScore)}"><span class="n">${p.statusScore}</span>Status</div>
-      <div class="pill ${pillClass(p.overrunScore)}"><span class="n">${p.overrunScore}</span>Overrun</div>
-    </div>
-
-    <div class="row"><span class="l">${primaryIcon} ${primaryLabel}</span><span class="v" style="direction:rtl;">${p.contractorName||'—'}</span></div>
-    ${showSecondary ? `<div class="row"><span class="l">🧭 ${secondaryLabel}</span><span class="v" style="direction:rtl;">${p.consultantName}</span></div>` : ''}
-    <div class="row"><span class="l">📈 Planned Progress</span><span class="v">${p.planned}%</span></div>
-    <div class="row"><span class="l">📉 Schedule Variance</span><span class="v">${svLabel}</span></div>
-    <div class="row"><span class="l">💰 Contract Value</span><span class="v">SAR ${p.value.toLocaleString()} mm</span></div>
-    <div class="row"><span class="l">⏳ Duration Elapsed</span><span class="v">${p.elapsed}%</span></div>
-
-    <div class="attn attn-${p.rag}">⚠️ <b>Attention:</b> <span>${p.attention.replace(p.reason||'\u0000', `<span class="attn-ar">${p.reason||''}</span>`)}</span></div>
-  `;
-  row.innerHTML = `<span class="msgavatar">${AVATAR_SVG}</span>`;
-  row.appendChild(div);
-  t.appendChild(row);
-  scrollBottom();
+  const card = document.createElement('div');
+  card.className = 'card st-' + p.sk;
+  card.innerHTML = cardHtml(p);
+  const row = botRow(card, true);
+  card.querySelectorAll('.clamp').forEach(el => { if(el.scrollHeight > el.clientHeight + 3) el.classList.add('has-more'); });
+  card.querySelectorAll('.more').forEach(btn => btn.addEventListener('click', () => {
+    const open = btn.previousElementSibling.classList.toggle('open');
+    btn.textContent = open ? 'Show less ▴' : 'Show more ▾';
+    btn.setAttribute('aria-expanded', open);
+  }));
+  card.querySelectorAll('.olderbtn').forEach(btn => btn.addEventListener('click', () => {
+    const box = btn.previousElementSibling, open = box.hidden;       // hidden -> opening
+    box.hidden = !open;
+    btn.textContent = open ? 'Hide earlier updates ▴' : `Show ${btn.dataset.n} earlier update${btn.dataset.n>1?'s':''} ▾`;
+    btn.setAttribute('aria-expanded', open);
+  }));
+  scrollToTop(row);
 }
 
-function norm(s){ return (s||'').toString().toLowerCase().trim(); }
-
-// ---------- Smart query parsing: filler stripping + synonym/criteria detection ----------
-const FILLER_PHRASES = [
-  "can you show me","show me","find me","search for","what is","what's","whats",
-  "give me","tell me about","look up","lookup","can you","please","i want to know",
-  "i want","i need to know","i need","pull up","get me","check on","check",
-  "status of","the status of","do you have","what about"
+/* ---------- portfolio dashboard ---------- */
+const nf = v => v.toLocaleString('en-US', {maximumFractionDigits:1});
+const PF_BARS = [
+  ['ahead',   'Ahead of Schedule', 'متقدم',         'ahead of schedule'],
+  ['ontrack', 'On Schedule',       'منتظم',         'on schedule'],
+  ['delay',   'Delayed',           'متأخر',         'delayed'],
+  ['trouble', 'Troubled',          'متعثر',         'troubled'],
+  ['susp',    'Fully Suspended',   'ايقاف كلي',     'fully suspended'],
+  ['completed','Completed',        'مكتمل التنفيذ', 'completed'],
 ];
-
-// trigger words the person might type/say, mapped to a canonical key
-const STATUS_SYNONYMS = {
-  "delayed":    ["delayed","late","behind","slipping","slow","running late"],
-  "distressed": ["distressed","critical","trouble","troubled","struggling"],
-  "suspended":  ["suspended","stopped","halted","paused","frozen","on hold","holding"],
-  "withdrawn":  ["withdrawn","cancelled","canceled","terminated"],
-  "completed":  ["completed","finished","done","closed","handover","handed over"],
-  "ahead":      ["ahead","early"],
-  "on track":   ["on track","ontrack","on-track","normal","regular","healthy"],
-};
-// actual substrings to test against projectStatus for each canonical key — not the same as the
-// trigger words above (e.g. "handover" should match "Provisional Handover", not literal "completed")
-const STATUS_MATCH = {
-  "delayed":    ["delayed"],
-  "distressed": ["distressed"],
-  "suspended":  ["suspended"],
-  "withdrawn":  ["withdrawn"],
-  "completed":  ["completed","handover"],
-  "ahead":      ["ahead"],
-  "on track":   ["on track"],
-};
-
-const REGION_SYNONYMS = {
-  "Madinah": ["madinah","al madinah","al-madinah","medina","madina"],
-  "Tabuk":   ["tabuk"],
-};
-
-const STOPWORDS = /\b(project|projects|in|at|for|of|the|near|with|a|an|please|show|me|schedule|status|health|score|currently|right|now|is|are|that|are|all)\b/gi;
-
-function escapeRe(s){ return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
-
-function stripFillers(q){
-  let out = ' ' + q + ' ';
-  [...FILLER_PHRASES].sort((a,b)=>b.length-a.length).forEach(f=>{
-    out = out.replace(new RegExp('\\b'+escapeRe(f)+'\\b','g'), ' ');
-  });
-  return out.replace(/\s+/g,' ').trim();
+function portfolioHtml(){
+  const P = PORTFOLIO, max = Math.max(1, ...PF_BARS.map(b => P.status[b[0]] || 0));
+  const bars = PF_BARS.map(([k,en,ar,q]) => {
+    const n = P.status[k] || 0, w = n ? Math.max(4, Math.round(n/max*100)) : 0;
+    return `<button class="brow c-${k}" data-q="${q}" ${n ? '' : 'disabled'} aria-label="${en}: ${n} projects">` +
+           `<div class="btop"><span class="bl"><b>${en}</b><small>${ar}</small></span><span class="bn"><b>${n}</b></span></div>` +
+           `<div class="btrack"><i style="width:${w}%"></i></div></button>`;
+  }).join('');
+  const vc = P.variance < 0 ? 'neg' : P.variance > 0 ? 'pos' : 'mute';
+  const kpis = [
+    tile({v:`${nf(P.budgetM)}<span class="u">M SAR</span>`, big:true, l:LBL.pfBudget}),
+    tile({v:fmtPct(P.planned), big:true, l:LBL.pfPlanned, bar:P.planned, bc:'#7FA7D9'}),
+    tile({v:fmtPct(P.actual),  big:true, l:LBL.pfActual,  bar:P.actual,  bc:'#2ED39B'}),
+    tile({v:fmtSigned(P.variance), big:true, cls:vc, l:LBL.pfVariance}),
+  ].join('');
+  const inv = [
+    tile({v:nf(P.approvedCount), big:true, cls:'v-blue', l:LBL.invApprNo}),
+    tile({v:`${nf(P.approvedM)}<span class="u">M SAR</span>`, big:true, cls:'v-blue', l:LBL.invApprAmt}),
+    tile({v:nf(P.paidCount), big:true, cls:'good', l:LBL.invPaidNo}),
+    tile({v:`${nf(P.paidM)}<span class="u">M SAR</span>`, big:true, cls:'good', l:LBL.invPaidAmt}),
+  ].join('');
+  return `<div class="strip"></div>
+    <div class="pfhead"><div class="t"><b>${LBL.pfStatus[0]}</b><small>${LBL.pfStatus[1]}</small></div>
+      <div class="d">Weekly control · data through ${REPORT_DATE}</div></div>
+    <div class="totalbox"><span class="tn">${P.total}</span><span class="tt"><b>${LBL.pfTotal[0]}</b><small>${LBL.pfTotal[1]}</small></span></div>
+    ${bars}
+    <div class="bhint">Tap a bar to list those projects.</div>
+    <div class="pfsec"><div class="sh"><b>${LBL.pfDash[0]}</b><small>${LBL.pfDash[1]}</small></div><div class="grid g2">${kpis}</div></div>
+    <div class="pfsec"><div class="sh"><b>${LBL.pfInv[0]}</b><small>${LBL.pfInv[1]}</small></div><div class="grid g2">${inv}</div></div>`;
+}
+function addPortfolio(scroll){
+  const card = document.createElement('div');
+  card.className = 'card pf';
+  card.innerHTML = portfolioHtml();
+  const row = botRow(card, true);
+  card.querySelectorAll('.brow:not(:disabled)').forEach(b => b.addEventListener('click', () => handleQuery(b.dataset.q)));
+  if(scroll) scrollToTop(row);
+}
+function portfolioSpeech(){
+  const P = PORTFOLIO, s = P.status;
+  return `Portfolio of ${P.total} projects. ${s.ahead} ahead of schedule, ${s.ontrack} on schedule, ${s.delay} delayed, ${s.trouble} troubled, ${s.susp} fully suspended. ` +
+         `Budget ${nf(P.budgetM)} million riyals with taxes. Planned ${P.planned} percent, performance ${P.actual} percent, variance ${P.variance} percent. ` +
+         `${P.approvedCount} approved invoices worth ${nf(P.approvedM)} million, and ${P.paidCount} paid invoices worth ${nf(P.paidM)} million.`;
 }
 
-function parseSmartQuery(qRaw){
-  const padded = ' ' + norm(qRaw) + ' ';
-  let ragFilter = null, statusKey = null, region = null;
+/* =====================================================================
+   Conversation
+   ===================================================================== */
+const HELP_TEXT =
+  "I show the weekly control card of any project (data through " + REPORT_DATE + "). Ask me by:\n" +
+  "• *PO* — e.g. 901240386 (or its last digits)\n" +
+  "• *Project / contractor / consultant* — Arabic or English, e.g. Yanbu, Badr, ينبع\n" +
+  "• *Status* — troubled, delayed, fully suspended, on schedule, ahead\n" +
+  "• *Flags* — zero progress, partially suspended, critical\n" +
+  "• *Area* — Madinah, Tabuk\n" +
+  "• *Portfolio* — status bars, budget, planned / performance / variance and invoices (tap 📊)\n\n" +
+  "Combine them freely: “delayed in Madinah”, “zero progress Tabuk”.\n" +
+  "🎤 Tap the mic to speak, 🔊 to hear replies read aloud.";
 
-  ['red','amber','green'].forEach(c=>{ if(padded.includes(' '+c+' ')) ragFilter = c[0].toUpperCase()+c.slice(1); });
-  Object.entries(STATUS_SYNONYMS).forEach(([canon, words])=>{
-    words.forEach(w=>{ if(padded.includes(' '+w+' ')) statusKey = canon; });
-  });
-  Object.entries(REGION_SYNONYMS).forEach(([canon, words])=>{
-    words.forEach(w=>{ if(padded.includes(' '+w+' ')) region = canon; });
-  });
-
-  let remainder = stripFillers(norm(qRaw));
-  const toStrip = [];
-  if(ragFilter) toStrip.push(ragFilter.toLowerCase());
-  if(statusKey) toStrip.push(...STATUS_SYNONYMS[statusKey]);
-  if(region) toStrip.push(...REGION_SYNONYMS[region]);
-  toStrip.forEach(w=>{ remainder = remainder.replace(new RegExp('\\b'+escapeRe(w)+'\\b','g'),' '); });
-  remainder = remainder.replace(STOPWORDS,' ').replace(/\s+/g,' ').trim();
-
-  return { ragFilter, statusKey, region, remainder };
-}
-
-// ---------- Fuzzy fallback (typo tolerance) ----------
-function levenshtein(a,b){
-  const m=a.length, n=b.length;
-  if(!m) return n; if(!n) return m;
-  const dp = [];
-  for(let i=0;i<=m;i++){ dp.push(new Array(n+1).fill(0)); dp[i][0]=i; }
-  for(let j=0;j<=n;j++) dp[0][j]=j;
-  for(let i=1;i<=m;i++){
-    for(let j=1;j<=n;j++){
-      dp[i][j] = a[i-1]===b[j-1] ? dp[i-1][j-1] : 1+Math.min(dp[i-1][j-1],dp[i-1][j],dp[i][j-1]);
-    }
-  }
-  return dp[m][n];
-}
-
-function fuzzyFind(qRaw){
-  const qn = norm(qRaw);
-  if(qn.length<3) return [];
-  const threshold = qn.length<=4 ? 1 : qn.length<=7 ? 2 : 3;
-  const scored = [];
-  PROJECTS.forEach(p=>{
-    const fields = [norm(p.num), ...norm(p.city).split(' '), ...norm(p.name).split(' ')].filter(Boolean);
-    let best = Infinity;
-    fields.forEach(f=>{ const d = levenshtein(qn, f); if(d<best) best = d; });
-    if(best <= threshold) scored.push({p, dist:best});
-  });
-  scored.sort((a,b)=>a.dist-b.dist);
-  return scored.slice(0,8).map(s=>s.p);
-}
-
-function findMatches(qRaw){
-  const q = norm(qRaw);
-  if(!q) return {type:'none'};
-
-  // exact project number — fastest, unambiguous path
-  let exact = PROJECTS.filter(p=>norm(p.num)===q);
-  if(exact.length===1) return {type:'one', project:exact[0]};
-
-  if(q==='help'){ return {type:'help'}; }
-
-  // smart multi-criteria parse (handles natural phrasing: "red projects in tabuk", "delayed in madinah", etc.)
-  const parsed = parseSmartQuery(qRaw);
-  const filterCount = [parsed.ragFilter, parsed.statusKey, parsed.region].filter(Boolean).length;
-
-  if(filterCount > 0){
-    let list = PROJECTS.slice();
-    if(parsed.ragFilter) list = list.filter(p=>p.rag===parsed.ragFilter);
-    if(parsed.statusKey) list = list.filter(p=>STATUS_MATCH[parsed.statusKey].some(sub=>norm(p.projectStatus).includes(sub)));
-    if(parsed.region) list = list.filter(p=>p.region===parsed.region);
-    if(parsed.remainder){
-      list = list.filter(p=>
-        norm(p.name).includes(parsed.remainder) || norm(p.city).includes(parsed.remainder) ||
-        norm(p.contractorName).includes(parsed.remainder) || norm(p.consultantName).includes(parsed.remainder)
-      );
-    }
-    // simple single-criterion cases keep their original response shape for familiar replies
-    if(filterCount===1 && !parsed.remainder){
-      if(parsed.ragFilter) return {type:'rag', rag: parsed.ragFilter, list};
-      if(parsed.region) return {type:'region', region: parsed.region, list};
-    }
-    const labelParts = [];
-    if(parsed.statusKey) labelParts.push(parsed.statusKey);
-    if(parsed.ragFilter) labelParts.push(parsed.ragFilter.toLowerCase());
-    if(parsed.region) labelParts.push(`in ${parsed.region}`);
-    if(parsed.remainder) labelParts.push(`matching "${parsed.remainder}"`);
-    return { type:'filtered', label: labelParts.join(' '), list };
-  }
-
-  // region keyword alone (no other criteria detected above, e.g. just "Tabuk")
-  const regions = [...new Set(PROJECTS.map(p=>p.region.toLowerCase()))];
-  if(regions.includes(q)){
-    const list = PROJECTS.filter(p=>p.region.toLowerCase()===q);
-    return {type:'region', region: PROJECTS.find(p=>p.region.toLowerCase()===q).region, list};
-  }
-
-  // filler-stripped text so a question like "what is the status of O138" still resolves cleanly
-  const cleaned = stripFillers(q) || q;
-
-  // partial project number — check both the raw and filler-stripped query
-  let partialNum = PROJECTS.filter(p=>norm(p.num).includes(q) || norm(p.num).includes(cleaned));
-  if(partialNum.length===1) return {type:'one', project:partialNum[0]};
-  if(partialNum.length>1) return {type:'many', list:partialNum};
-
-  // name / city / contractor / consultant contains
-  let byText = PROJECTS.filter(p=>
-    norm(p.name).includes(cleaned) || norm(p.city).includes(cleaned) ||
-    norm(p.contractorName).includes(cleaned) || norm(p.consultantName).includes(cleaned)
-  );
-  if(byText.length===1) return {type:'one', project:byText[0]};
-  if(byText.length>1) return {type:'many', list:byText};
-
-  // last resort: typo-tolerant fuzzy match
-  const fuzzy = fuzzyFind(cleaned);
-  if(fuzzy.length===1) return {type:'one', project:fuzzy[0], fuzzy:true};
-  if(fuzzy.length>1) return {type:'many', list:fuzzy, fuzzy:true};
-
-  return {type:'none'};
-}
-
-function handleQuery(qRaw, isNum){
+function handleQuery(qRaw){
+  qRaw = String(qRaw||'').trim();
+  if(!qRaw) return;
   addText(qRaw, 'out');
   showTyping();
-  const delay = 500 + Math.random()*400;
-  setTimeout(()=>{
+  setTimeout(() => {
     hideTyping();
-    const r = findMatches(qRaw);
-    if(r.type==='help'){
-      addText("I understand natural phrasing too — try things like:\n• \"red projects in Tabuk\"\n• \"delayed projects in Madinah\"\n• \"show me suspended projects\"\n\nOr the basics:\n• *Project number* — e.g. O138\n• *Project name keyword* — e.g. Yanbu, Badr\n• *City / Region* — e.g. Tabuk, Madinah\n• *red* / *amber* / *green* for a health band\n\n🎤 Tap the mic to speak your question, and toggle 🔊 to hear replies read aloud.", 'in');
-      speakResponse("You can ask me by project number, name, city, or status. Try saying red projects in Tabuk, or delayed projects in Madinah.");
-      return;
-    }
-    if(r.type==='none'){
-      addText(`I couldn't find a project matching "${qRaw}". Try a project number, part of a name, a city/region, or a status like "delayed" or "suspended". Type *help* for examples.`, 'in');
-      speakResponse(`I couldn't find a match for ${qRaw}. Try a project number, a city, or a status like delayed or suspended.`);
-      return;
-    }
-    if(r.type==='one'){
-      const prefix = r.fuzzy ? `Closest match for *"${qRaw}"* — here's *${r.project.num}*:` : `Here's the latest card for *${r.project.num}* (data as of 17 Sep 2026):`;
-      addText(prefix, 'in');
-      addCard(r.project);
-      speakResponse(cardToSpeech(r.project));
-      return;
-    }
-    if(r.type==='many'){
-      speakResponse(`I found ${r.list.length} matching projects. Please pick one.`);
-      addOptions(r.list, qRaw);
-      return;
-    }
-    if(r.type==='filtered'){
-      if(r.list.length===0){ addText(`No projects found ${r.label}.`, 'in'); speakResponse(`No projects found ${r.label}.`); return; }
-      const counts = {Green:0,Amber:0,Red:0};
-      r.list.forEach(p=>counts[p.rag]++);
-      addText(`${r.list.length} project(s) ${r.label} — 🟢 ${counts.Green} · 🟠 ${counts.Amber} · 🔴 ${counts.Red}\n\nTap one for its full card:`, 'in');
-      speakResponse(`Found ${r.list.length} projects ${r.label}.`);
-      addOptions(r.list.slice(0,8), r.label);
-      return;
-    }
-    if(r.type==='region'){
-      const counts = {Green:0,Amber:0,Red:0};
-      r.list.forEach(p=>counts[p.rag]++);
-      addText(`${r.region}: ${r.list.length} projects — 🟢 ${counts.Green} · 🟠 ${counts.Amber} · 🔴 ${counts.Red}\n\nReply with a project number, or try "red in ${r.region}" — or tap one below:`, 'in');
-      speakResponse(`${r.region} has ${r.list.length} projects: ${counts.Green} green, ${counts.Amber} amber, and ${counts.Red} red.`);
-      addOptions(r.list.filter(p=>p.rag!=='Green').concat(r.list.filter(p=>p.rag==='Green')).slice(0,8), r.region);
-      return;
-    }
-    if(r.type==='rag'){
-      if(r.list.length===0){ addText(`No ${r.rag} projects right now — good news!`, 'in'); speakResponse(`No ${r.rag} projects right now. Good news.`); return; }
-      addText(`${r.list.length} project(s) currently ${r.rag}:`, 'in');
-      speakResponse(`${r.list.length} projects are currently ${r.rag}.`);
-      addOptions(r.list, r.rag);
-      return;
-    }
-  }, delay);
+    let r;
+    try { r = search(qRaw); } catch(e){ console.error(e); r = {type:'none'}; }
+    respond(r, qRaw);
+  }, 450 + Math.random()*350);
 }
 
-document.getElementById('sendBtn').addEventListener('click', ()=>{
-  const inp = document.getElementById('inp');
-  if(inp.value.trim()){ handleQuery(inp.value.trim()); inp.value=''; }
-});
-document.getElementById('inp').addEventListener('keydown', (e)=>{
-  if(e.key==='Enter'){ document.getElementById('sendBtn').click(); }
-});
-document.querySelectorAll('.quickchip').forEach(c=>{
-  c.addEventListener('click', ()=>{ handleQuery(c.dataset.q); });
-  c.addEventListener('keydown', (e)=>{
-    if(e.key==='Enter' || e.key===' '){ e.preventDefault(); handleQuery(c.dataset.q); }
-  });
-});
+function respond(r, qRaw){
+  if(r.type==='help'){
+    addText((r.greeting ? "👋 Hello! " : "") + HELP_TEXT, 'in');
+    speakResponse("You can ask me by PO number, project or contractor name, status, or area. Try saying delayed projects in Madinah.");
+    return;
+  }
+  if(r.type==='portfolio'){
+    addText(`Here's the portfolio status and dashboard (data through ${REPORT_DATE}):`, 'in');
+    addPortfolio(true);
+    speakResponse(portfolioSpeech());
+    return;
+  }
+  if(r.type==='raghint'){
+    addText("Projects are classified by their official status rather than red / amber / green. Try *troubled*, *delayed*, *fully suspended*, *on schedule* or *ahead* — or *critical* for all delayed, troubled and suspended projects.", 'in');
+    speakResponse("Projects are classified by official status. Try troubled, delayed, or critical.");
+    return;
+  }
+  if(r.type==='none'){
+    if(r.label){
+      addText(`No projects match *${r.label}* in this report.${r.hasFilter ? '\nTip: try removing one filter.' : ''}`, 'in');
+      speakResponse(`No projects match ${r.label}.`);
+    } else {
+      addText(`I couldn't find a project for “${qRaw}”. Try a PO (e.g. 901240386), part of a project or contractor name, a status (troubled, delayed, fully suspended, on schedule, ahead), an area (Madinah, Tabuk) or “zero progress”. Type *help* for examples.`, 'in');
+      speakResponse("I couldn't find a match. Try a PO number, a name, a status, or an area.");
+    }
+    return;
+  }
+  if(r.type==='one'){
+    const p = r.project;
+    const lead = r.how==='po'    ? `Here's the latest control card for PO *${p.po}* (data through ${REPORT_DATE}):`
+               : r.how==='fuzzy' ? `Closest match for “${qRaw}” — PO *${p.po}*:`
+               :                   `Only one project matches *${r.label}* — PO *${p.po}*:`;
+    addText(lead, 'in');
+    addCard(p);
+    speakResponse(cardToSpeech(p));
+    return;
+  }
+  if(r.type==='list'){
+    const n = r.list.length;
+    const mixed = new Set(r.list.map(p => p.sk)).size > 1;
+    const lead = `${r.fuzzy ? 'Closest matches — ' : ''}*${n}* project${n>1?'s':''} — ${r.label}${mixed ? '\n' + countsLine(r.list) : ''}\n\nTap one for its control card:`;
+    speakResponse(`${n} projects. ${r.label}.`);
+    addOptions(r.list, lead, n);
+  }
+}
 
-// ============================================================
-// Voice output (text-to-speech)
-// ============================================================
+/* =====================================================================
+   Voice output (text-to-speech)
+   ===================================================================== */
 let voiceOutputEnabled = false;
-const speakToggleBtn = document.getElementById('speakToggleBtn');
-
-function cleanForSpeech(text){
-  return text.replace(/\*/g,'').replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,'').replace(/\s+/g,' ').trim();
-}
-
+const speakToggleBtn = $('speakToggleBtn');
+function cleanForSpeech(t){ return t.replace(/\*/g,'').replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu,'').replace(/\s+/g,' ').trim(); }
 function speakResponse(text){
-  if(!voiceOutputEnabled) return;
-  if(!('speechSynthesis' in window)) return;
+  if(!voiceOutputEnabled || !('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
-  const utter = new SpeechSynthesisUtterance(cleanForSpeech(text));
-  utter.lang = 'en-US';
-  utter.rate = 1.0;
-  window.speechSynthesis.speak(utter);
+  const u = new SpeechSynthesisUtterance(cleanForSpeech(text));
+  u.lang = 'en-US'; u.rate = 1.0;
+  window.speechSynthesis.speak(u);
 }
-
+function fcSpeech(f){
+  if(f.d) return fmtDate(f.d);
+  if((f.t||'').indexOf('غير متوقع') >= 0) return 'not expected';
+  if((f.t||'').indexOf('متعثر') >= 0) return 'already troubled';
+  return 'already delayed';
+}
 function cardToSpeech(p){
-  const svPart = p.sv>0 ? `running ${p.sv} points behind schedule` : p.sv<0 ? `running ${Math.abs(p.sv)} points ahead of schedule` : `on schedule`;
-  return `Project ${p.num}, status ${p.projectStatus}. Health score ${p.health} out of 100. ${svPart}. Contract value ${p.value} million riyals, ${p.elapsed} percent of duration elapsed.`;
+  const v = p.variance<0 ? 'minus '+Math.abs(p.variance) : String(p.variance);
+  let s = `PO ${p.po}. Status ${ST[p.sk].en}. Planned ${p.planned} percent, performance ${p.actual} percent, variance ${v} percent. Elapsed time ${p.elapsed} percent.`;
+  if(p.zero>0) s += ` Zero progress for ${p.zero} months.`;
+  if(p.susp>0) s += ` Suspension ${p.susp} percent.`;
+  s += ` Expected delay ${fcSpeech(p.expDelay)}. Expected troubled ${fcSpeech(p.expTroubled)}.`;
+  return s;
 }
-
 if(speakToggleBtn){
-  speakToggleBtn.addEventListener('click', ()=>{
+  speakToggleBtn.addEventListener('click', () => {
     voiceOutputEnabled = !voiceOutputEnabled;
     speakToggleBtn.textContent = voiceOutputEnabled ? '🔊' : '🔇';
     speakToggleBtn.classList.toggle('active', voiceOutputEnabled);
@@ -561,68 +799,48 @@ if(speakToggleBtn){
   });
 }
 
-// ============================================================
-// Voice input (speech-to-text)
-// ============================================================
-const micBtn = document.getElementById('micBtn');
-const langBtn = document.getElementById('langBtn');
-const voiceHint = document.getElementById('voiceHint');
+/* =====================================================================
+   Voice input (speech-to-text)
+   ===================================================================== */
+const micBtn = $('micBtn'), langBtn = $('langBtn'), voiceHint = $('voiceHint');
 const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
-let recogLang = 'en-US';
-let recognition = null;
-let isListening = false;
-
+let recogLang = 'en-US', recognition = null, isListening = false;
 if(SpeechRecognitionAPI){
   recognition = new SpeechRecognitionAPI();
-  recognition.continuous = false;
-  recognition.interimResults = false;
-  recognition.maxAlternatives = 1;
-
-  recognition.onstart = ()=>{
-    isListening = true;
-    micBtn.classList.add('listening','active');
-    voiceHint.textContent = recogLang==='ar-SA' ? 'Listening… (Arabic)' : 'Listening…';
-  };
-  recognition.onend = ()=>{
-    isListening = false;
-    micBtn.classList.remove('listening','active');
-    voiceHint.textContent = 'Tap 🎤 to ask by voice';
-  };
-  recognition.onerror = (e)=>{
-    isListening = false;
-    micBtn.classList.remove('listening','active');
-    voiceHint.textContent = e.error==='not-allowed' ? 'Microphone permission denied' : 'Tap 🎤 to ask by voice';
-  };
-  recognition.onresult = (e)=>{
-    const transcript = e.results[0][0].transcript;
-    const inp = document.getElementById('inp');
-    inp.value = transcript;
-    handleQuery(transcript);
-    inp.value = '';
-  };
-
-  micBtn.addEventListener('click', ()=>{
+  recognition.continuous = false; recognition.interimResults = false; recognition.maxAlternatives = 1;
+  recognition.onstart  = () => { isListening = true; micBtn.classList.add('listening','active'); voiceHint.textContent = recogLang==='ar-SA' ? 'Listening… (Arabic)' : 'Listening…'; };
+  recognition.onend    = () => { isListening = false; micBtn.classList.remove('listening','active'); voiceHint.textContent = 'Tap 🎤 to ask by voice'; };
+  recognition.onerror  = e  => { isListening = false; micBtn.classList.remove('listening','active'); voiceHint.textContent = e.error==='not-allowed' ? 'Microphone permission denied' : 'Tap 🎤 to ask by voice'; };
+  recognition.onresult = e  => { handleQuery(e.results[0][0].transcript); };
+  micBtn.addEventListener('click', () => {
     if(isListening){ recognition.stop(); return; }
     recognition.lang = recogLang;
-    try{ recognition.start(); } catch(err){ /* already running */ }
+    try { recognition.start(); } catch(err){}
   });
-
-  langBtn.addEventListener('click', ()=>{
+  langBtn.addEventListener('click', () => {
     recogLang = recogLang==='en-US' ? 'ar-SA' : 'en-US';
     langBtn.textContent = recogLang==='en-US' ? 'EN' : 'AR';
-    langBtn.title = `Voice recognition language: ${recogLang==='en-US' ? 'English' : 'Arabic'}`;
+    langBtn.title = 'Voice recognition language: ' + (recogLang==='en-US' ? 'English' : 'Arabic');
   });
 } else {
-  micBtn.classList.add('unsupported');
-  micBtn.disabled = true;
+  micBtn.classList.add('unsupported'); micBtn.disabled = true;
   micBtn.title = 'Voice input is not supported in this browser';
   langBtn.style.display = 'none';
   voiceHint.textContent = 'Voice input not supported on this browser';
 }
 
-// Welcome message
-document.getElementById('headerAvatarSlot').innerHTML = AVATAR_SVG;
-addText("👋 Hi! I'm the NWC Northwestern Cluster PMO Bot.\n\nAsk me about any project by *number*, *name*, or *city/region* and I'll send you its latest health card.\n\nTry: O138, Tabuk, Yanbu, or type *help*.", 'in');
+/* =====================================================================
+   Wiring + welcome
+   ===================================================================== */
+$('sendBtn').addEventListener('click', () => { const i=$('inp'); if(i.value.trim()){ handleQuery(i.value.trim()); i.value=''; } });
+$('inp').addEventListener('keydown', e => { if(e.key==='Enter') $('sendBtn').click(); });
+document.querySelectorAll('.quickchip').forEach(c => {
+  c.addEventListener('click', () => handleQuery(c.dataset.q));
+  c.addEventListener('keydown', e => { if(e.key==='Enter' || e.key===' '){ e.preventDefault(); handleQuery(c.dataset.q); } });
+});
+$('headerAvatarSlot').innerHTML = AVATAR_SVG;
+addText("👋 Hi! I'm the NWC Northwestern Cluster PMO Bot.\n\nAsk for any project's weekly control card by *PO*, *name*, *contractor*, *status* or *area* (data through " + REPORT_DATE + ").\n\nTry: *901240386*, *troubled*, *delayed in Madinah*, *Yanbu* — or type *help*. Tap *📊 portfolio* any time for the dashboard.", 'in');
+addPortfolio(false);
 </script>
 </body>
 </html>
