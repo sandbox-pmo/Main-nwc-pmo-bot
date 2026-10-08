@@ -1,0 +1,78 @@
+{
+  "name": "PMO Bot — NWC Northwestern Cluster",
+  "short_name": "PMO Bot",
+  "description": "Weekly project control cards and portfolio dashboard for the NWC Northwestern Cluster PMO.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#EEF2F7",
+  "theme_color": "#0E6286",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": [
+    "business",
+    "productivity"
+  ],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Portfolio dashboard",
+      "short_name": "Portfolio",
+      "description": "Status bars, budget, invoices",
+      "url": "./?q=portfolio",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Troubled projects",
+      "short_name": "Troubled",
+      "description": "List the troubled projects",
+      "url": "./?q=troubled",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    },
+    {
+      "name": "Delayed projects",
+      "short_name": "Delayed",
+      "description": "List the delayed projects",
+      "url": "./?q=delayed",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192",
+          "type": "image/png"
+        }
+      ]
+    }
+  ]
+}
