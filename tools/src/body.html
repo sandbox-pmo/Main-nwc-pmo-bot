@@ -1,0 +1,80 @@
+<section class="landing" id="landing" aria-label="PMO Bot start page">
+  <div class="lbrands"><div class="lb nwc"><img id="lNwc" alt="National Water Company"></div><div class="lb hill"><img id="lHill" alt="Hill International"></div></div>
+  <h1>PMO Bot</h1>
+  <p class="lsub">NWC Northwestern Cluster &middot; weekly project control</p>
+  <p class="lp">Ask for the latest weekly update of any project &mdash; by PO, name, contractor, status or area. The bot opens as a pop-up in the bottom-right corner of your screen, and you can pin it to the Windows taskbar with its avatar icon.</p>
+  <div class="lbtns">
+    <button class="lbtn primary" id="lOpen" type="button">💬 Open the PMO Bot</button>
+    <button class="lbtn" id="lInstall" type="button">📌 Install &amp; pin to taskbar</button>
+  </div>
+  <div class="lsteps">
+    <h2>Pin the PMO Bot to the Windows taskbar</h2>
+    <ol>
+      <li><b>Microsoft Edge:</b> click the <b>&#8943;</b> menu (top-right) &rarr; <b>Apps</b> &rarr; <b>Install this site as an app</b>. <b>Chrome:</b> <b>&#8942;</b> &rarr; <b>Cast, save and share</b> &rarr; <b>Install page as app</b>.</li>
+      <li>In the dialog tick <b>Pin to taskbar</b> and click <b>Install</b>.</li>
+      <li>From then on, click the <b>PMO Bot avatar</b> on your taskbar. It opens in its own small window &mdash; right-click the icon for quick links to the Portfolio, Troubled and Delayed projects.</li>
+    </ol>
+  </div>
+  <div class="lfoot">Data through <span data-rd></span> &middot; NWC &amp; Hill International</div>
+</section>
+
+<button class="launcher" id="launcher" type="button" aria-label="Open the PMO Bot" aria-expanded="false"><span class="llabel">Ask the PMO Bot</span><span class="lav" id="launcherAvatar" aria-hidden="true"></span></button>
+
+<div class="phone" id="app">
+  <div class="popbar"><span class="pt"><span class="live"></span>PMO Bot</span><button id="minBtn" type="button" aria-label="Minimise the bot to the corner" title="Minimise (Esc)">&#8212;</button></div>
+  <div class="header">
+    <div class="avatar" aria-hidden="true" id="headerAvatarSlot"></div>
+    <div class="headtext">
+      <div class="name">PMO Bot</div>
+      <div class="status"><span class="on">online &middot; </span>Northwestern Cluster<br>Data to <span data-rd></span></div>
+      <div class="hpills">
+        <button class="hpill" id="themeBtn" type="button" aria-label="Switch to dark mode" title="Light / dark mode"><span class="ico">🌙</span><span class="lbl">Dark</span></button>
+        <button class="hpill" id="installBtn" type="button" title="Install as an app and pin it to the taskbar"><span class="ico">📌</span><span class="lbl">Install</span></button>
+      </div>
+    </div>
+    <div class="brandstack">
+      <div class="brand nwc"><img src="__LOGO_NWC__" alt="National Water Company"></div>
+      <div class="brand hill"><img src="__LOGO_HILL__" alt="Hill International"></div>
+    </div>
+  </div>
+  <div class="geopattern" aria-hidden="true"></div>
+  <div class="thread" id="thread" role="log" aria-live="polite"></div>
+  <div class="quickrow">
+    <div class="quickchip hl" data-q="portfolio" role="button" tabindex="0">📊 Portfolio</div>
+    <div class="quickchip hl" data-q="portfolio madinah" role="button" tabindex="0">📊 Portfolio Madinah</div>
+    <div class="quickchip hl" data-q="portfolio tabuk" role="button" tabindex="0">📊 Portfolio Tabuk</div>
+    <div class="quickchip hl" data-q="sgr" role="button" tabindex="0">🚦 SGR</div>
+    <div class="quickchip hl" data-q="expected trouble" role="button" tabindex="0">⏳ Expected Trouble</div>
+    <div class="quickchip hl" data-q="tc" role="button" tabindex="0">🧪 T&amp;C</div>
+    <div class="quickchip hl" data-q="handover" role="button" tabindex="0">🤝 Handover</div>
+    <div class="quickchip" data-q="help" role="button" tabindex="0">Help</div>
+    <div class="quickchip" data-q="critical" role="button" tabindex="0">Critical</div>
+    <div class="quickchip" data-q="troubled" role="button" tabindex="0">Troubled</div>
+    <div class="quickchip" data-q="delayed" role="button" tabindex="0">Delayed</div>
+    <div class="quickchip" data-q="zero progress" role="button" tabindex="0">Zero progress</div>
+    <div class="quickchip" data-q="partially suspended" role="button" tabindex="0">Partially suspended</div>
+    <div class="quickchip" data-q="Tabuk" role="button" tabindex="0">Tabuk</div>
+    <div class="quickchip" data-q="Madinah" role="button" tabindex="0">Madinah</div>
+    <div class="quickchip" data-q="data updates" role="button" tabindex="0">🗂 Data updates</div>
+  </div>
+  <div class="voicebar">
+    <button id="micBtn" class="micwide" aria-label="Speak your question" title="Tap to speak"><span class="micico" aria-hidden="true">🎤</span><span id="voiceHint">Tap to speak</span></button>
+    <button id="langBtn" class="voicebtn langbtn" aria-label="Voice input language" title="Voice recognition language">EN</button>
+    <button id="speakToggleBtn" class="voicebtn" aria-label="Toggle spoken replies" title="Read replies aloud">🔇</button>
+  </div>
+  <div class="inputbar">
+    <input type="text" id="inp" placeholder="PO, project, contractor, status or area..." aria-label="Ask the PMO Bot" autocomplete="off">
+    <button id="sendBtn" aria-label="Send">&#10148;</button>
+  </div>
+</div>
+
+<div class="modal" id="installModal" role="dialog" aria-modal="true" aria-labelledby="imTitle">
+  <div class="box">
+    <h2 id="imTitle">📌 Install the PMO Bot &amp; pin it</h2>
+    <p class="msub" id="imSub"></p>
+    <ol id="imSteps"></ol>
+    <details id="imOther"><summary>Using a different browser or device?</summary><div id="imOtherBody"></div></details>
+    <button class="mclose" id="imClose" type="button">Got it</button>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
