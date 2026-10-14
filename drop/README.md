@@ -18,4 +18,5 @@
 * If a file cannot be read (a column was renamed, an unknown project status appeared ...), the run **fails with a clear message** (Actions tab -> open the red run) and the **app keeps showing the previous data**. Nothing is half-updated.
 * The **Data updates** tab in the app shows which files are loaded, when the data was last updated and the data-quality notes.
 * Files in this folder are readable by anyone who has the repository address (the repository is public).
+* **About the password:** in the app, the **Data updates** tab hides the upload and run buttons behind a password. That keeps the buttons away from people who only use the app. The real protection is GitHub itself: only accounts with **write access** to this repository can add files, so keep the list under Settings -> Collaborators short and turn on two-factor sign-in for those accounts.
 * GitHub pauses scheduled runs after 60 days with no activity in the repository; dropping a new file counts as activity. If the Actions tab shows "scheduled workflows disabled", click **Enable**.

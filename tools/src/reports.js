@@ -182,6 +182,25 @@ function addTroubleTab(){
   wireRows(card); finishReport(card);
 }
 
+/* ---------- password lock for the update controls ----------
+   A SOFT lock: it keeps the upload / run controls away from people who only use the app. Only a salted PBKDF2 fingerprint of the password is stored here, never the password.
+   (Real protection of the upload itself is GitHub's own login: only accounts with write access to the repository can add files.) */
+const UPDATE_LOCK = {salt:'d59b672e572b08dd1d73d06f8d8ebf18', iter:300000, hash:'72a7390f2cdc5a2576db36b9510a37bdc2cd64f17598f6679d7f305bc52238a7'};
+const UNLOCK_MIN = 15; let unlockedAt = 0, lockFails = 0, lockUntil = 0; const DATA_PANELS = [];     // every open Data updates panel, so unlocking / locking applies to all of them at once
+function refreshPanels(){ for(let i = DATA_PANELS.length - 1; i >= 0; i--){ const p = DATA_PANELS[i]; if(!document.body.contains(p.card)) DATA_PANELS.splice(i, 1); else renderActions(p.card, p.base); } }
+const hexBytes = h => Uint8Array.from(h.match(/../g).map(x => parseInt(x, 16)));
+const toHex = buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+function isUnlocked(){ let t = unlockedAt; try { t = Math.max(t, +sessionStorage.getItem('pmoUpdateUnlocked') || 0); } catch(e){} return !!t && Date.now() - t < UNLOCK_MIN * 60000; }
+function setUnlocked(on){ unlockedAt = on ? Date.now() : 0; try { on ? sessionStorage.setItem('pmoUpdateUnlocked', String(unlockedAt)) : sessionStorage.removeItem('pmoUpdateUnlocked'); } catch(e){} }
+async function passwordOk(pw){
+  if(!(window.crypto && crypto.subtle)) throw new Error('secure');
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits({name:'PBKDF2', hash:'SHA-256', salt:hexBytes(UPDATE_LOCK.salt), iterations:UPDATE_LOCK.iter}, key, 256);
+  const a = toHex(bits), b = UPDATE_LOCK.hash; let d = a.length ^ b.length;
+  for(let i = 0; i < Math.max(a.length, b.length); i++) d |= (a.charCodeAt(i) || 0) ^ (b.charCodeAt(i) || 0);                // compare without stopping at the first difference
+  return d === 0;
+}
+
 /* ---------- Data updates: what is loaded, when it is checked, where to drop new files ---------- */
 function repoInfo(){
   const h = location.hostname, m = h.match(/^([^.]+)\.github\.io$/), seg = location.pathname.split('/')[1];
@@ -213,12 +232,41 @@ function addDataPanel(){
     `<div><span>Projects loaded</span><b>${BUILD.projects}</b><small>${BUILD.withGates} with gate data</small></div>` +
     `<div><span>Data last updated</span><b>${fmtT(built)}</b></div>` +
     `<div><span>Automatic check</span><b>every hour, 08:00–19:00, Sunday–Thursday</b><small>${nx ? 'next check: ' + fmtT(nx) : ''}</small></div></div>` +
-    `<div class="dbtns"><a class="optbtn dlink" href="${base}/upload/main/drop" target="_blank" rel="noopener">⬆ Upload the new Excel files</a>` +
-    `<a class="optbtn dlink" href="${base}/tree/main/drop" target="_blank" rel="noopener">📂 Open the drop folder</a>` +
-    `<a class="optbtn dlink" href="${base}/actions/workflows/update.yml" target="_blank" rel="noopener">▶ Check for new files now (Run workflow)</a></div>` +
-    `<div class="rrule">Drop <b>both</b> files — the weekly progress file and the gates schedule file (any file name). The newest of each kind is used. If a file cannot be read, the site keeps the previous data and the update shows an error in GitHub → Actions.</div>` +
+    `<div class="dactions"></div>` +
     (bits.length ? `<div class="dq"><b>Data-quality notes</b><ul>${bits.map(b => `<li>${b}</li>`).join('')}</ul></div>` : '');
   finishReport(card);
+  DATA_PANELS.push({card, base}); renderActions(card, base);
+}
+function renderActions(card, base){                                         // the update controls: locked until the password is entered
+  const box = card.querySelector('.dactions'); clearTimeout(card._relock);
+  if(isUnlocked()){
+    box.innerHTML = `<div class="dbtns"><a class="optbtn dlink" href="${base}/upload/main/drop" target="_blank" rel="noopener">⬆ Upload the new Excel files</a>` +
+      `<a class="optbtn dlink" href="${base}/tree/main/drop" target="_blank" rel="noopener">📂 Open the drop folder</a>` +
+      `<a class="optbtn dlink" href="${base}/actions/workflows/update.yml" target="_blank" rel="noopener">▶ Check for new files now (Run workflow)</a></div>` +
+      `<div class="rrule">Drop <b>both</b> files — the weekly progress file and the gates schedule file (any file name). The newest of each kind is used. If a file cannot be read, the site keeps the previous data and the update shows an error in GitHub → Actions. GitHub asks you to sign in with an account that has write access.</div>` +
+      `<div class="lockbar"><span>🔓 Unlocked — locks again after ${UNLOCK_MIN} minutes</span><button class="optbtn lockbtn" type="button">Lock now</button></div>`;
+    box.querySelector('.lockbtn').addEventListener('click', () => { setUnlocked(false); refreshPanels(); });
+    let t0 = unlockedAt; try { t0 = Math.max(t0, +sessionStorage.getItem('pmoUpdateUnlocked') || 0); } catch(e){}
+    card._relock = setTimeout(() => { if(!isUnlocked()) refreshPanels(); }, Math.max(1000, UNLOCK_MIN * 60000 - (Date.now() - t0) + 500));
+    return;
+  }
+  box.innerHTML = `<div class="lockbox"><div class="lockhead">🔒 Updating the data is password-protected</div><div class="rrule">Enter the password to see the upload and update controls. What is loaded now, and when it was last updated, stays visible to everyone.</div>` +
+    `<label class="locklabel">Password<span class="lockrow"><input class="lockinput" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="go"><button class="optbtn lockgo" type="button">Unlock</button></span></label><div class="lockerr" role="alert" aria-live="polite"></div></div>`;
+  const inp = box.querySelector('.lockinput'), go = box.querySelector('.lockgo'), err = box.querySelector('.lockerr'); let busy = false;
+  const wait = () => { const s = Math.ceil((lockUntil - Date.now()) / 1000); if(s > 0){ err.textContent = `Too many attempts — try again in ${s} s.`; go.disabled = true; setTimeout(wait, 500); } else { go.disabled = false; if(err.textContent.startsWith('Too many')) err.textContent = ''; } };
+  const attempt = async () => {
+    if(busy || Date.now() < lockUntil) return; const pw = inp.value; if(!pw){ err.textContent = 'Please type the password.'; inp.focus(); return; }
+    busy = true; go.disabled = true; err.textContent = 'Checking…';
+    try {
+      const ok = await passwordOk(pw);
+      if(ok){ lockFails = 0; inp.value = ''; setUnlocked(true); refreshPanels(); return; }
+      lockFails++; inp.value = ''; err.textContent = 'Wrong password.';
+      if(lockFails >= 3){ lockUntil = Date.now() + Math.min(60, Math.pow(2, lockFails - 3)) * 1000; wait(); }
+    } catch(e){ err.textContent = 'The password cannot be checked on this page — open the app from its https address.'; }
+    busy = false; if(Date.now() >= lockUntil) go.disabled = false; inp.focus();
+  };
+  go.addEventListener('click', attempt); inp.addEventListener('keydown', e => { if(e.key === 'Enter'){ e.preventDefault(); attempt(); } });
+  if(Date.now() < lockUntil) wait();
 }
 
 /* ---------- typed instructions that open these screens ---------- */
