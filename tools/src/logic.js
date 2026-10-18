@@ -249,7 +249,7 @@ const LEX = new Map();                                 // known word -> meaning 
   ['help','menu','مساعده','عون','hi','hello','hey','salam','salaam','مرحبا','اهلا','سلام'].forEach(w => add(w, 'help'));
   ['red','amber','green'].forEach(w => add(w, 'rag:' + w));
   ['المتوقع','متوقع','المتوقعه','متوقعه','تعثرها','تاخرها','استلام','الاستلام','تسليم','التسليم','ابتدايي','الابتدايي','جزيي','الجزيي','مراجعه','المراجعه','بوابات','بوابه','البوابات','المراحل','مراحل','المرحله','تحديث','التحديث','بيانات','البيانات','رفع','الملفات','ملفات','الملف','الاختبار','اختبار','التشغيل','تشغيل','التجريبي','تجريبي'].forEach(w => add(w, 'rep:' + w));
-  ['sgr','gate','gates','stage','review','soon','upcoming','expected','commissioning','testing','tnc','upload','revision','refresh','dropbox','folder','yellow','overdue','blinking','predicted','coming','going','sync','submit'].forEach(w => add(w, 'rep:' + w));
+  ['operating','benefited','unused','underused','sgr','gate','gates','stage','review','soon','upcoming','expected','commissioning','testing','tnc','upload','revision','refresh','dropbox','folder','yellow','overdue','blinking','predicted','coming','going','sync','submit'].forEach(w => add(w, 'rep:' + w));
   ALIAS_DEF.forEach(([en, ar]) => nrm(en).split(' ').forEach(w => add(w, 'alias:' + nrm(ar))));
   FILLERS.forEach(f => f.split(' ').forEach(w => add(w, 'stop:' + w)));
   STOP.forEach(w => add(w, 'stop:' + w));

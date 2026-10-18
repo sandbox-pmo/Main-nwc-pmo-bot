@@ -61,6 +61,9 @@ def assemble(src_dir, gen_js):
     avatar = read(os.path.join(src_dir, 'avatar_js.js'))
     logic = read(os.path.join(src_dir, 'logic.js'))
     reports = read(os.path.join(src_dir, 'reports.js')) if os.path.exists(os.path.join(src_dir, 'reports.js')) else ''
+    for extra in ('adhoc_data.js', 'adhoc.js'):                                   # the Operating Status dashboard (optional parts)
+        if os.path.exists(os.path.join(src_dir, extra)):
+            reports += read(os.path.join(src_dir, extra))
     shell = read(os.path.join(src_dir, 'shell.js'))
     tail = '</script>\n</body>\n</html>'
     assert logic.rstrip().endswith(tail), 'unexpected end of logic.js'

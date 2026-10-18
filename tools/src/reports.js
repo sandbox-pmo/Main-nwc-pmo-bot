@@ -318,6 +318,7 @@ function routeReport(q){
     const f = any('overdue') ? 'red' : any('red') ? 'red' : any('yellow', 'amber') ? 'yellow' : any('soon', 'upcoming', 'next', 'coming') ? 'redyellow' : any('green') ? 'green' : 'all';
     return {type:'report', view:'sgr', arg:f};
   }
+  if((any('operating', 'benefited', 'unused', 'underused') && only(new Set(['operating','status','projects','project','benefited','not','fully','unused','underused','dashboard','report','adhoc','ad','hoc']))) || q === 'operating status') return {type:'report', view:'adhoc'};
   if(q === 't c' || any('tc', 'tnc', 'commissioning') || (has('testing') && t.length <= 3)) return {type:'report', view:'tc'};
   if(any('expected', 'upcoming', 'soon', 'predicted', 'coming', 'going', 'next') && any('trouble', 'troubled', 'troubles') && t.length <= 5) return {type:'report', view:'trouble'};
   if(q.indexOf('المتوقع') >= 0 && q.indexOf('تعثر') >= 0) return {type:'report', view:'trouble'};
@@ -334,10 +335,10 @@ function routeReport(q){
   if(any('بيانات','البيانات','الملفات','ملفات','الملف') && any('تحديث','التحديث','رفع')) return {type:'report', view:'data'};
   return null;
 }
-const REPORT_LABEL = {sgr:'SGR — Stage Gate Review', tc:'T&C — Testing & Commissioning', trouble:'Expected Trouble', handover:'Handover', data:'Data updates'};
+const REPORT_LABEL = {adhoc:'Operating Status', sgr:'SGR — Stage Gate Review', tc:'T&C — Testing & Commissioning', trouble:'Expected Trouble', handover:'Handover', data:'Data updates'};
 function openReport(r){
-  const lead = {sgr:'the Stage Gate Review (SGR) view', tc:'the T&C (Testing & Commissioning) list', trouble:'the projects expected to move to Trouble', handover:'the Handover view', data:'the data updates panel'}[r.view];
+  const lead = {adhoc:'the Operating Status dashboard (projects not fully benefited from)', sgr:'the Stage Gate Review (SGR) view', tc:'the T&C (Testing & Commissioning) list', trouble:'the projects expected to move to Trouble', handover:'the Handover view', data:'the data updates panel'}[r.view];
   addText(corr(r) + `Here is ${lead}:`, 'in');
-  ({sgr:addSgrTab, tc:addTcTab, trouble:addTroubleTab, handover:addHandoverTab, data:addDataPanel})[r.view](r.arg);
-  speakResponse({sgr:'Stage gate review. Red projects need an SGR within a week, yellow within three weeks.', tc:'Testing and commissioning, nearest to today first.', trouble:'Projects expected to move to trouble, soonest first.', handover:'Partial initial handover and initial handover projects.', data:'Data updates.'}[r.view]);
+  ({adhoc:addAdhocTab, sgr:addSgrTab, tc:addTcTab, trouble:addTroubleTab, handover:addHandoverTab, data:addDataPanel})[r.view](r.arg);
+  speakResponse({adhoc:'Operating status of projects not fully benefited from.', sgr:'Stage gate review. Red projects need an SGR within a week, yellow within three weeks.', tc:'Testing and commissioning, nearest to today first.', trouble:'Projects expected to move to trouble, soonest first.', handover:'Partial initial handover and initial handover projects.', data:'Data updates.'}[r.view]);
 }
