@@ -268,8 +268,8 @@ def newest_first(items, cutoff):
 GATE_N = 8
 
 
-def read_gates(path):
-    wb = openpyxl.load_workbook(path, data_only=True)
+def read_gates(path, wb=None):
+    wb = wb or openpyxl.load_workbook(path, data_only=True)
     ws = hr = None
     for s in wb.worksheets:
         if s.sheet_state != 'visible':
@@ -322,13 +322,83 @@ def read_gates(path):
     return wb, names, out, notes
 
 
+GATE_NAMES_EN = ['Registration', 'Initial Planning Stage', 'Tender for design', 'Design Stage', 'Tender for Construction Stage', 'Construction Stage (95%)', 'Testing & Commissioning (5%)', 'Handover and Closeout']
+CELL_STATUS = {'مكتمل': 'c', 'جاري': 'p', 'لا ينطبق': 'n'}          # completed / in progress / not applicable ; an empty cell = not started ('-')
+AR_DIGITS = str.maketrans('٠١٢٣٤٥٦٧٨٩', '0123456789')
+
+
+def read_gates_status(path, wb=None):
+    """A stage-gate TRACKER workbook: one row per project, a STATUS per gate ("بوابة 1" ... "بوابة 8": completed / in progress / not applicable / empty)
+    and a planned DATE per gate ("تاريخ بوابة n المخطط", normally only the later gates).  Columns are found by header."""
+    wb = wb or openpyxl.load_workbook(path, data_only=True)
+    for ws in wb.worksheets:
+        if ws.sheet_state != 'visible':
+            continue
+        for hr in range(1, 6):
+            code_col, stat, plan, ar = None, {}, {}, {}
+            for c in range(1, ws.max_column + 1):
+                raw = ws.cell(hr, c).value
+                if not isinstance(raw, str):
+                    continue
+                t = norm(raw).translate(AR_DIGITS)
+                if t == 'updated sn' and code_col is None:
+                    code_col = c
+                m = re.match(r'^تاريخ بوابه\s*([1-8])\s*المخطط', t)
+                if m:
+                    plan.setdefault(int(m.group(1)), c); continue
+                m = re.match(r'^بوابه\s*([1-8])\b\s*(.*)$', t)
+                if m and int(m.group(1)) not in stat:
+                    stat[int(m.group(1))] = c; ar[int(m.group(1))] = clean(re.sub(r'^\s*بوابة\s*[1-8٠-٩]\s*', '', raw))
+            if code_col and len(stat) == GATE_N:
+                notes, out = {}, {}
+                for r in range(hr + 1, ws.max_row + 1):
+                    code = ws.cell(r, code_col).value
+                    if code in (None, ''):
+                        continue
+                    code = clean(code).upper()
+                    if code in out:
+                        continue
+                    st, gates = [], []
+                    for n in range(1, GATE_N + 1):
+                        v = ws.cell(r, stat[n]).value; key = clean(v) if v is not None else ''
+                        if key in CELL_STATUS:
+                            st.append(CELL_STATUS[key])
+                        else:
+                            st.append('-')
+                            if key:
+                                notes['unknownGateStatus'] = notes.get('unknownGateStatus', 0) + 1
+                        d = parse_date(ws.cell(r, plan[n]).value, notes, f'{code} gate {n} planned') if n in plan else None
+                        gates.append([None, iso(d)])
+                    out[code] = {'gates': gates, 'gst': ''.join(st), 'po': '', 'pm': None}
+                if out:
+                    return wb, [ar[n] for n in range(1, GATE_N + 1)], out, notes
+    raise IngestError('could not find the gate status columns ("بوابة 1" to "بوابة 8" with "Updated SN") in the gates file')
+
+
+def read_gates_any(path):
+    """-> dict(model, names, ar, records, notes): the gates file in either layout (schedule windows, or stage-gate tracker)"""
+    wb = openpyxl.load_workbook(path, data_only=True)
+    try:
+        _, names, out, notes = read_gates(path, wb)
+        return dict(model='windows', names=names, ar=None, records=out, notes=notes)
+    except IngestError as e1:
+        try:
+            _, ar, out, notes = read_gates_status(path, wb)
+            return dict(model='status', names=list(GATE_NAMES_EN), ar=ar, records=out, notes=notes)
+        except IngestError as e2:
+            raise IngestError(f'{e1}; and {e2}')
+
+
 # ------------------------------------------------------------------ build the data
-def ingest(weekly_path, gates_path, repo='', built=None, ignored=None):
+def ingest(weekly_path, gates_path, repo='', built=None, ignored=None, extra_gates=None):
     TEXT_NUMBERS.clear()
     wb, ws, F, rows, report = read_weekly(weekly_path)
-    gwb, gate_names, gates, gnotes = read_gates(gates_path)
+    sources = [read_gates_any(gates_path)] + [read_gates_any(p) for p in (extra_gates or [])]
+    for src, pth in zip(sources, [gates_path] + list(extra_gates or [])):
+        src['file'] = os.path.basename(pth); src['by_po'] = {v['po']: k for k, v in src['records'].items() if v['po']}; src['used'] = 0
+    gate_names = next((s_['names'] for s_ in sources if s_['model'] == 'windows'), sources[0]['names']); gate_ar = next((s_['ar'] for s_ in sources if s_['ar']), None)
+    gnotes = {}
     cutoff = report + datetime.timedelta(days=UPD_CUTOFF_DAYS)
-    by_po = {v['po']: k for k, v in gates.items() if v['po']}
     cell = lambda r, k: ws.cell(r, F[k]).value
     projects, pf_rows = [], []
     unmatched, matched_by_po = [], 0
@@ -345,9 +415,13 @@ def ingest(weekly_path, gates_path, repo='', built=None, ignored=None):
         if not start or not end:
             raise IngestError(f'PO {po}: contract start / end date missing')
         pno = clean(cell(r, 'pno'))
-        code = pno.upper(); g = gates.get(code)
-        if g is None and po in by_po:
-            code = by_po[po]; g = gates[code]; matched_by_po += 1
+        code = pno.upper(); g = None
+        for src in sources:                                                   # the newest gates file first; older ones only fill the gaps
+            g = src['records'].get(code)
+            if g is None and po in src['by_po']:
+                g = src['records'][src['by_po'][po]]; matched_by_po += 1
+            if g is not None:
+                src['used'] += 1; break
         if g is None:
             unmatched.append(pno)
         p = dict(po=po, pno=pno, name=clean(cell(r, 'name')), contractor=clean(cell(r, 'contractor')), consultant=clean(cell(r, 'consultant')), area=area, areaEn=AREA_EN[area],
@@ -358,6 +432,8 @@ def ingest(weekly_path, gates_path, repo='', built=None, ignored=None):
                  mgmt=split_numbered(cell(r, 'mgmt')) if cell(r, 'mgmt') else [], upd=newest_first(split_numbered(cell(r, 'upd')), cutoff) if cell(r, 'upd') else [],
                  tech=split_numbered(cell(r, 'tech')) if cell(r, 'tech') else [], ord=ordn,
                  hoPartial=bool(F['partial']) and clean(cell(r, 'partial')) == 'نعم', gates=g['gates'] if g else None, pmGate=g['pm'] if g else None)
+        if g and g.get('gst'):
+            p['gst'] = g['gst']                                                # stage-gate tracker: c = completed, p = in progress, n = not applicable, - = not started
         projects.append(p)
         pf_rows.append(dict(area=area, sk=sk, value=fnum(cell(r, 'value')), pv=fnum(cell(r, 'pv')), ev=fnum(cell(r, 'ev')),
                             appr_n=int(fnum(cell(r, 'appr_n'))), appr=fnum(cell(r, 'appr_amt')), paid_n=int(fnum(cell(r, 'paid_n'))), paid=fnum(cell(r, 'paid_amt')),
@@ -379,7 +455,13 @@ def ingest(weekly_path, gates_path, repo='', built=None, ignored=None):
         sub = [i for i, p in enumerate(projects) if p['area'] == ar]
         if sub:
             a = agg([pf_rows[i] for i in sub]); a.update({'en': en, 'ar': ar, 'pos': [projects[i]['po'] for i in sub]}); scopes[key] = a
-    notes = dict(gnotes)
+    notes = {}
+    for src in sources:                                                       # data-quality notes of every gates file that was used
+        for k, v in src['notes'].items():
+            if isinstance(v, list):
+                notes[k] = (notes.get(k, []) + v)
+            else:
+                notes[k] = notes.get(k, 0) + v
     notes['unmatched'] = unmatched; notes['matchedByPO'] = matched_by_po
     if ignored:
         notes['ignored'] = [{'file': i['file'], 'why': i['why'][:300]} for i in ignored]          # files in drop/ that could not be read (shown in the app)
@@ -389,11 +471,12 @@ def ingest(weekly_path, gates_path, repo='', built=None, ignored=None):
         notes['badDatesCount'] = len(notes['badDates']); notes['badDates'] = notes['badDates'][:12]
     build = {'built': (built or datetime.datetime.now(datetime.timezone.utc)).strftime('%Y-%m-%dT%H:%M:%SZ'), 'repo': repo,
              'weeklyFile': os.path.basename(weekly_path), 'gatesFile': os.path.basename(gates_path), 'reportDate': report.isoformat(),
-             'projects': len(projects), 'withGates': len(projects) - len(unmatched), 'notes': notes}
+             'projects': len(projects), 'withGates': len(projects) - len(unmatched), 'gatesModel': sources[0]['model'],
+             'gatesSources': [{'file': s_['file'], 'model': s_['model'], 'projects': s_['used']} for s_ in sources], 'notes': notes}
     month = lambda d: f'{d.day} {d.strftime("%b")} {d.year}'
     dump = lambda o: json.dumps(o, ensure_ascii=False, separators=(',', ':'))
     js = (f"const REPORT_DATE = {json.dumps(month(report))};\nconst PROJECTS = {dump(projects)};\nconst PORTFOLIO = {dump(portfolio)};\n"
-          f"const PORTFOLIOS = {dump(scopes)};\nconst GATES = {dump([{'n': i + 1, 'name': n} for i, n in enumerate(gate_names)])};\nconst BUILD = {dump(build)};\n")
+          f"const PORTFOLIOS = {dump(scopes)};\nconst GATES = {dump([dict({'n': i + 1, 'name': n}, **({'ar': gate_ar[i]} if gate_ar else {})) for i, n in enumerate(gate_names)])};\nconst BUILD = {dump(build)};\n")
     return {'js': js, 'projects': projects, 'portfolio': portfolio, 'scopes': scopes, 'gate_names': gate_names, 'build': build, 'report': report}
 
 

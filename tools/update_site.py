@@ -81,29 +81,33 @@ def main():
             return 0
         repo = os.environ.get('GITHUB_REPOSITORY', '')
         ignored = []; why = lambda e: str(e) if isinstance(e, ingest.IngestError) else f'could not be opened ({type(e).__name__})'
-        gates = None
-        for p in cands['gates']:                                              # the newest gates file that can really be read
+        gates = None; extras = []
+        for p in cands['gates']:                                              # newest readable gates file leads; up to two older readable ones fill the projects it does not cover
             try:
-                ingest.read_gates(p); gates = p; break
+                ingest.read_gates_any(p)
             except Exception as e:
-                ignored.append({'file': os.path.basename(p), 'kind': 'gates', 'why': why(e)})
+                ignored.append({'file': os.path.basename(p), 'kind': 'gates', 'why': why(e)}); continue
+            if gates is None:
+                gates = p
+            elif len(extras) < 2:
+                extras.append(p)
         if gates is None:
             raise ingest.IngestError('no gates schedule file in drop/ can be read: ' + '; '.join(f"{i['file']}: {i['why']}" for i in ignored))
         res = weekly = None
         for p in cands['weekly']:                                             # the newest weekly file that can really be read
             try:
-                res = ingest.ingest(p, gates, repo, ignored=ignored); weekly = p; break
+                res = ingest.ingest(p, gates, repo, ignored=ignored, extra_gates=extras); weekly = p; break
             except Exception as e:
                 ignored.append({'file': os.path.basename(p), 'kind': 'weekly', 'why': why(e)})
         if res is None:
             raise ingest.IngestError('no weekly progress file in drop/ can be read: ' + '; '.join(f"{i['file']}: {i['why']}" for i in ignored if i['kind'] == 'weekly'))
         if ignored:                                                           # (a late weekly failure is not in the notes yet: build once more with the full list)
-            res = ingest.ingest(weekly, gates, repo, ignored=ignored)
+            res = ingest.ingest(weekly, gates, repo, ignored=ignored, extra_gates=extras)
         build_site.write_site(src, res['js'], root)
         json.dump({'key': key, 'weekly': os.path.basename(weekly), 'gates': os.path.basename(gates), 'built': res['build']['built'], 'reportDate': res['build']['reportDate'], 'projects': res['build']['projects'],
                    'ignored': [i['file'] for i in ignored]}, open(state_path, 'w'), indent=1)
         n = res['build']['notes']
-        print(f"UPDATED from {os.path.basename(weekly)} (report date {res['report']}) + {os.path.basename(gates)}: {res['build']['projects']} projects, {res['build']['withGates']} with gate data.")
+        print(f"UPDATED from {os.path.basename(weekly)} (report date {res['report']}) + {os.path.basename(gates)}: {res['build']['projects']} projects, {res['build']['withGates']} with gate data (" + ', '.join(f"{s_['projects']} from {s_['file']} [{s_['model']}]" for s_ in res['build']['gatesSources']) + ').')
         print('Notes:', {k: (v if k != 'unmatched' else f"{len(v)} projects not in the gates file") for k, v in n.items() if k != 'ignored'})
         for i in ignored:
             print(f"::warning::IGNORED {i['file']} - {i['why']} (the newest readable {'gates' if i['kind'] == 'gates' else 'weekly'} file is used instead)")

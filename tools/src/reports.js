@@ -18,10 +18,25 @@ const MONTHS_LONG = ['January','February','March','April','May','June','July','A
 
 /* ---------- Stage Gate Review rules ---------- */
 const SGR_RED_DAYS = 7, SGR_YELLOW_DAYS = 21, SGR_STALE_MONTHS = 3;
+function gateInfoStatus(p, today){                                          // stage-gate TRACKER layout: a status per gate + a planned date for some gates
+  const cutoff = addMonths(today, -SGR_STALE_MONTHS);
+  const gs = p.gates.map((g, i) => ({n:i+1, name:GATES[i].name, ar:GATES[i].ar, s:null, e:parseISO(g[1]), c:p.gst[i], ok:true}));
+  const prog = gs.filter(g => g.c === 'p'); let cur = null;
+  if(prog.length) cur = prog[prog.length - 1];                                // the gate marked "in progress" (the later one if two are)
+  else { const pend = gs.filter(g => g.c === '-'); if(pend.length) cur = pend[0]; }   // else the first gate not started
+  let state, days = null;
+  if(!cur) state = 'complete';
+  else if(!cur.e) state = 'nodate';
+  else { days = dayDiff(cur.e, today); state = days >= 0 ? 'ongoing' : cur.e >= cutoff ? 'overdue' : 'stale'; }     // a planned date older than 3 months is not considered
+  gs.forEach(g => { g.st = g.c === 'c' ? 'done' : g.c === 'n' ? 'ignored' : cur && g.n === cur.n ? (state === 'stale' ? 'ignored' : 'current') : 'upcoming'; });
+  const shown = state === 'ongoing' || state === 'overdue' || state === 'nodate' ? cur : null;
+  return {state, cur: shown, stale: state === 'stale' ? cur : null, gs, days: state === 'ongoing' || state === 'overdue' ? days : null, cutoff, today, model:'status', next:null};
+}
 function gateInfo(p, today){
   if(!p.gates) return {state:'nodata', gs:null};
+  if(p.gst) return gateInfoStatus(p, today);
   const cutoff = addMonths(today, -SGR_STALE_MONTHS);
-  const gs = p.gates.map((g, i) => { const s = parseISO(g[0]), e = parseISO(g[1]); return {n:i+1, name:GATES[i].name, s, e, ok: !!(s && e && e >= s)}; });
+  const gs = p.gates.map((g, i) => { const s = parseISO(g[0]), e = parseISO(g[1]); return {n:i+1, name:GATES[i].name, ar:GATES[i].ar, s, e, ok: !!(s && e && e >= s)}; });
   if(!gs.some(g => g.ok)) return {state:'nodata', gs};
   const live = gs.filter(g => g.ok && g.e >= cutoff);                      // a gate that ended more than 3 months ago is not considered
   const inside = live.filter(g => g.s <= today && today <= g.e);
@@ -33,11 +48,13 @@ function gateInfo(p, today){
   gs.forEach(g => {
     g.st = !g.ok ? 'nodates' : g.e < cutoff ? 'ignored' : cur && g.n === cur.n ? 'current' : g.s <= today && today <= g.e ? 'overlap' : g.e < today ? 'done' : 'upcoming';
   });
-  return {state, cur, next, gs, days: cur ? dayDiff(cur.e, today) : null, cutoff, today};
+  return {state, cur, next, gs, days: cur ? dayDiff(cur.e, today) : null, cutoff, today, model:'windows'};
 }
 function sgrFlag(info){
   if(info.state === 'nodata') return {k:'grey', sub:'nodata', label:'No gate data', detail:'This project is not in the gates schedule file (or has no usable gate dates).', key:1e9};
-  if(info.state === 'stale')  return {k:'grey', sub:'stale', label:'No active gate', detail:'All planned gate dates are more than 3 months old.', key:1e9};
+  if(info.state === 'complete') return {k:'grey', sub:'complete', label:'All gates completed', detail:'Every applicable gate of this project is marked completed.', key:1e9};
+  if(info.state === 'nodate')   { const c = info.cur; return {k:'grey', sub:'nodate', label:'No SGR date', detail:`Gate ${c.n} · ${c.name} is in progress — the gates file has no planned date for it`, key:1e9}; }
+  if(info.state === 'stale')  return {k:'grey', sub:'stale', label:'No active gate', detail: info.model === 'status' ? 'The planned date of the current gate is more than 3 months old.' : 'All planned gate dates are more than 3 months old.', key:1e9};
   if(info.state === 'notstarted') return {k:'grey', sub:'notstarted', label:'No active gate', detail:`Not started yet — Gate ${info.next.n} · ${info.next.name} starts ${fmtDate(isoOf(info.next.s))} (${inDays(dayDiff(info.next.s, info.today))})`, key:1e9};
   const c = info.cur, end = fmtDate(isoOf(c.e)), name = `Gate ${c.n} · ${c.name}`, d = info.days;
   if(info.state === 'overdue') return {k:'red', blink:true, label:'SGR overdue', detail:`${name} · ended ${end} (${inDays(d)})`, key:d};
@@ -46,7 +63,18 @@ function sgrFlag(info){
   return {k, blink: k === 'red', label, detail:`${name} · ends ${end} (${inDays(d)})`, key:d};
 }
 const flagDot = f => `<span class="fldot fl-${f.k}${f.blink ? ' blink' : ''}" aria-hidden="true"></span>`;
+const gnameHtml = g => esc(g.name) + (g.ar ? ` <small class="gar">${esc(g.ar)}</small>` : '');
+function gateRowsStatus(info, today){                                       // tracker layout: the status of each gate, its planned date (when there is one) against today
+  return info.gs.map(g => {
+    const lab = g.c === 'c' ? 'Completed' : g.c === 'n' ? 'Not applicable' : g.c === 'p' ? 'In progress' : 'Not started';
+    let rel = '';
+    if(g.e && g.c !== 'n'){ const d = dayDiff(g.e, today); rel = `planned ${fmtDate(isoOf(g.e))} (${g.c === 'c' ? 'completed' : inDays(d)})` + (g.st === 'ignored' && g.c !== 'c' ? ' — more than 3 months old, not considered' : ''); }
+    else if(g.c === 'p') rel = 'no planned date in the file';
+    return `<div class="grow g-${g.st}"><span class="gn">${g.n}</span><div><div class="gname">${gnameHtml(g)}${g.st === 'current' ? ' <b class="gcur">◀ current</b>' : ''}</div><div class="gdates"><b>${lab}</b>${rel ? `<br><span class="grel">${rel}</span>` : ''}</div></div></div>`;
+  }).join('');
+}
 function gateRows(info, today){                                            // the eight gates against today's date
+  if(info.model === 'status') return gateRowsStatus(info, today);
   return info.gs.map(g => {
     let txt;
     if(!g.ok) txt = 'no dates';
@@ -58,7 +86,7 @@ function gateRows(info, today){                                            // th
                 : g.st === 'done' ? `ended ${inDays(dayDiff(g.e, today))}` : `starts ${inDays(dayDiff(g.s, today))}`;
       txt = `${range}<br><span class="grel">${rel}</span>`;
     }
-    return `<div class="grow g-${g.st}"><span class="gn">${g.n}</span><div><div class="gname">${esc(g.name)}${g.st === 'current' ? ' <b class="gcur">◀ current</b>' : ''}</div><div class="gdates">${txt}</div></div></div>`;
+    return `<div class="grow g-${g.st}"><span class="gn">${g.n}</span><div><div class="gname">${gnameHtml(g)}${g.st === 'current' ? ' <b class="gcur">◀ current</b>' : ''}</div><div class="gdates">${txt}</div></div></div>`;
   }).join('');
 }
 function sgrBlock(p){                                                      // goes on every project card
@@ -131,6 +159,14 @@ function addHandoverTab(focus){
 function tcRows(today){
   const cutoff = addMonths(today, -SGR_STALE_MONTHS), rows = [], skipped = []; let noDates = 0, old = 0;
   PROJECTS.forEach(p => {
+    if(p.gst && p.gates){                                                 // tracker layout: gate 7 status + planned date
+      const c7 = p.gst[6], e7 = parseISO(p.gates[6][1]);
+      if(c7 === 'c' || c7 === 'n') return;                                // finished / not applicable: not in the pipeline
+      if(!e7){ noDates++; skipped.push({p, why:'nodates'}); return; }
+      const st7 = c7 === 'p' ? 'now' : e7 >= today ? 'soon' : 'overdue';
+      if(st7 === 'overdue' && e7 < cutoff){ old++; skipped.push({p, why:'old'}); return; }
+      rows.push({p, s:null, e:e7, state:st7, dist: st7 === 'now' ? 0 : st7 === 'soon' ? dayDiff(e7, today) : dayDiff(today, e7), cat: handoverCat(p)}); return;
+    }
     const g = p.gates && p.gates[6], s = g && parseISO(g[0]), e = g && parseISO(g[1]);
     if(!s || !e || e < s){ noDates++; skipped.push({p, why:'nodates'}); return; }
     if(e < cutoff){ old++; skipped.push({p, why:'old'}); return; }                                          // older than 3 months: not considered
@@ -154,8 +190,10 @@ function addTcTab(){
     `<div class="tsum-t">All projects in the weekly file: Partial Initial Handover <b>${allP}</b> · Initial Handover <b>${allI}</b>.` +
     `${skP + skI ? ` Not in this list (T&C window older than 3 months, or not in the gates file): Partial <b>${skP}</b> · Initial <b>${skI}</b>.` : ''}</div></div>` +
     `<div class="rlist">${rows.map(r => {
-      const rel = r.state === 'now' ? `in T&C now — ends ${inDays(dayDiff(r.e, today))}` : r.state === 'soon' ? `starts ${inDays(dayDiff(r.s, today))}` : `window ended ${inDays(dayDiff(r.e, today))}`;
-      return projRow(r.p, `T&C: <b>${fmtDate(isoOf(r.s))}</b> → <b>${fmtDate(isoOf(r.e))}</b>`, rel, tag(r.cat), 'tc-' + r.state);
+      const dd = dayDiff(r.e, today);
+      const rel = r.s ? (r.state === 'now' ? `in T&C now — ends ${inDays(dd)}` : r.state === 'soon' ? `starts ${inDays(dayDiff(r.s, today))}` : `window ended ${inDays(dd)}`)
+                      : (r.state === 'now' ? `in T&C now — ${dd >= 0 ? 'planned to finish ' + inDays(dd) : 'planned date passed ' + inDays(dd)}` : r.state === 'soon' ? `planned ${inDays(dd)}` : `planned date passed ${inDays(dd)}`);
+      return projRow(r.p, r.s ? `T&C: <b>${fmtDate(isoOf(r.s))}</b> → <b>${fmtDate(isoOf(r.e))}</b>` : `T&C planned date: <b>${fmtDate(isoOf(r.e))}</b>`, rel, tag(r.cat), 'tc-' + r.state);
     }).join('') || '<div class="rempty">No project has a Testing & Commissioning window around today.</div>'}</div>` +
     `<div class="rrule">${noDates} projects have no usable T&C dates (not in the gates file) · ${old} windows ended more than 3 months ago and are not listed.</div>`;
   wireRows(card); finishReport(card);
@@ -224,12 +262,14 @@ function addDataPanel(){
   if((n.unmatched || []).length) bits.push(`${n.unmatched.length} projects are not in the gates file (${n.unmatched.slice(0, 6).map(esc).join(', ')}${n.unmatched.length > 6 ? ' …' : ''})`);
   if(n.datesCleaned) bits.push(`${n.datesCleaned} gate dates were typed oddly (e.g. “01-Oct-24 A”, “20225”) and were corrected automatically`);
   if(n.badDatesCount) bits.push(`${n.badDatesCount} gate dates could not be read`);
+  if(n.unknownGateStatus) bits.push(`${n.unknownGateStatus} gate status cell contained text that is not a status (treated as not started)`);
   if(n.reversed) bits.push(`${n.reversed} gate has a finish date before its start date and is ignored`);
   if(n.textNumbers) bits.push(`${n.textNumbers} number typed as text was converted`);
   const card = repCard('Data updates', 'تحديث البيانات', 'Drop the two Excel files in the GitHub folder — the app updates itself');
   card.querySelector('.rbody').innerHTML =
     `<div class="dtable"><div><span>Weekly progress file</span><b>${esc(BUILD.weeklyFile)}</b><small>report date ${REPORT_DATE}</small></div>` +
-    `<div><span>Gates schedule file</span><b>${esc(BUILD.gatesFile)}</b></div>` +
+    `<div><span>Gates file (newest readable)</span><b>${esc(BUILD.gatesFile)}</b><small>${BUILD.gatesModel === 'status' ? 'stage-gate tracker: status of each gate + planned dates' : 'schedule: start and finish dates of each gate'}</small></div>` +
+    ((BUILD.gatesSources || []).length > 1 ? `<div><span>Gate data comes from</span>${BUILD.gatesSources.map(s => `<b>${s.projects} projects — ${esc(s.file)}</b>`).join('')}<small>the newest file leads; older files only fill the projects it does not cover</small></div>` : '') +
     `<div><span>Projects loaded</span><b>${BUILD.projects}</b><small>${BUILD.withGates} with gate data</small></div>` +
     `<div><span>Data last updated</span><b>${fmtT(built)}</b></div>` +
     `<div><span>Automatic check</span><b>every hour, 08:00–19:00, Sunday–Thursday</b><small>${nx ? 'next check: ' + fmtT(nx) : ''}</small></div></div>` +
