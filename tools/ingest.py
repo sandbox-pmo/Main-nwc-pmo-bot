@@ -323,7 +323,7 @@ def read_gates(path):
 
 
 # ------------------------------------------------------------------ build the data
-def ingest(weekly_path, gates_path, repo='', built=None):
+def ingest(weekly_path, gates_path, repo='', built=None, ignored=None):
     TEXT_NUMBERS.clear()
     wb, ws, F, rows, report = read_weekly(weekly_path)
     gwb, gate_names, gates, gnotes = read_gates(gates_path)
@@ -381,6 +381,8 @@ def ingest(weekly_path, gates_path, repo='', built=None):
             a = agg([pf_rows[i] for i in sub]); a.update({'en': en, 'ar': ar, 'pos': [projects[i]['po'] for i in sub]}); scopes[key] = a
     notes = dict(gnotes)
     notes['unmatched'] = unmatched; notes['matchedByPO'] = matched_by_po
+    if ignored:
+        notes['ignored'] = [{'file': i['file'], 'why': i['why'][:300]} for i in ignored]          # files in drop/ that could not be read (shown in the app)
     if TEXT_NUMBERS:
         notes['textNumbers'] = len(TEXT_NUMBERS)
     if notes.get('badDates'):

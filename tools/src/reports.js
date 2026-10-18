@@ -220,6 +220,7 @@ function addDataPanel(){
   const built = new Date(BUILD.built), nx = nextCheck(new Date());
   const fmtT = d => d.toLocaleString('en-GB', {weekday:'short', day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit', timeZone:'Asia/Riyadh'}) + ' (Riyadh)';
   const n = BUILD.notes || {}, bits = [];
+  (n.ignored || []).forEach(i => bits.push(`⚠ <b>${esc(i.file)}</b> in the drop folder was <b>ignored</b> — ${esc(i.why)}. The newest readable file of that kind is used instead.`));
   if((n.unmatched || []).length) bits.push(`${n.unmatched.length} projects are not in the gates file (${n.unmatched.slice(0, 6).map(esc).join(', ')}${n.unmatched.length > 6 ? ' …' : ''})`);
   if(n.datesCleaned) bits.push(`${n.datesCleaned} gate dates were typed oddly (e.g. “01-Oct-24 A”, “20225”) and were corrected automatically`);
   if(n.badDatesCount) bits.push(`${n.badDatesCount} gate dates could not be read`);

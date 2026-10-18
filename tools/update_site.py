@@ -46,7 +46,8 @@ def sha(path):
     return h.hexdigest()
 
 
-def pick(drop, root):
+def candidates(drop, root):
+    """{'weekly': [...], 'gates': [...]} - every recognised file in drop/, NEWEST FIRST (by when it was added to the repository)"""
     found = {'weekly': [], 'gates': []}
     for p in sorted(glob.glob(os.path.join(drop, '**', '*.xlsx'), recursive=True)):
         if os.path.basename(p).startswith('~$'):
@@ -54,11 +55,9 @@ def pick(drop, root):
         kind = classify(p)
         if kind:
             found[kind].append(p)
-    if not found['weekly'] or not found['gates']:
-        missing = [k for k, v in found.items() if not v]
-        raise ingest.IngestError('the drop folder needs both files; missing: ' + ', '.join('weekly progress file' if m == 'weekly' else 'gates schedule file' for m in missing))
-    newest = lambda lst: max(lst, key=lambda p: (modified(p, root), os.path.getmtime(p)))
-    return newest(found['weekly']), newest(found['gates'])
+    for k in found:
+        found[k].sort(key=lambda p: (modified(p, root), os.path.getmtime(p)), reverse=True)
+    return found
 
 
 def main():
@@ -70,20 +69,44 @@ def main():
     src = os.path.join(HERE, 'src') if os.path.isdir(os.path.join(HERE, 'src')) else os.path.join(HERE, '..', 'parts')
     state_path = os.path.join(drop, '.processed.json')
     try:
-        weekly, gates = pick(drop, root)
-        key = hashlib.sha256((sha(weekly) + sha(gates) + build_site.src_hash(src) + build_site.read(os.path.join(HERE, 'ingest.py'))).encode()).hexdigest()
+        cands = candidates(drop, root)
+        missing = [k for k, v in cands.items() if not v]
+        if missing:
+            raise ingest.IngestError('the drop folder needs both files; missing: ' + ', '.join('weekly progress file' if m == 'weekly' else 'gates schedule file' for m in missing))
+        # nothing new since the last run (same files, same code) -> nothing to do
+        key = hashlib.sha256(('|'.join(sha(p) for k in ('weekly', 'gates') for p in cands[k]) + build_site.src_hash(src) + build_site.read(os.path.join(HERE, 'ingest.py'))).encode()).hexdigest()
         old = json.load(open(state_path)) if os.path.exists(state_path) else {}
         if old.get('key') == key and os.path.exists(os.path.join(root, 'index.html')) and not a.force:
-            print(f"No change: {os.path.basename(weekly)} + {os.path.basename(gates)} were already processed.")
+            print(f"No change: the {len(cands['weekly']) + len(cands['gates'])} files in drop/ were already processed.")
             return 0
         repo = os.environ.get('GITHUB_REPOSITORY', '')
-        res = ingest.ingest(weekly, gates, repo)
+        ignored = []; why = lambda e: str(e) if isinstance(e, ingest.IngestError) else f'could not be opened ({type(e).__name__})'
+        gates = None
+        for p in cands['gates']:                                              # the newest gates file that can really be read
+            try:
+                ingest.read_gates(p); gates = p; break
+            except Exception as e:
+                ignored.append({'file': os.path.basename(p), 'kind': 'gates', 'why': why(e)})
+        if gates is None:
+            raise ingest.IngestError('no gates schedule file in drop/ can be read: ' + '; '.join(f"{i['file']}: {i['why']}" for i in ignored))
+        res = weekly = None
+        for p in cands['weekly']:                                             # the newest weekly file that can really be read
+            try:
+                res = ingest.ingest(p, gates, repo, ignored=ignored); weekly = p; break
+            except Exception as e:
+                ignored.append({'file': os.path.basename(p), 'kind': 'weekly', 'why': why(e)})
+        if res is None:
+            raise ingest.IngestError('no weekly progress file in drop/ can be read: ' + '; '.join(f"{i['file']}: {i['why']}" for i in ignored if i['kind'] == 'weekly'))
+        if ignored:                                                           # (a late weekly failure is not in the notes yet: build once more with the full list)
+            res = ingest.ingest(weekly, gates, repo, ignored=ignored)
         build_site.write_site(src, res['js'], root)
-        json.dump({'key': key, 'weekly': os.path.basename(weekly), 'gates': os.path.basename(gates), 'built': res['build']['built'], 'reportDate': res['build']['reportDate'], 'projects': res['build']['projects']},
-                  open(state_path, 'w'), indent=1)
+        json.dump({'key': key, 'weekly': os.path.basename(weekly), 'gates': os.path.basename(gates), 'built': res['build']['built'], 'reportDate': res['build']['reportDate'], 'projects': res['build']['projects'],
+                   'ignored': [i['file'] for i in ignored]}, open(state_path, 'w'), indent=1)
         n = res['build']['notes']
         print(f"UPDATED from {os.path.basename(weekly)} (report date {res['report']}) + {os.path.basename(gates)}: {res['build']['projects']} projects, {res['build']['withGates']} with gate data.")
-        print('Notes:', {k: (v if k != 'unmatched' else f"{len(v)} projects not in the gates file") for k, v in n.items()})
+        print('Notes:', {k: (v if k != 'unmatched' else f"{len(v)} projects not in the gates file") for k, v in n.items() if k != 'ignored'})
+        for i in ignored:
+            print(f"::warning::IGNORED {i['file']} - {i['why']} (the newest readable {'gates' if i['kind'] == 'gates' else 'weekly'} file is used instead)")
         return 0
     except ingest.IngestError as e:
         print('::error::UPDATE FAILED - the site was NOT changed. ' + str(e), file=sys.stderr)
