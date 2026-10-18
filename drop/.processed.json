@@ -1,8 +1,11 @@
 {
- "key": "7bb07a1441abd8f59a8a07b60bbacc4560d35e91b313a6f8b9a7e62e22f69a12",
- "weekly": "Weekly_Progress_Status_of_Madinah_Projects_Till_08-10-2026.xlsx",
+ "key": "14936e9b36ad59dca4dac5f79dd06a24df604390fe9a91485aaa70bacd5d0218",
+ "weekly": "Weekly_Progress_Status_of_Madinah_Projects_Till_15-10-2026.xlsx",
  "gates": "NorthWest_Cluster_Projects_life_cycle_Schedule.xlsx",
- "built": "2026-10-14T05:52:38Z",
- "reportDate": "2026-10-08",
- "projects": 76
+ "built": "2026-10-18T10:54:45Z",
+ "reportDate": "2026-10-15",
+ "projects": 76,
+ "ignored": [
+  "NorttWest_Cluster_Projects_life_cycle_Schedule.xlsx"
+ ]
 }
