@@ -14,7 +14,7 @@ const adLive = po => PROJECTS.find(p => p.po === po);
 const adShort = (s, n) => s.length > n ? s.slice(0, n - 1).trim() + '…' : s;
 function adBar(cls, en, ar, n, max, val, extra){
   const w = n ? Math.max(4, Math.round(n / max * 100)) : 0;
-  return `<div class="brow static ${cls}" role="img" aria-label="${en}: ${n}${val != null ? ', ' + nf(val) + ' million SAR' : ''}"><div class="btop"><span class="bl"><b>${en}</b><small>${ar}</small>${val != null ? `<small class="bv">${nf(val)} M SAR</small>` : ''}</span><span class="bn"><b>${n}</b></span></div><div class="btrack"><i style="width:${w}%"></i></div></div>`;
+  return `<div class="brow static ${cls}" role="img" aria-label="${en}: ${n}${val != null ? ', ' + nf(val) + ' million SAR' : ''}"><div class="btop"><span class="bl"><b dir="rtl">${ar}</b><small>${en}</small>${val != null ? `<small class="bv">${nf(val)} M SAR</small>` : ''}</span><span class="bn"><b>${n}</b></span></div><div class="btrack"><i style="width:${w}%"></i></div></div>`;
 }
 function adChip(po){                                                       // a linked project that IS in the weekly report -> opens its control card
   const p = adLive(po); if(!p) return '';
@@ -49,24 +49,24 @@ function adRow(g, r){
 }
 function addAdhocTab(){
   const A = ADHOC.A, B = ADHOC.B, C = ADHOC.C, S = ADHOC.summary, total = A.length + B.length + C.length, totalVal = S.delivered.value + S.underImpl.value + S.ops.value;
-  const card = repCard('Operating Status', 'حالة تشغيل المشاريع', `Projects not fully benefited from · ad-hoc report of ${fmtDate(ADHOC.date)} (deck slides 12–19) · linked projects open their control cards`);
+  const card = repCard('حالة تشغيل المشاريع', 'Operating Status', `<span dir="rtl">مشاريع غير مستفاد منها بالكامل · تقرير مخصص بتاريخ ${fmtDate(ADHOC.date)} (الشرائح 12–19)</span><br><small>Projects not fully benefited from · ad-hoc report of ${fmtDate(ADHOC.date)} (deck slides 12–19) · linked projects open their control cards</small>`);
   const cat = k => A.filter(r => k === 'ongoing' ? (r.cat === 'ongoing' || r.cat === 'ongoing_future') : r.cat === k).length, mx = Math.max(...AD_CATS.map(c => cat(c[0])));
-  const sec = (en, ar, inner) => `<div class="pfsec"><div class="sh"><b>${en}</b><small>${ar}</small></div>${inner}</div>`;
-  const tiles = arr => `<div class="grid g2">${arr.map(t => tile({v: t.v, big: true, cls: t.cls || '', l: [t.en, t.ar]})).join('')}</div>`;
+  const sec = (en, ar, inner) => `<div class="pfsec"><div class="sh"><b dir="rtl">${ar}</b><small>${en}</small></div>${inner}</div>`;
+  const tiles = arr => `<div class="grid g2">${arr.map(t => tile({v: t.v, big: true, cls: t.cls || '', l: [t.ar, t.en]})).join('')}</div>`;
   const u = (n, val) => `${n}<span class="u">${val == null ? '' : nf(val) + ' M SAR'}</span>`;
-  const list = g => `<details class="adgrp" id="adg-${g}" open><summary><span class="sh"><b>${AD_GROUPS[g].en}</b><small>${AD_GROUPS[g].ar}</small></span><span class="adcount">${{A: A, B: B, C: C}[g].length}</span></summary>${{A: A, B: B, C: C}[g].map(r => adRow(g, r)).join('')}</details>`;
+  const list = g => `<details class="adgrp" id="adg-${g}" open><summary><span class="sh"><b dir="rtl">${AD_GROUPS[g].ar}</b><small>${AD_GROUPS[g].en}</small></span><span class="adcount">${{A: A, B: B, C: C}[g].length}</span></summary>${{A: A, B: B, C: C}[g].map(r => adRow(g, r)).join('')}</details>`;
   card.querySelector('.rbody').innerHTML =
-    `<div class="totalbox"><span class="tn">${total}</span><span class="tt"><b>Projects not fully benefited from</b><small>مشاريع غير مستفاد منها بالكامل</small><small class="bv">${nf(totalVal)} M SAR in total</small></span></div>` +
+    `<div class="totalbox"><span class="tn">${total}</span><span class="tt"><b dir="rtl">مشاريع غير مستفاد منها بالكامل</b><small>Projects not fully benefited from</small><small class="bv">${nf(totalVal)} M SAR in total</small></span></div>` +
     ['A', 'B', 'C'].map(g => { const n = {A: A, B: B, C: C}[g].length, v = {A: S.delivered.value, B: S.underImpl.value, C: S.ops.value}[g];
-      return `<button class="brow ${AD_GROUPS[g].cls}" data-grp="${g}" type="button" aria-label="${AD_GROUPS[g].en}: ${n} projects"><div class="btop"><span class="bl"><b>${AD_GROUPS[g].en}</b><small>${AD_GROUPS[g].ar}</small><small class="bv">${nf(v)} M SAR</small></span><span class="bn"><b>${n}</b></span></div><div class="btrack"><i style="width:${Math.max(4, Math.round(n / 16 * 100))}%"></i></div></button>`; }).join('') +
-    `<div class="bhint">Tap a bar to jump to its project list.</div>` +
+      return `<button class="brow ${AD_GROUPS[g].cls}" data-grp="${g}" type="button" aria-label="${AD_GROUPS[g].en}: ${n} projects"><div class="btop"><span class="bl"><b dir="rtl">${AD_GROUPS[g].ar}</b><small>${AD_GROUPS[g].en}</small><small class="bv">${nf(v)} M SAR</small></span><span class="bn"><b>${n}</b></span></div><div class="btrack"><i style="width:${Math.max(4, Math.round(n / 16 * 100))}%"></i></div></button>`; }).join('') +
+    `<div class="bhint"><span dir="rtl">اضغط على الشريط للانتقال إلى قائمة المشاريع</span><br><small>Tap a bar to jump to its project list.</small></div>` +
     sec('Delivered projects — ' + A.length, 'المشاريع المسلّمة', tiles([{v: u(S.delivered.notOp[0], S.delivered.notOp[1]), cls: 'bad', en: 'Not in service', ar: 'غير مشغّلة'}, {v: u(S.delivered.partOp[0], S.delivered.partOp[1]), cls: 'warn', en: 'Partly in service', ar: 'مشغّلة جزئياً'},
       {v: u(S.delivered.sewer[0], S.delivered.sewer[1]), cls: 'v-blue', en: 'Sewer', ar: 'صرف صحي'}, {v: u(S.delivered.water[0], S.delivered.water[1]), cls: 'v-blue', en: 'Water', ar: 'مياه'}]) +
       adBar('c-k3', 'Madinah', 'المدينة المنورة', S.delivered.madinah[0], 9, S.delivered.madinah[1]) + adBar('c-k1', 'Tabuk', 'تبوك', S.delivered.tabuk[0], 9, S.delivered.tabuk[1]) +
-      `<div class="adsub">Why they cannot be used yet</div>` + AD_CATS.filter(c => cat(c[0])).map(c => adBar(c[3], c[1], c[2], cat(c[0]), mx)).join('')) +
+      `<div class="adsub"><span dir="rtl">أسباب عدم الاستفادة حتى الآن</span><small>Why they cannot be used yet</small></div>` + AD_CATS.filter(c => cat(c[0])).map(c => adBar(c[3], c[1], c[2], cat(c[0]), mx)).join('')) +
     sec('Under implementation — ' + B.length, 'تحت التنفيذ', tiles([{v: u(S.underImpl.noOpOnFinish[0], S.underImpl.noOpOnFinish[1]), cls: 'bad', en: 'Cannot operate on completion', ar: 'لن تُشغّل فور الانتهاء'}, {v: u(S.underImpl.partOnFinish[0], S.underImpl.partOnFinish[1]), cls: 'warn', en: 'Partly operates on completion', ar: 'تُشغّل جزئياً'},
       {v: u(S.underImpl.madinah[0], S.underImpl.madinah[1]), cls: 'v-blue', en: 'Madinah', ar: 'المدينة المنورة'}, {v: u(S.underImpl.tabuk[0], S.underImpl.tabuk[1]), cls: 'v-blue', en: 'Tabuk', ar: 'تبوك'}]) +
-      `<div class="adsub">Live status of these projects (weekly file)</div>` + ['ahead', 'ontrack', 'delay', 'trouble'].map(k => ({k, n: B.filter(r => adLive(r.po).sk === k).length})).filter(x => x.n).map(x => adBar('c-' + x.k, ST[x.k].en, ST[x.k].ar, x.n, 2)).join('')) +
+      `<div class="adsub"><span dir="rtl">الحالة الحالية لهذه المشاريع (التقرير الأسبوعي)</span><small>Live status of these projects (weekly file)</small></div>` + ['ahead', 'ontrack', 'delay', 'trouble'].map(k => ({k, n: B.filter(r => adLive(r.po).sk === k).length})).filter(x => x.n).map(x => adBar('c-' + x.k, ST[x.k].en, ST[x.k].ar, x.n, 2)).join('')) +
     sec('From Operations — ' + C.length, 'من إدارة التشغيل', tiles([{v: u(S.ops.water[0], S.ops.water[1]), cls: 'v-blue', en: 'Water', ar: 'مياه'}, {v: u(S.ops.sewer[0], S.ops.sewer[1]), cls: 'v-blue', en: 'Sewer', ar: 'صرف صحي'}, {v: u(S.ops.madinah[0], S.ops.madinah[1]), en: 'Madinah', ar: 'المدينة المنورة'}, {v: u(S.ops.tabuk[0], null), en: 'Tabuk', ar: 'تبوك'}])) +
     `<div class="adlist">${list('A')}${list('B')}${list('C')}</div>` +
     `<div class="rrule">Figures are those of the deck (slide 12), cross-checked against its tables. Linked projects that appear in the weekly report show their live status; projects marked “future / tender stage” are not in the weekly report and have no control card.</div>`;
