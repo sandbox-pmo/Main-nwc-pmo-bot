@@ -121,3 +121,17 @@ details.gdist{direction:ltr; text-align:left;} .gdist .gd{display:flex; gap:9px;
 .adtitle{display:flex; flex-direction:column; border-bottom:2px solid var(--line); padding-bottom:4px;} .adtitle b{font-size:14px; color:var(--text);} .adtitle small{font-size:11.5px; color:var(--muted);}
 .adwrap{display:flex; flex-direction:column; gap:6px; border-top:1px solid var(--line); padding:4px 10px 8px;} .adwrap:first-of-type{border-top:0;}
 .adwrap .adrow{border:0; padding:0;}
+
+.adkpis{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:4px 0 10px;}
+.kpi{display:flex; flex-direction:column; gap:4px; padding:10px; border-radius:12px; border:1px solid var(--line); background:var(--surface); border-top:4px solid var(--accent);}
+.kpi.k1{border-top-color:#E5484D;} .kpi.k2{border-top-color:#C9A96A;} .kpi.k3{border-top-color:#F5A524;} .kpi.k4{border-top-color:#13A89E;}
+.kv{font-size:24px; font-weight:800; line-height:1.1; color:var(--text);} .kl{display:flex; flex-direction:column; gap:1px;} .kl b{font-size:12px; color:var(--text);} .kl small{font-size:10.5px; color:var(--muted);} .kl .ks{color:var(--text);}
+.hubs{display:flex; flex-direction:column; gap:8px;}
+.hubrow{border:1px solid var(--line); border-radius:12px; background:var(--surface2); padding:8px 10px; display:flex; flex-direction:column; gap:6px;}
+.hubhead{display:flex; align-items:center; gap:10px; min-height:44px;}
+.hubn{flex-shrink:0; width:26px; height:26px; border-radius:50%; background:var(--surface); border:1px solid var(--line); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:12px; color:var(--text);}
+.hubt{display:flex; flex-direction:column; gap:2px; min-width:0; flex:1; text-align:left; direction:ltr;} .hubt b{font-size:13px; color:var(--text);} .hubt small{font-size:11px; color:var(--muted); text-align:right;}
+.hubm{display:flex; flex-wrap:wrap; gap:4px; margin-top:2px;}
+.hubc{display:flex; flex-direction:column; align-items:flex-end; flex-shrink:0;} .hubc b{font-size:20px; font-weight:800; color:var(--text); line-height:1;} .hubc small{font-size:10.5px; color:var(--muted);}
+.hubrow .adlinks{margin:0;}
+@media (max-width:340px){ .adkpis{grid-template-columns:1fr;} }

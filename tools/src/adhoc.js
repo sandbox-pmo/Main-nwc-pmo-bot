@@ -21,11 +21,17 @@ const AD_DRILL_LABEL = (key) => {
   if (g === 'cat') return AD_CAT[k].slice(0, 2);
   if (g === 'rel') return AD_REL[k];
   if (g === 'type') return ['تعذر التشغيل أو الاستفادة بسبب غياب المشروع المرتبط', 'Use or commissioning blocked by a missing linked project'];
+  if (g === 'hub') return [`يعيق مشاريع أخرى · ${k === 'NONE' ? 'بدون رمز محدد' : k}`, `Blocks other projects · ${k === 'NONE' ? 'no coded blocker' : k}`];
   if (g === 'card') return k === 'yes' ? ['لها بطاقة تحكم في التقرير الأسبوعي', 'Has a control card in the weekly report'] : ['ليس لها بطاقة في التقرير الأسبوعي', 'Not in the weekly report (no control card)'];
   return [key, key];
 };
 const adRowsAll = () => ADHOC.rows;
-function adPredicate(key){ const [g, k] = key.split('|'); if (key === 'ALL|all') return () => true; return r => AD_PRED[g](k, r); }
+const adCodesOf = r => { const c = String(r.rel || '').split(/[\s\/]+/).map(x => x.trim()).filter(x => x && x.toUpperCase() !== 'NA' && x !== '-'); return c.length ? c.map(x => x.toUpperCase()) : ['NONE']; };
+const adHubs = () => { const m = {}; ADHOC.rows.forEach(r => adCodesOf(r).forEach(c => { (m[c] = m[c] || {code: c, rows: [], title: ''}).rows.push(r); if (!m[c].title && r.relTitle) m[c].title = r.relTitle; })); return Object.values(m).sort((x, y) => y.rows.length - x.rows.length || x.code.localeCompare(y.code)); };
+const adValue = rs => rs.reduce((s, r) => s + (r.value || 0), 0);
+const adValued = rs => rs.filter(r => r.value != null).length;
+const nfM = v => (v == null ? '—' : nf(v) + ' M SAR');
+function adPredicate(key){ const [g, k] = key.split('|'); if (key === 'ALL|all') return () => true; if (g === 'hub') return r => adCodesOf(r).includes(k); return r => AD_PRED[g](k, r); }
 const adLiveP = po => PROJECTS.find(p => p.po === po);
 function adChip(po){                                          // a linked project in the weekly report -> opens its control card
   const p = adLiveP(po); if (!p) return '';
@@ -54,16 +60,28 @@ function adDrillHtml(key){
 }
 function adOverviewHtml(){
   const R = ADHOC.rows, n = R.length, cnt = pred => R.filter(pred).length, mx = Math.max(...AD_CAT_ORDER.map(k => cnt(r => r.cat === k)));
+  const hubs = adHubs(), coded = hubs.filter(h => h.code !== 'NONE'), top = coded.slice(0, 6), none = hubs.find(h => h.code === 'NONE');
+  const totalVal = adValue(R), valued = adValued(R), withCard = cnt(r => r.po || r.relPo);
   const sec = (en, ar, inner) => `<div class="pfsec"><div class="sh"><b dir="rtl">${ar}</b><small>${en}</small></div>${inner}</div>`;
-  const tile2 = (key, v, cls, ar, en) => adDrillBtn(key, tile({v, big: true, cls, l: [ar, en]}));
-  return adDrillBtn('ALL|all', `<div class="totalbox"><span class="tn">${n}</span><span class="tt"><b dir="rtl">مشاريع مرتبطة بمشاريع أخرى</b><small>Linked projects · linkage register ${fmtDate(ADHOC.date)}</small></div></div>`) +
-    AD_CAT_ORDER.map(k => adBar2(AD_CAT[k][2], AD_CAT[k][0], AD_CAT[k][1], cnt(r => r.cat === k), mx, 'cat|' + k)).join('') +
-    `<div class="bhint"><span dir="rtl">اضغط على أي شريط أو رقم لعرض المشاريع</span><br><small>Tap any bar or number to see its projects.</small></div>` +
-    sec('Direction of the link', 'اتجاه الارتباط', '<div class="grid g2">' +
-      ['Downstream', 'Upstream', 'Both', 'None'].map(k => tile2('rel|' + k, cnt(r => r.relation === k), k === 'None' ? '' : 'v-blue', AD_REL[k][0], AD_REL[k][1])).join('') + '</div>') +
-    sec('Use and impact', 'الاستفادة والأثر', '<div class="grid g2">' + tile2('type|impact', cnt(r => r.type || r.impact), 'bad', 'تعذر التشغيل أو الاستفادة', 'Use or commissioning blocked') +
-      tile2('card|yes', cnt(r => r.po || r.relPo), 'v-blue', 'لها بطاقة تحكم', 'With a control card') + '</div>') +
-    `<div class="rrule">Source: linkage register (28 projects). Categories follow the status of the linked project. Tap any bar or number to open its projects.</div>`;
+  const kpi = (key, big, ar, en, sub, cls) => `<button type="button" class="adtb kpi ${cls || ''}" data-drill="${key}" aria-label="${en}: ${big}"><span class="kv">${big}</span><span class="kl"><b dir="rtl">${ar}</b><small>${en}</small>${sub ? `<small class="ks">${sub}</small>` : ''}</span></button>`;
+  const hubRow = (h, i) => {
+    const cats = [...new Set(h.rows.map(r => r.cat))].map(k => `<span class="adpill ${AD_CAT[k][2]}">${AD_CAT[k][0]}</span>`).join('');
+    const card = (() => { const r = h.rows.find(x => x.relPo); return r ? adChip(r.relPo) : ''; })();
+    const val = adValue(h.rows);
+    return `<div class="hubrow"><button type="button" class="adtb hubhead" data-drill="hub|${h.code}"><span class="hubn">${i + 1}</span><span class="hubt"><b>${h.code}</b><small dir="rtl">${esc(adShort(h.title || '', 60))}</small><span class="hubm">${cats}</span></span><span class="hubc"><b>${h.rows.length}</b><small>${h.rows.length > 1 ? 'projects' : 'project'}</small>${val ? `<small class="bv">${nf(val)} M SAR</small>` : ''}</span></button>${card ? `<div class="adlinks">${card}</div>` : ''}</div>`;
+  };
+  return `<div class="adkpis">` +
+      kpi('ALL|all', n, 'مشاريع لم يُستفد منها', 'Not benefited from', `${valued} of ${n} valued`, 'k1') +
+      kpi('ALL|all', nfM(totalVal), 'القيمة المعروفة', 'Known value at stake', 'from deck tables', 'k2') +
+      kpi('cat|tender', cnt(r => r.cat === 'tender'), 'مرتبطة بمشاريع تحت الطرح', 'Waiting on a project under tender', `${Math.round(cnt(r => r.cat === 'tender') / n * 100)}% of the total`, 'k3') +
+      kpi('card|yes', withCard, 'لها بطاقة في التقرير', 'With a control card', `${n - withCard} not in the weekly report`, 'k4') + `</div>` +
+    sec('Projects that hold up the most others', 'أكثر المشاريع التي تعيق غيرها', `<div class="hubs">${top.map(hubRow).join('')}</div>` +
+      `<div class="rrule">${coded.length} blocking projects in total. Tap a project to see the projects it holds up. ${none ? `${none.rows.length} projects have no coded blocker in the register, so their link is described in text only.` : ''}</div>`) +
+    sec('Status of the blocking projects', 'حالة المشاريع المُعيقة', AD_CAT_ORDER.map(k => adBar2(AD_CAT[k][2], AD_CAT[k][0], AD_CAT[k][1], cnt(r => r.cat === k), mx, 'cat|' + k)).join('')) +
+    sec('Direction and impact', 'اتجاه الارتباط والأثر', '<div class="grid g2">' +
+      ['Downstream', 'Upstream', 'Both', 'None'].map(k => adDrillBtn('rel|' + k, tile({v: cnt(r => r.relation === k), big: true, cls: k === 'None' ? '' : 'v-blue', l: [AD_REL[k][0], AD_REL[k][1]]}))).join('') +
+      adDrillBtn('type|impact', tile({v: cnt(r => r.type || r.impact), big: true, cls: 'bad', l: ['تعذر التشغيل أو الاستفادة', 'Use or commissioning blocked']})) + '</div>') +
+    `<div class="rrule">Source: linkage register (28 projects) with values from the Ad-Hoc deck where the project appears there. Values are a minimum, not a total.</div>`;
 }
 function paintAdhoc(card, key){
   card.querySelector('.rbody').innerHTML = key ? adDrillHtml(key) : adOverviewHtml();
