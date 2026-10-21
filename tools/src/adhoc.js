@@ -3,11 +3,12 @@
    Operating Status - linkage register (new breakdown). Source: the "ارتباطات المشاريع" workbook (28 linked projects).
    Every bar and number drills down to its project list; each project with a control card links to it.
    ===================================================================== */
-const AD_CAT_ORDER = ['tender', 'construction', 'future', 'external', 'transferred'];
+const AD_CAT_ORDER = ['tender', 'construction', 'future', 'strategic', 'external', 'transferred'];
 const AD_CAT = {
   tender: ['مرتبط بمشروع تحت الطرح', 'Linked to a project under tender', 'c-k1'],
   construction: ['مرتبط بمشروع تحت التنفيذ', 'Linked to a project under construction', 'c-k2'],
   future: ['مرتبط بمشروع مستقبلي', 'Linked to a future project', 'c-k4'],
+  strategic: ['مرتبط بمشروع مستقبلي مدرج ضمن الاستراتيجية', 'Linked to a future project included in the strategy', 'c-k2'],
   external: ['مرتبط بمشروع مستقبلي لدى جهة خارجية', 'Linked to a future project of an external party', 'c-k5'],
   transferred: ['نُقل إلى جهة أخرى', 'Transferred to another entity', 'c-k3'],
 };
