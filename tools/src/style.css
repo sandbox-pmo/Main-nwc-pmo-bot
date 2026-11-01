@@ -330,3 +330,10 @@ html.standalone .phone{max-width:520px;}
   .quickrow, .voicebar, .inputbar{ flex:0 0 auto; }
   .voicebar{ padding-top:4px; padding-bottom:4px; }
 }
+
+/* iPhone: any text field at 16px or larger, so Safari does not zoom the page when it is tapped */
+input, textarea, select { font-size:16px !important; }
+/* the app fits the visible area, including when the on-screen keyboard is open */
+@media (max-width:719px){
+  .phone{ height:var(--app-h, 100vh) !important; height:var(--app-h, 100dvh) !important; }
+}

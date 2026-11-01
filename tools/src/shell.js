@@ -133,3 +133,13 @@ if(popupMode()) setTimeout(() => { try { $('inp').focus({preventScroll:true}); }
 
 /* report date shown in the header / start page comes from the loaded weekly file */
 document.querySelectorAll('[data-rd]').forEach(e => { e.textContent = REPORT_DATE; });
+
+/* phones: the app's height follows the visible screen (the keyboard shrinks it instead of hiding the input) */
+function fitAppToScreen(){
+  const h = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  document.documentElement.style.setProperty('--app-h', Math.round(h) + 'px');
+}
+fitAppToScreen();
+window.addEventListener('resize', fitAppToScreen);
+if(window.visualViewport){ window.visualViewport.addEventListener('resize', fitAppToScreen); window.visualViewport.addEventListener('scroll', fitAppToScreen); }
+document.addEventListener('focusin', e => { if(e.target && e.target.matches && e.target.matches('input, textarea')){ setTimeout(() => { const t = document.querySelector('.thread'); if(t) t.scrollTop = t.scrollHeight; window.scrollTo(0, 0); }, 300); } });
