@@ -354,6 +354,8 @@ const CONSULTANTS = [
   {key: 'Dorsch', en: 'Dorsch', words: ['dorsch', 'dorch', 'dorsh', 'دورش', 'دورتش', 'دورس']},
 ];
 const CONS_FILLER = new Set(['projects','project','consultant','consultants','the','of','by','for','show','list','all','me','give','what','which','are','is','in','with','and','or','pls','please','مشاريع','مشروع','استشاري','الاستشاري','الاستشارى','استشارى','من','عند','لدى','كل','جميع','عرض','اعرض','ما','هي','في','مع','و','او','أو']);
+const ASST_WEEK = ['week','weeks','wk','wks','أسبوع','اسبوع','أسابيع','اسابيع','اسبوعين'];
+const ASST_DAY = ['day','days','يوم','أيام','ايام','يوما'];
 const ASST_SGR = ['sgr','sgrs','gate','gates','stage','review','بوابه','بوابة','بوابات','مراجعه','مراجعة','مراحل'];
 function isArabic(s){ return /[\u0600-\u06FF]/.test(String(s || '')); }
 function nearWord(t, words){                                  // closest word for a typed token, with a tolerance that grows with length
@@ -367,8 +369,16 @@ function routeAssist(q){
   const toks = nrm(q).split(/[\s,?؟!.]+/).filter(Boolean); if(!toks.length) return null;
   const ar = isArabic(q);
   /* SGR within N days: "what will be the projects to reach SGR in the next 15 days?" */
-  const num = toks.map(t => /^\d{1,3}$/.test(t) ? +t : null).find(x => x && x > 0 && x <= 365);
-  if(num && toks.some(t => nearWord(t, ASST_SGR).w)) return {type:'report', view:'sgrdays', arg:num};
+  const ni = toks.findIndex(t => /^\d{1,3}$/.test(t) && +t > 0 && +t <= 52);
+  if(ni >= 0 && toks.some(t => nearWord(t, ASST_SGR).w)){
+    const n = +toks[ni], unit = [toks[ni + 1], toks[ni - 1]].find(t => t && (ASST_WEEK.includes(t) || ASST_DAY.includes(t)));
+    if(unit && ASST_WEEK.includes(unit)) return {type:'report', view:'sgrdays', arg:{days: n * 7, label: n + (n === 1 ? ' week' : ' weeks')}};
+    if(unit && ASST_DAY.includes(unit)) return {type:'report', view:'sgrdays', arg:{days: n, label: n + (n === 1 ? ' day' : ' days')}};
+    /* no unit given: do not guess between days and weeks */
+    return {type:'confirm', raw:q, assist:true, options:[
+      {label: n + ' days', query: 'sgr within ' + n + ' days', r: {type:'none'}},
+      {label: n + ' weeks (' + n * 7 + ' days)', query: 'sgr within ' + n + ' weeks', r: {type:'none'}}]};
+  }
   /* consultant filter: only consultant words (typos allowed) and filler words */
   const rest = toks.filter(t => !CONS_FILLER.has(t)); if(!rest.length) return null;
   const hits = rest.map(t => { const best = CONSULTANTS.map(c => ({c, ...nearWord(t, c.words)})).filter(x => x.w).sort((a, b) => a.d - b.d); return best.length ? best : null; });
@@ -392,13 +402,14 @@ function assistOffer(qRaw){                                   // the bot cannot 
   botRow(bubble);
   bubble.querySelectorAll('.askbtn').forEach(b => b.addEventListener('click', () => handleQuery(b.dataset.q, b.textContent.trim())));
 }
-function addSgrDays(days){
+function addSgrDays(arg){
+  const days = typeof arg === 'number' ? arg : arg.days, span = typeof arg === 'number' ? days + ' days' : arg.label + ' (' + days + ' days)';
   const today = todayDate(), cutoff = addMonths(today, -SGR_STALE_MONTHS);
   const rows = PROJECTS.map(p => { const info = gateInfo(p, today); return {p, info, f: sgrFlag(info)}; })
     .filter(x => x.info.state === 'ongoing' && x.info.days <= days && x.info.days >= 0)
     .sort((a, b) => a.info.days - b.info.days || a.p.ord - b.p.ord);
-  const card = repCard('SGR within ' + days + ' days', 'مراجعة بوابات المراحل خلال ' + days + ' يوماً', `Projects whose current gate ends within ${days} days (today ${fmtDate(isoOf(today))}) · overdue gates are not shown`);
-  const ar = `<div class="sgrin-h">${rows.length} project${rows.length === 1 ? '' : 's'} within ${days} days · ${rows.length} مشروع خلال ${days} يوماً</div>`;
+  const card = repCard('SGR within ' + span, 'مراجعة بوابات المراحل خلال ' + span, `Projects whose current gate ends within ${span} (today ${fmtDate(isoOf(today))}) · overdue gates are not shown`);
+  const ar = `<div class="sgrin-h">${rows.length} project${rows.length === 1 ? '' : 's'} within ${span} · ${rows.length} مشروع خلال ${span}</div>`;
   const list = rows.length ? rows.map(x => `<details class="srow sg-${x.f.k}"><summary><span class="srow-h">${flagDot(x.f)}<span class="rr-name">${esc(x.p.name)}</span></span><span class="rr-meta"><b>PO ${x.p.po}</b><span>${x.p.areaEn}</span></span><span class="rr-line"><b>${x.f.label}</b> — ${x.f.detail}</span></summary>` +
     `<div class="sbody">${x.info.gs ? `<div class="gates">${gateRows(x.info, today)}</div>` : ''}<button class="optbtn openbtn" data-po="${x.p.po}">Open the control card</button></div></details>`).join('')
     : '<div class="rempty">No project reaches SGR within this period.</div>';
@@ -409,4 +420,4 @@ function addSgrDays(days){
 /* idle: after one minute without any action the bot says hello once */
 let assistLastAct = Date.now(), assistGreeted = false;
 ['keydown', 'click', 'touchstart', 'input'].forEach(ev => document.addEventListener(ev, () => { assistLastAct = Date.now(); assistGreeted = false; }, true));
-setInterval(() => { if(!assistGreeted && Date.now() - assistLastAct > 60000){ assistGreeted = true; addText('Hi, this is your PMO Buddy. How can I help you?\n\nمرحباً، أنا مساعدك PMO. كيف أستطيع مساعدتك؟', 'in'); } }, 5000);
+setInterval(() => { if(!assistGreeted && Date.now() - assistLastAct > 60000){ assistGreeted = true; addText('Hi, this is your PMO Buddy. How can I help you?\n\n\u2067مرحبا، أنا PMO رفيقك ، كيف أقدر أساعدك  ؟\u2069', 'in'); } }, 5000);
