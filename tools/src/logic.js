@@ -591,6 +591,18 @@ function updSection(items){
   return `<div class="sec"><div class="sh"><b>${l[0]}</b><small>${l[1]}</small></div>${note ? `<div class="subnote">${note}</div>` : ''}<div class="sb">${body}</div></div>`;
 }
 
+/* Current Technical Action: each item's date (dd/mm/yyyy in the text) is shown as a chip; newest first; collapsed behind "Show More" */
+const TECH_DATE = /(\d{1,2})\s*[\/\-]\s*(\d{1,2})\s*[\/\-]\s*(\d{4})/g;
+function itemIsoDate(t){ let best = null; for(const m of String(t).matchAll(TECH_DATE)){ const d = new Date(+m[3], +m[2] - 1, +m[1]); if(!isNaN(d) && (!best || d > best)) best = d; } return best ? isoOf(best) : null; }
+function techSection(items){
+  const own = items.map(itemIsoDate); let last = null; const eff = own.map(o => (last = o || last));
+  let nxt = null; for(let i = eff.length - 1; i >= 0; i--){ if(eff[i] == null) eff[i] = nxt; else nxt = eff[i]; }
+  const order = items.map((t, i) => i).sort((a, b) => ((eff[b] || '') > (eff[a] || '') ? 1 : (eff[b] || '') < (eff[a] || '') ? -1 : a - b));
+  const li = (i, k) => `<li><span class="n">${k + 1}</span><span class="ut">${own[i] ? `<span class="dchip">${fmtDate(own[i])}</span>` : ''}${esc(items[i])}</span></li>`;
+  const body = !items.length ? '<p class="none">—</p>' : items.length === 1 ? `<p>${own[0] ? `<span class="dchip">${fmtDate(own[0])}</span>` : ''}${esc(items[0])}</p>` : '<ol>' + order.map((i, k) => li(i, k)).join('') + '</ol>';
+  return `<div class="sec tech"><div class="sh"><b>${LBL.tech[0]}</b><small>${LBL.tech[1]}</small></div>` +
+    `<button class="optbtn techbtn" type="button" aria-expanded="false">Show More ▾</button><div class="techbody" hidden>${items.length > 1 ? '<div class="subnote">Newest first</div>' : ''}${body}</div></div>`;
+}
 function cardHtml(p){
   const s = ST[p.sk];
   const zc = p.zero>=3 ? 'bad' : p.zero>=1 ? 'warn' : '';
@@ -623,7 +635,7 @@ function cardHtml(p){
       <div class="dtile"><div class="dv">${fmtDate(p.end)}</div><div class="dl">${LBL.end[0]}</div><div class="da">${LBL.end[1]}</div></div>
     </div>
     <div class="grid">${tiles}</div>
-    ${section(LBL.mgmt, p.mgmt)}${updSection(p.upd)}${section(LBL.tech, p.tech)}`;
+    ${section(LBL.mgmt, p.mgmt)}${updSection(p.upd)}${techSection(p.tech)}`;
 }
 
 function addCard(p){
@@ -636,6 +648,10 @@ function addCard(p){
     const open = btn.previousElementSibling.classList.toggle('open');
     btn.textContent = open ? 'Show less ▴' : 'Show more ▾';
     btn.setAttribute('aria-expanded', open);
+  }));
+  card.querySelectorAll('.techbtn').forEach(btn => btn.addEventListener('click', () => {
+    const box = btn.nextElementSibling, open = box.hidden;
+    box.hidden = !open; btn.textContent = open ? 'Show Less ▴' : 'Show More ▾'; btn.setAttribute('aria-expanded', open);
   }));
   card.querySelectorAll('.olderbtn').forEach(btn => btn.addEventListener('click', () => {
     const box = btn.previousElementSibling, open = box.hidden;       // hidden -> opening
@@ -781,7 +797,7 @@ function respond(r, qRaw){
       addText(`${corr(r)}No projects match *${r.label}* in this report.${r.hasFilter ? '\nTip: try removing one filter.' : ''}`, 'in');
       speakResponse(`No projects match ${r.label}.`);
     } else {
-      addText(`I couldn't find a project for “${qRaw}”. Try a PO (e.g. 901240386), part of a project or contractor name, a status (troubled, delayed, fully suspended, on schedule, ahead), an area (Madinah, Tabuk) or “zero progress”. Type *help* for examples.`, 'in');
+      assistOffer(qRaw)
       speakResponse("I couldn't find a match. Try a PO number, a name, a status, or an area.");
     }
     return;

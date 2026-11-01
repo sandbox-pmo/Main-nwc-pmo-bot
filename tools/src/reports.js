@@ -312,6 +312,7 @@ function renderActions(card, base){                                         // t
 
 /* ---------- typed instructions that open these screens ---------- */
 function routeReport(q){
+  const asst = routeAssist(q); if(asst) return asst;
   const t = q.split(' ').filter(Boolean), has = w => t.includes(w), any = (...ws) => ws.some(has);
   const only = set => t.every(w => set.has(w) || STOP.has(w));
   if(any('sgr') || (any('gate', 'gates') && any('review', 'stage', 'reviews', 'sgr')) || (has('gates') && t.length <= 2) || only(new Set(['stage','gate','review'])) && any('gate', 'review')){
@@ -335,10 +336,77 @@ function routeReport(q){
   if(any('بيانات','البيانات','الملفات','ملفات','الملف') && any('تحديث','التحديث','رفع')) return {type:'report', view:'data'};
   return null;
 }
-const REPORT_LABEL = {adhoc:'Operating Status', sgr:'SGR — Stage Gate Review', tc:'T&C — Testing & Commissioning', trouble:'Expected Trouble', handover:'Handover', data:'Data updates'};
+const REPORT_LABEL = {sgrdays:'SGR within days', adhoc:'Operating Status', sgr:'SGR — Stage Gate Review', tc:'T&C — Testing & Commissioning', trouble:'Expected Trouble', handover:'Handover', data:'Data updates'};
 function openReport(r){
-  const lead = {adhoc:'the Operating Status dashboard (projects not fully benefited from)', sgr:'the Stage Gate Review (SGR) view', tc:'the T&C (Testing & Commissioning) list', trouble:'the projects expected to move to Trouble', handover:'the Handover view', data:'the data updates panel'}[r.view];
+  const lead = {sgrdays:'the projects reaching SGR within the period', adhoc:'the Operating Status dashboard (projects not fully benefited from)', sgr:'the Stage Gate Review (SGR) view', tc:'the T&C (Testing & Commissioning) list', trouble:'the projects expected to move to Trouble', handover:'the Handover view', data:'the data updates panel'}[r.view];
   addText(corr(r) + `Here is ${lead}:`, 'in');
-  ({adhoc:addAdhocTab, sgr:addSgrTab, tc:addTcTab, trouble:addTroubleTab, handover:addHandoverTab, data:addDataPanel})[r.view](r.arg);
-  speakResponse({adhoc:'Operating status of projects not fully benefited from.', sgr:'Stage gate review. Red projects need an SGR within a week, yellow within three weeks.', tc:'Testing and commissioning, nearest to today first.', trouble:'Projects expected to move to trouble, soonest first.', handover:'Partial initial handover and initial handover projects.', data:'Data updates.'}[r.view]);
+  ({sgrdays:addSgrDays, adhoc:addAdhocTab, sgr:addSgrTab, tc:addTcTab, trouble:addTroubleTab, handover:addHandoverTab, data:addDataPanel})[r.view](r.arg);
+  speakResponse({sgrdays:'Projects reaching stage gate review soon.', adhoc:'Operating status of projects not fully benefited from.', sgr:'Stage gate review. Red projects need an SGR within a week, yellow within three weeks.', tc:'Testing and commissioning, nearest to today first.', trouble:'Projects expected to move to trouble, soonest first.', handover:'Partial initial handover and initial handover projects.', data:'Data updates.'}[r.view]);
 }
+
+
+/* =====================================================================
+   Assistant: understands typos, consultant names (FCC / Future / فيوتشر, Dorsch / دورش), "SGR in N days",
+   asks "Do you mean" only when unsure, and offers choices when it cannot help.
+   ===================================================================== */
+const CONSULTANTS = [
+  {key: 'FCC', en: 'FCC', words: ['fcc', 'future', 'futur', 'فيوتشر', 'فيوتشير', 'فيوتر', 'فيوتشرز']},
+  {key: 'Dorsch', en: 'Dorsch', words: ['dorsch', 'dorch', 'dorsh', 'دورش', 'دورتش', 'دورس']},
+];
+const CONS_FILLER = new Set(['projects','project','consultant','consultants','the','of','by','for','show','list','all','me','give','what','which','are','is','in','with','and','or','pls','please','مشاريع','مشروع','استشاري','الاستشاري','الاستشارى','استشارى','من','عند','لدى','كل','جميع','عرض','اعرض','ما','هي','في','مع','و','او','أو']);
+const ASST_SGR = ['sgr','sgrs','gate','gates','stage','review','بوابه','بوابة','بوابات','مراجعه','مراجعة','مراحل'];
+function isArabic(s){ return /[\u0600-\u06FF]/.test(String(s || '')); }
+function nearWord(t, words){                                  // closest word for a typed token, with a tolerance that grows with length
+  let best = {d: 99, w: null};
+  for(const w of words){ const tol = t.length <= 2 ? 0 : t.length <= 4 ? 1 : 2; const d = w === t ? 0 : (t.length >= 3 && w.startsWith(t)) ? 0 : levenshtein(t, w); if(d <= tol && d < best.d) best = {d, w}; }
+  return best;
+}
+function consultantOf(p){ const c = String(p.consultant || '').toLowerCase(); if(c.includes('فيوتشر') || c.includes('fcc')) return 'FCC'; if(c.includes('دورش') || c.includes('dorsch')) return 'Dorsch'; return ''; }
+function consultantList(key){ return PROJECTS.filter(p => consultantOf(p) === key).sort((a, b) => a.ord - b.ord); }
+function routeAssist(q){
+  const toks = nrm(q).split(/[\s,?؟!.]+/).filter(Boolean); if(!toks.length) return null;
+  const ar = isArabic(q);
+  /* SGR within N days: "what will be the projects to reach SGR in the next 15 days?" */
+  const num = toks.map(t => /^\d{1,3}$/.test(t) ? +t : null).find(x => x && x > 0 && x <= 365);
+  if(num && toks.some(t => nearWord(t, ASST_SGR).w)) return {type:'report', view:'sgrdays', arg:num};
+  /* consultant filter: only consultant words (typos allowed) and filler words */
+  const rest = toks.filter(t => !CONS_FILLER.has(t)); if(!rest.length) return null;
+  const hits = rest.map(t => { const best = CONSULTANTS.map(c => ({c, ...nearWord(t, c.words)})).filter(x => x.w).sort((a, b) => a.d - b.d); return best.length ? best : null; });
+  if(hits.some(h => !h)) return null;
+  const keys = [...new Set(hits.map(h => h[0].c.key))];
+  const ambiguous = hits.some(h => h.length > 1 && h[0].d === h[1].d && h[0].c.key !== h[1].c.key);
+  if(ambiguous || keys.length > 1){
+    const opts = CONSULTANTS.map(c => ({label: (ar ? c.words.find(w => /[\u0600-\u06FF]/.test(w)) + ' — ' : '') + c.en + ' consultant', query: 'consultant ' + c.en, r: {type:'none'}}));
+    return {type:'confirm', raw:q, options:opts, assist:true};
+  }
+  const key = keys[0], list = consultantList(key);
+  if(!list.length) return null;
+  return {type:'list', list, label: `${key} consultant`, assist:true};
+}
+function assistOffer(qRaw){                                   // the bot cannot place the request: say so and offer choices
+  const ar = isArabic(qRaw);
+  const bubble = document.createElement('div'); bubble.className = 'msg in';
+  const head = ar ? `أستطيع مساعدتك في هذه المعلومات… اختر أحد الخيارات أو اكتب سؤالاً جديداً.` : `I can help you with getting this information… Please choose between these options or write a new question.`;
+  const opts = [['📊 Portfolio', 'portfolio'], ['🚦 SGR in 15 days', 'sgr in 15 days'], ['🏗 FCC projects', 'consultant FCC'], ['🏗 Dorsch projects', 'consultant Dorsch'], ['❓ Help', 'help']];
+  bubble.innerHTML = fmtMsg(head) + '<div class="optlist">' + opts.map(([l, q]) => `<button class="optbtn askbtn" data-q="${esc(q)}"><span class="on">${esc(l)}</span></button>`).join('') + '</div>' + `<span class="time">${timeNow()}</span>`;
+  botRow(bubble);
+  bubble.querySelectorAll('.askbtn').forEach(b => b.addEventListener('click', () => handleQuery(b.dataset.q, b.textContent.trim())));
+}
+function addSgrDays(days){
+  const today = todayDate(), cutoff = addMonths(today, -SGR_STALE_MONTHS);
+  const rows = PROJECTS.map(p => { const info = gateInfo(p, today); return {p, info, f: sgrFlag(info)}; })
+    .filter(x => x.info.state === 'ongoing' && x.info.days <= days && x.info.days >= 0)
+    .sort((a, b) => a.info.days - b.info.days || a.p.ord - b.p.ord);
+  const card = repCard('SGR within ' + days + ' days', 'مراجعة بوابات المراحل خلال ' + days + ' يوماً', `Projects whose current gate ends within ${days} days (today ${fmtDate(isoOf(today))}) · overdue gates are not shown`);
+  const ar = `<div class="sgrin-h">${rows.length} project${rows.length === 1 ? '' : 's'} within ${days} days · ${rows.length} مشروع خلال ${days} يوماً</div>`;
+  const list = rows.length ? rows.map(x => `<details class="srow sg-${x.f.k}"><summary><span class="srow-h">${flagDot(x.f)}<span class="rr-name">${esc(x.p.name)}</span></span><span class="rr-meta"><b>PO ${x.p.po}</b><span>${x.p.areaEn}</span></span><span class="rr-line"><b>${x.f.label}</b> — ${x.f.detail}</span></summary>` +
+    `<div class="sbody">${x.info.gs ? `<div class="gates">${gateRows(x.info, today)}</div>` : ''}<button class="optbtn openbtn" data-po="${x.p.po}">Open the control card</button></div></details>`).join('')
+    : '<div class="rempty">No project reaches SGR within this period.</div>';
+  card.querySelector('.rbody').innerHTML = ar + '<div class="rlist">' + list + '</div>';
+  card.querySelectorAll('.openbtn').forEach(b => b.addEventListener('click', e => { e.preventDefault(); handleQuery(b.dataset.po); }));
+  finishReport(card);
+}
+/* idle: after one minute without any action the bot says hello once */
+let assistLastAct = Date.now(), assistGreeted = false;
+['keydown', 'click', 'touchstart', 'input'].forEach(ev => document.addEventListener(ev, () => { assistLastAct = Date.now(); assistGreeted = false; }, true));
+setInterval(() => { if(!assistGreeted && Date.now() - assistLastAct > 60000){ assistGreeted = true; addText('Hi, this is your PMO Buddy. How can I help you?\n\nمرحباً، أنا مساعدك PMO. كيف أستطيع مساعدتك؟', 'in'); } }, 5000);
