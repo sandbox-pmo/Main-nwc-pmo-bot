@@ -337,3 +337,17 @@ input, textarea, select { font-size:16px !important; }
 @media (max-width:719px){
   .phone{ height:var(--app-h, 100vh) !important; height:var(--app-h, 100dvh) !important; }
 }
+
+/* ---------- iPhone / phones: the app fills exactly the visible screen; compact top band; input always visible ---------- */
+@media (max-width:719px){
+  html, body{ height:auto; min-height:0; overflow:hidden; }
+  .phone{ position:fixed; top:0; left:0; right:0; bottom:0; height:auto; max-height:none; display:flex; flex-direction:column; overflow:hidden; max-width:none; }
+  .header{ height:auto; max-height:none; flex:0 0 auto; padding-top:calc(env(safe-area-inset-top,0px) + 4px); padding-bottom:4px; }
+  .header .avatar{ width:56px !important; height:56px !important; }
+  .brandstack{ width:64px; gap:3px; }
+  .brand.nwc img{ height:auto; max-height:30px; width:auto; }
+  .brand.hill{ height:20px; }
+  .brand.hill img{ height:14px; }
+  .thread{ flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+  .inputbar{ flex:0 0 auto; padding-bottom:calc(8px + env(safe-area-inset-bottom,0px)); }
+}
