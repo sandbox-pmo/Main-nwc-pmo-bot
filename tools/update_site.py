@@ -17,6 +17,8 @@ def classify(path):
     try:
         if 'Portfolio Status' in wb.sheetnames:
             return 'weekly'
+        if 'Floor Plan_Master File' in wb.sheetnames and '360 Obs' in wb.sheetnames:
+            return 'wh'
         for ws in wb.worksheets:
             if ws.sheet_state != 'visible':
                 continue
@@ -48,7 +50,7 @@ def sha(path):
 
 def candidates(drop, root):
     """{'weekly': [...], 'gates': [...]} - every recognised file in drop/, NEWEST FIRST (by when it was added to the repository)"""
-    found = {'weekly': [], 'gates': []}
+    found = {'weekly': [], 'gates': [], 'wh': []}
     for p in sorted(glob.glob(os.path.join(drop, '**', '*.xlsx'), recursive=True)):
         if os.path.basename(p).startswith('~$'):
             continue
@@ -70,7 +72,8 @@ def main():
     state_path = os.path.join(drop, '.processed.json')
     try:
         cands = candidates(drop, root)
-        missing = [k for k, v in cands.items() if not v]
+        cands.setdefault('wh', [])
+        missing = [k for k, v in cands.items() if not v and k in ('weekly', 'gates')]
         if missing:
             raise ingest.IngestError('the drop folder needs both files; missing: ' + ', '.join('weekly progress file' if m == 'weekly' else 'gates schedule file' for m in missing))
         # nothing new since the last run (same files, same code) -> nothing to do
@@ -103,7 +106,13 @@ def main():
             raise ingest.IngestError('no weekly progress file in drop/ can be read: ' + '; '.join(f"{i['file']}: {i['why']}" for i in ignored if i['kind'] == 'weekly'))
         if ignored:                                                           # (a late weekly failure is not in the notes yet: build once more with the full list)
             res = ingest.ingest(weekly, gates, repo, ignored=ignored, extra_gates=extras)
-        build_site.write_site(src, res['js'], root)
+        whjs = ''
+        for p in cands.get('wh', []):                                         # the White Helmet database (optional): newest readable one
+            try:
+                import wh as _wh; whjs = _wh.js(p)[0]; break
+            except Exception as e:
+                ignored.append({'file': os.path.basename(p), 'kind': 'wh', 'why': why(e)})
+        build_site.write_site(src, res['js'] + whjs, root)
         json.dump({'key': key, 'weekly': os.path.basename(weekly), 'gates': os.path.basename(gates), 'built': res['build']['built'], 'reportDate': res['build']['reportDate'], 'projects': res['build']['projects'],
                    'ignored': [i['file'] for i in ignored]}, open(state_path, 'w'), indent=1)
         n = res['build']['notes']

@@ -312,6 +312,7 @@ function renderActions(card, base){                                         // t
 
 /* ---------- typed instructions that open these screens ---------- */
 function routeReport(q){
+  const wh = routeWH(q); if(wh) return wh;
   const asst = routeAssist(q); if(asst) return asst;
   const t = q.split(' ').filter(Boolean), has = w => t.includes(w), any = (...ws) => ws.some(has);
   const only = set => t.every(w => set.has(w) || STOP.has(w));
@@ -336,12 +337,12 @@ function routeReport(q){
   if(any('بيانات','البيانات','الملفات','ملفات','الملف') && any('تحديث','التحديث','رفع')) return {type:'report', view:'data'};
   return null;
 }
-const REPORT_LABEL = {sgrdays:'SGR within days', adhoc:'Operating Status', sgr:'SGR — Stage Gate Review', tc:'T&C — Testing & Commissioning', trouble:'Expected Trouble', handover:'Handover', data:'Data updates'};
+const REPORT_LABEL = {wh:'White Helmet', sgrdays:'SGR within days', adhoc:'Operating Status', sgr:'SGR — Stage Gate Review', tc:'T&C — Testing & Commissioning', trouble:'Expected Trouble', handover:'Handover', data:'Data updates'};
 function openReport(r){
-  const lead = {sgrdays:'the projects reaching SGR within the period', adhoc:'the Operating Status dashboard (projects not fully benefited from)', sgr:'the Stage Gate Review (SGR) view', tc:'the T&C (Testing & Commissioning) list', trouble:'the projects expected to move to Trouble', handover:'the Handover view', data:'the data updates panel'}[r.view];
+  const lead = {wh:'the White Helmet dashboard', sgrdays:'the projects reaching SGR within the period', adhoc:'the Operating Status dashboard (projects not fully benefited from)', sgr:'the Stage Gate Review (SGR) view', tc:'the T&C (Testing & Commissioning) list', trouble:'the projects expected to move to Trouble', handover:'the Handover view', data:'the data updates panel'}[r.view];
   addText(corr(r) + `Here is ${lead}:`, 'in');
-  ({sgrdays:addSgrDays, adhoc:addAdhocTab, sgr:addSgrTab, tc:addTcTab, trouble:addTroubleTab, handover:addHandoverTab, data:addDataPanel})[r.view](r.arg);
-  speakResponse({sgrdays:'Projects reaching stage gate review soon.', adhoc:'Operating status of projects not fully benefited from.', sgr:'Stage gate review. Red projects need an SGR within a week, yellow within three weeks.', tc:'Testing and commissioning, nearest to today first.', trouble:'Projects expected to move to trouble, soonest first.', handover:'Partial initial handover and initial handover projects.', data:'Data updates.'}[r.view]);
+  ({wh:(a) => (a ? addWHSearch(a) : addWHTab()), sgrdays:addSgrDays, adhoc:addAdhocTab, sgr:addSgrTab, tc:addTcTab, trouble:addTroubleTab, handover:addHandoverTab, data:addDataPanel})[r.view](r.arg);
+  speakResponse({wh:'White Helmet reports and observations.', sgrdays:'Projects reaching stage gate review soon.', adhoc:'Operating status of projects not fully benefited from.', sgr:'Stage gate review. Red projects need an SGR within a week, yellow within three weeks.', tc:'Testing and commissioning, nearest to today first.', trouble:'Projects expected to move to trouble, soonest first.', handover:'Partial initial handover and initial handover projects.', data:'Data updates.'}[r.view]);
 }
 
 
@@ -421,3 +422,116 @@ function addSgrDays(arg){
 let assistLastAct = Date.now(), assistGreeted = false;
 ['keydown', 'click', 'touchstart', 'input'].forEach(ev => document.addEventListener(ev, () => { assistLastAct = Date.now(); assistGreeted = false; }, true));
 setInterval(() => { if(!assistGreeted && Date.now() - assistLastAct > 60000){ assistGreeted = true; addText('Hi, this is your PMO Buddy. How can I help you?\n\n\u2067مرحبا، أنا PMO رفيقك ، كيف أقدر أساعدك  ؟\u2069', 'in'); } }, 5000);
+
+/* =====================================================================
+   White Helmet tab: floor-plan reports, 360 observations, issuers, contractors, consultants, regions.
+   Data: const WH (built from the White Helmet database, dropped in the same folder as the weekly file).
+   ===================================================================== */
+const WH_WORDS = ['wh', 'white', 'helmet'];
+const WH_NO = () => (typeof WH === 'undefined' ? null : WH);
+function whKey(s){ return String(s || '').replace(/\s+/g, '').toUpperCase(); }
+function whLinks(p){                                                       // weekly project(s) this White Helmet project points to: PO first, then project number
+  const byPo = p.po ? PROJECTS.find(x => whKey(x.po) === whKey(p.po)) : null;
+  const byNo = p.pno ? PROJECTS.find(x => whKey(x.pno) === whKey(p.pno)) : null;
+  if (byPo && byNo && byPo.po !== byNo.po) return {ambiguous: true, a: byPo, b: byNo};
+  return {project: byPo || byNo || null};
+}
+function whBar(l, s, n, mx, color){
+  const w = n && mx ? Math.max(4, Math.round(n / mx * 100)) : 0;
+  return `<div class="brow"><div class="btop"><span class="bl"><b>${esc(l)}</b>${s ? `<small>${esc(s)}</small>` : ''}</span><span class="bn"><b>${n.toLocaleString('en-US')}</b></span></div><div class="btrack"><i style="width:${w}%;background:${color}"></i></div></div>`;
+}
+function whOpenBtn(p){
+  const L = whLinks(p);
+  if (L.ambiguous) return `<div class="whchoose"><div class="whq" dir="rtl">هذان الرقمان يشيران إلى مشروعين مختلفين — اختر أحدهما</div><small>These numbers point to 2 different projects. Please choose one:</small>` +
+    `<button class="optbtn whpick" data-po="${esc(L.a.po)}">PO ${esc(L.a.po)} · ${esc(L.a.name.slice(0, 40))}</button><button class="optbtn whpick" data-po="${esc(L.b.po)}">Project ${esc(L.b.pno)} · ${esc(L.b.name.slice(0, 40))}</button></div>`;
+  return L.project ? `<button class="optbtn openbtn" data-po="${esc(L.project.po)}">Open the control card</button>` : `<small class="none">Not in the weekly report — no control card</small>`;
+}
+function whPanel(key){
+  const W = WH_NO(), k = W.kpi;
+  if (key === 'obsProj') {
+    const top = W.projects.filter(p => p.obs > 0).sort((a, b) => b.obs - a.obs).slice(0, 5), mx = top[0] ? top[0].obs : 1;
+    return `<div class="rgroup">Top 5 Projects with Observations · أعلى 5 مشاريع بالملاحظات</div>` + top.map(p => whBar(p.name.slice(0, 60), `PO ${p.po} · ${p.pno}`, p.obs, mx, '#3B8FEA')).join('');
+  }
+  if (key === 'obsIss') {
+    const top = W.issuers.filter(x => x.obs > 0).sort((a, b) => b.obs - a.obs).slice(0, 5), mx = top[0] ? top[0].obs : 1;
+    return `<div class="rgroup">Top 5 Observations Issuers · أعلى 5 مصدري الملاحظات</div>` + top.map(x => whBar(x.name, `${x.projects.length} projects`, x.obs, mx, '#3B8FEA')).join('');
+  }
+  if (key === 'repIss') {
+    const top = W.issuers.filter(x => x.rep > 0).sort((a, b) => b.rep - a.rep).slice(0, 5), mx = top[0] ? top[0].rep : 1;
+    return `<div class="rgroup">Top 5 Reports Issuers · أعلى 5 ناشري التقارير</div>` + top.map(x => whBar(x.name, `${x.projects.length} projects`, x.rep, mx, '#8B6FD6')).join('');
+  }
+  if (key === 'contr') {
+    const top = W.contractors.slice(0, 5), mx = top[0] ? top[0].reports : 1;
+    return `<div class="rgroup">Top 5 Contractors · أعلى 5 مقاولين</div>` + top.map(c => whBar(c.name.slice(0, 48), `${c.projects} projects`, c.reports, mx, '#2E8B57')).join('');
+  }
+  if (key === 'cons') {
+    const mx = W.consultants[0] ? W.consultants[0].reports : 1;
+    return `<div class="rgroup">Sort by Consultant · حسب الاستشاري</div>` + W.consultants.map(c => whBar(c.name, `${c.projects} projects`, c.reports, mx, '#7A5517')).join('');
+  }
+  if (key === 'region') {
+    const mx = W.regions[0] ? W.regions[0].reports : 1;
+    return `<div class="rgroup">Sort by Region · حسب المنطقة</div>` + W.regions.map(r => whBar(r.name === 'Madinah' ? 'Madinah · المدينة المنورة' : r.name === 'Tabuk' ? 'Tabuk · تبوك' : r.name, `${r.projects} projects · ${r.obs} observations`, r.reports, mx, '#0E6286')).join('');
+  }
+  return '';
+}
+function whSearch(q){                                                      // project name, PO, project number, consultant, contractor, employee names
+  const W = WH_NO(); if (!W) return {projects: [], issuers: []};
+  const qt = adTokens(q).filter(t => !WH_WORDS.includes(t) && !['helmet','الخوذه','هيلمت'].includes(t)); if (!qt.length) return {projects: [], issuers: []};
+  const issuerHits = W.issuers.filter(x => qt.every(t => adTokOK(t, adTokens(x.name))));
+  const issuerProjects = new Set(issuerHits.flatMap(x => x.projects));
+  const projects = W.projects.map(p => {
+    const toks = adTokens([p.name, p.po, p.pno, p.contractor, p.consultant, p.region, ...p.emps].join(' '));
+    const hit = qt.every(t => adTokOK(t, toks) || (issuerProjects.has(p.idx) && issuerHits.some(x => adTokOK(t, adTokens(x.name)))));
+    return hit ? p : null;
+  }).filter(Boolean);
+  return {projects: projects.slice(0, 15), total: projects.length, issuers: issuerHits.slice(0, 5)};
+}
+function whResultsHtml(q){
+  const r = whSearch(q), W = WH_NO();
+  const head = `<div class="adsres-h"><b dir="rtl">نتائج تقارير وايت هيلمت</b><small>White Helmet search · ${r.total || 0} project(s) for “${esc(q)}”</small></div>`;
+  const emp = r.issuers.length ? `<div class="rrule">Employees: ${r.issuers.map(x => `<b>${esc(x.name)}</b> (${x.obs} obs · ${x.rep} reports)`).join(' · ')}</div>` : '';
+  const rows = r.projects.length ? r.projects.map(p => `<div class="wh-row"><div class="rr-name" dir="rtl">${esc(p.name)}</div>` +
+      `<div class="rr-meta"><b>PO ${esc(p.po)}</b><span>Project ${esc(p.pno)}</span><span>${esc(p.region)}</span><span>${esc(p.consultant)}</span></div>` +
+      `<div class="rr-line"><b>${p.reports}</b> reports · <b>${p.obs}</b> observations · ${esc(p.contractor)}</div>${whOpenBtn(p)}</div>`).join('')
+    : '<div class="rempty">No White Helmet project matches. Try a project name, the PO or project number, a consultant (FCC, Dorsch), a contractor or an employee name.</div>';
+  return head + emp + `<div class="rlist">${rows}</div>` + (r.total > r.projects.length ? `<div class="rrule">Showing ${r.projects.length} of ${r.total}. Narrow the words to see the rest.</div>` : '');
+}
+function paintWH(card, panel, q){
+  const W = WH_NO();
+  const rb = card.querySelector('.rbody');
+  if (!W) { rb.innerHTML = '<div class="rempty">White Helmet database not loaded yet. Drop the White Helmet file in the drop folder.</div>'; return; }
+  const k = W.kpi, kpi = (v, ar, en) => `<div class="kpi"><span class="kv">${v.toLocaleString('en-US')}</span><span class="kl"><b dir="rtl">${ar}</b><small>${en}</small></span></div>`;
+  const btn = (key, label, wide) => `<button type="button" class="rpill whbtn${panel === key ? ' on' : ''}${wide ? ' wide' : ''}" data-panel="${key}" aria-pressed="${panel === key}">${esc(label)}</button>`;
+  rb.innerHTML =
+    `<div class="rrule">Floor-plan reports and 360 observations${W.asOf ? ' · database of ' + esc(W.asOf) : ''}</div>` +
+    `<div class="adkpis">${kpi(k.obs, 'الملاحظات', 'Total observations')}${kpi(k.reports, 'التقارير', 'Total reports')}${kpi(k.issuers, 'المصدرون', 'Issuers involved')}` +
+      `${kpi(k.projects, 'المشاريع', 'Projects involved')}${kpi(k.contractors, 'المقاولون', 'Contractors involved')}${kpi(k.floors, 'مخططات الطوابق', 'Floor plans uploaded')}</div>` +
+    `<div class="whbtns">${btn('obsProj', 'Top 5 Projects with Observations')}${btn('obsIss', 'Top 5 Observations Issuers')}${btn('repIss', 'Top 5 Reports Issuers')}${btn('contr', 'Top 5 Contractors')}${btn('cons', 'Sort by Consultant')}${btn('region', 'Sort by Region · Tabuk · Madinah', true)}</div>` +
+    `<div class="whsbox"><input type="search" class="adsearch whsearch" placeholder="WH: project, PO, consultant, contractor, employee" aria-label="Search White Helmet reports"></div>` +
+    `<div class="whpanel">${whPanel(panel || 'obsProj')}</div><div class="whres" hidden></div>`;
+  rb.querySelectorAll('.whbtn').forEach(b => b.addEventListener('click', () => paintWH(card, b.dataset.panel)));
+  const inp = rb.querySelector('.whsearch'), pan = rb.querySelector('.whpanel'), res = rb.querySelector('.whres');
+  inp.addEventListener('input', () => { const v = inp.value.trim(); if (!v) { res.hidden = true; pan.hidden = false; return; } pan.hidden = true; res.hidden = false; res.innerHTML = whResultsHtml(v); wireWHRes(res); });
+  if (q) { inp.value = q; inp.dispatchEvent(new Event('input')); }
+  wireWHRes(card);
+}
+function wireWHRes(root){
+  root.querySelectorAll('.openbtn').forEach(b => b.addEventListener('click', e => { e.preventDefault(); handleQuery(b.dataset.po); }));
+  root.querySelectorAll('.whpick').forEach(b => b.addEventListener('click', e => { e.preventDefault(); handleQuery(b.dataset.po); }));
+}
+function addWHTab(startPanel){
+  const card = repCard('White Helmet', 'وايت هيلمت', 'Floor-plan reports · 360 observations · issuers, contractors, consultants, regions');
+  paintWH(card, startPanel || 'obsProj'); finishReport(card);
+}
+function addWHSearch(q){
+  const card = repCard('White Helmet', 'وايت هيلمت', `<span dir="rtl">نتائج البحث</span> · search: ${esc(q)}`);
+  paintWH(card, 'obsProj', q); finishReport(card);
+}
+function routeWH(q){                                                       // WH / White Helmet / Helmet in the sentence
+  const t = nrm(q).split(/[\s,?؟!.]+/).filter(Boolean); if (!t.length) return null;
+  const hasWord = t.some(w => WH_WORDS.includes(w) || (w.length >= 5 && levenshtein(w, 'helmet') <= 1) || w === 'هيلمت' || w === 'الهيلمت');
+  if (!hasWord) return null;
+  const rest = t.filter(w => !WH_WORDS.includes(w) && !(w.length >= 5 && levenshtein(w, 'helmet') <= 1) && !['white','helmet','هيلمت','الهيلمت','وايت','الوايت'].includes(w));
+  if (!rest.length || /^(reports?|report|tab|dashboard|stats?|statistics|observations?|تقارير|لوحة)$/.test(rest.join(' '))) return {type:'report', view:'wh', arg:null};
+  return {type:'report', view:'wh', arg:q};
+}
