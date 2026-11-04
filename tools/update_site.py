@@ -50,7 +50,14 @@ def sha(path):
 
 def candidates(drop, root):
     """{'weekly': [...], 'gates': [...]} - every recognised file in drop/, NEWEST FIRST (by when it was added to the repository)"""
-    found = {'weekly': [], 'gates': [], 'wh': []}
+    found = {'weekly': [], 'gates': [], 'wh': [], 'mom': []}
+    for p in sorted(glob.glob(os.path.join(drop, '**', '*.docx'), recursive=True)):
+        try:
+            import docx as _docx
+            if any(any('الإجراء' in c.text for c in t.rows[0].cells) for t in _docx.Document(p).tables if t.rows):
+                found['mom'].append(p)
+        except Exception:
+            pass
     for p in sorted(glob.glob(os.path.join(drop, '**', '*.xlsx'), recursive=True)):
         if os.path.basename(p).startswith('~$'):
             continue
@@ -72,7 +79,7 @@ def main():
     state_path = os.path.join(drop, '.processed.json')
     try:
         cands = candidates(drop, root)
-        cands.setdefault('wh', [])
+        cands.setdefault('wh', []); cands.setdefault('mom', [])
         missing = [k for k, v in cands.items() if not v and k in ('weekly', 'gates')]
         if missing:
             raise ingest.IngestError('the drop folder needs both files; missing: ' + ', '.join('weekly progress file' if m == 'weekly' else 'gates schedule file' for m in missing))
@@ -112,7 +119,13 @@ def main():
                 import wh as _wh; whjs = _wh.js(p)[0]; break
             except Exception as e:
                 ignored.append({'file': os.path.basename(p), 'kind': 'wh', 'why': why(e)})
-        build_site.write_site(src, res['js'] + whjs, root)
+        momjs = ''
+        for p in cands.get('mom', []):                                        # the PMO meeting minutes (optional): newest readable one
+            try:
+                import mom as _mom; momjs = _mom.js(p)[0]; break
+            except Exception as e:
+                ignored.append({'file': os.path.basename(p), 'kind': 'mom', 'why': why(e)})
+        build_site.write_site(src, res['js'] + whjs + momjs, root)
         json.dump({'key': key, 'weekly': os.path.basename(weekly), 'gates': os.path.basename(gates), 'built': res['build']['built'], 'reportDate': res['build']['reportDate'], 'projects': res['build']['projects'],
                    'ignored': [i['file'] for i in ignored]}, open(state_path, 'w'), indent=1)
         n = res['build']['notes']

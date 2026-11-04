@@ -312,6 +312,7 @@ function renderActions(card, base){                                         // t
 
 /* ---------- typed instructions that open these screens ---------- */
 function routeReport(q){
+  const mo = routeMOM(q); if(mo) return mo;
   const wh = routeWH(q); if(wh) return wh;
   const asst = routeAssist(q); if(asst) return asst;
   const t = q.split(' ').filter(Boolean), has = w => t.includes(w), any = (...ws) => ws.some(has);
@@ -337,12 +338,12 @@ function routeReport(q){
   if(any('بيانات','البيانات','الملفات','ملفات','الملف') && any('تحديث','التحديث','رفع')) return {type:'report', view:'data'};
   return null;
 }
-const REPORT_LABEL = {wh:'White Helmet', sgrdays:'SGR within days', adhoc:'Operating Status', sgr:'SGR — Stage Gate Review', tc:'T&C — Testing & Commissioning', trouble:'Expected Trouble', handover:'Handover', data:'Data updates'};
+const REPORT_LABEL = {mom:'MOM · PMO Executive Meeting', wh:'White Helmet', sgrdays:'SGR within days', adhoc:'Operating Status', sgr:'SGR — Stage Gate Review', tc:'T&C — Testing & Commissioning', trouble:'Expected Trouble', handover:'Handover', data:'Data updates'};
 function openReport(r){
-  const lead = {wh:'the White Helmet dashboard', sgrdays:'the projects reaching SGR within the period', adhoc:'the Operating Status dashboard (projects not fully benefited from)', sgr:'the Stage Gate Review (SGR) view', tc:'the T&C (Testing & Commissioning) list', trouble:'the projects expected to move to Trouble', handover:'the Handover view', data:'the data updates panel'}[r.view];
+  const lead = {mom:'the MOM of the PMO Executive Meeting', wh:'the White Helmet dashboard', sgrdays:'the projects reaching SGR within the period', adhoc:'the Operating Status dashboard (projects not fully benefited from)', sgr:'the Stage Gate Review (SGR) view', tc:'the T&C (Testing & Commissioning) list', trouble:'the projects expected to move to Trouble', handover:'the Handover view', data:'the data updates panel'}[r.view];
   addText(corr(r) + `Here is ${lead}:`, 'in');
-  ({wh:(a) => (a ? addWHSearch(a) : addWHTab()), sgrdays:addSgrDays, adhoc:addAdhocTab, sgr:addSgrTab, tc:addTcTab, trouble:addTroubleTab, handover:addHandoverTab, data:addDataPanel})[r.view](r.arg);
-  speakResponse({wh:'White Helmet reports and observations.', sgrdays:'Projects reaching stage gate review soon.', adhoc:'Operating status of projects not fully benefited from.', sgr:'Stage gate review. Red projects need an SGR within a week, yellow within three weeks.', tc:'Testing and commissioning, nearest to today first.', trouble:'Projects expected to move to trouble, soonest first.', handover:'Partial initial handover and initial handover projects.', data:'Data updates.'}[r.view]);
+  ({mom:addMOMTab, wh:(a) => (a ? addWHSearch(a) : addWHTab()), sgrdays:addSgrDays, adhoc:addAdhocTab, sgr:addSgrTab, tc:addTcTab, trouble:addTroubleTab, handover:addHandoverTab, data:addDataPanel})[r.view](r.arg);
+  speakResponse({mom:'Minutes of the PMO executive meeting, Northwestern Cluster.', wh:'White Helmet reports and observations.', sgrdays:'Projects reaching stage gate review soon.', adhoc:'Operating status of projects not fully benefited from.', sgr:'Stage gate review. Red projects need an SGR within a week, yellow within three weeks.', tc:'Testing and commissioning, nearest to today first.', trouble:'Projects expected to move to trouble, soonest first.', handover:'Partial initial handover and initial handover projects.', data:'Data updates.'}[r.view]);
 }
 
 
@@ -534,4 +535,35 @@ function routeWH(q){                                                       // WH
   const rest = t.filter(w => !WH_WORDS.includes(w) && !(w.length >= 5 && levenshtein(w, 'helmet') <= 1) && !['white','helmet','هيلمت','الهيلمت','وايت','الوايت'].includes(w));
   if (!rest.length || /^(reports?|report|tab|dashboard|stats?|statistics|observations?|تقارير|لوحة)$/.test(rest.join(' '))) return {type:'report', view:'wh', arg:null};
   return {type:'report', view:'wh', arg:q};
+}
+
+/* =====================================================================
+   MOM: PMO Executive Meeting minutes, Northwestern Cluster highlights (yellow), updates newest first.
+   Data: const MOM (built from the minutes .docx in the drop folder).
+   ===================================================================== */
+const MOM_WORDS = ['mom', 'minutes', 'minute', 'محضر', 'المحضر'];
+function routeMOM(q){
+  const t = nrm(q).split(/[\s,?؟!.]+/).filter(Boolean);
+  if (!t.some(w => MOM_WORDS.includes(w))) return null;
+  return {type:'report', view:'mom'};
+}
+function momCardHtml(a, i){
+  const ups = a.updates, first = ups.slice(0, 3), rest = ups.slice(3);
+  const li = u => `<li><span class="momdc">${esc(u.d)}</span><span class="momt">${esc(u.t)}</span></li>`;
+  return `<div class="momcard"><div class="momah" dir="rtl">${i + 1}. ${esc(a.action)}</div>` +
+    `<div class="momkv"><span>Owner: ${esc(a.owner || '—')}</span><span>${esc(a.created)} → ${esc(a.expected)}</span></div>` +
+    `<div class="momsub">Updates · newest first</div><ol class="momlist">${first.map(li).join('')}</ol>` +
+    (rest.length ? `<div class="momrest" hidden><ol class="momlist">${rest.map(li).join('')}</ol></div><button type="button" class="optbtn mommore" aria-expanded="false">Show ${rest.length} earlier updates ▾</button>` : '') + `</div>`;
+}
+function addMOMTab(){
+  if (typeof MOM === 'undefined') { const c = repCard('MOM', 'محضر', 'Minutes not loaded yet — drop the minutes .docx in the drop folder.'); finishReport(c); return; }
+  const card = repCard('MOM · PMO Executive Meeting', 'محضر اجتماع · الاجتماع الدوري لقطاع المشاريع', `Northwestern Cluster highlights · meeting of ${esc(MOM.meeting)} · latest update ${esc(MOM.latest)}`);
+  const rb = card.querySelector('.rbody');
+  rb.innerHTML = `<div class="momhead"><b>${esc(MOM.title)}</b><b dir="rtl">${esc(MOM.titleAr)}</b></div>` +
+    `<div class="momgrid">${MOM.actions.map(momCardHtml).join('')}</div>`;
+  rb.querySelectorAll('.mommore').forEach(btn => btn.addEventListener('click', () => {
+    const box = btn.previousElementSibling, open = box.hidden; box.hidden = !open;
+    btn.textContent = open ? 'Show less ▴' : btn.textContent.replace('Show', 'Show').replace(/Show.*/, `Show ${box.querySelectorAll('li').length} earlier updates ▾`); btn.setAttribute('aria-expanded', open);
+  }));
+  finishReport(card);
 }
