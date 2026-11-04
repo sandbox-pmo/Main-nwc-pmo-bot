@@ -567,3 +567,5 @@ function addMOMTab(){
   }));
   finishReport(card);
 }
+
+/* build: MOM minutes read by the update job (python-docx) */
