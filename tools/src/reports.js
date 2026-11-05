@@ -697,3 +697,5 @@ function routeMeet(q){
   if (t.some(w => ['meeting','meetings','minutes','اجتماع','الاجتماع','محضر','المحضر'].includes(w)) && t.length <= 4 && !t.some(w => /^\d{9}$/.test(w))) return {type:'report', view:'meet', arg:null};
   return null;
 }
+
+/* build: meeting presentations read by the update job (python-pptx) */

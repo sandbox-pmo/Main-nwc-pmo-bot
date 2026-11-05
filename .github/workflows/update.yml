@@ -27,7 +27,7 @@ jobs:
           python-version: '3.12'
 
       - name: Install the Excel reader
-        run: pip install openpyxl python-docx
+        run: pip install openpyxl python-docx python-pptx
 
       - name: Rebuild the app from the newest files in drop/
         run: python tools/update_site.py
