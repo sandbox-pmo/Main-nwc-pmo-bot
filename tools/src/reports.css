@@ -172,3 +172,7 @@ details.gdist{direction:ltr; text-align:left;} .gdist .gd{display:flex; gap:9px;
 .opschips{display:flex; flex-wrap:wrap; gap:4px;} .opc{font-size:10.5px; font-weight:700; border-radius:999px; padding:2px 8px; border:1px solid var(--line); background:var(--surface2); color:var(--text);} .opc.c-blue{background:#E8F1FA; color:#0E3F66; border-color:#B5D0EA;} .opc.c-gold{background:#FFF1D6; color:#7A5517; border-color:#C9A96A;} .opc.c-red{background:#FDE9EC; color:#9B2C4C; border-color:#E5484D;} .opc.c-purple{background:#EEE8FA; color:#5B3FB0; border-color:#A48CE8;}
 .opsmore summary{cursor:pointer; font-size:11.5px; font-weight:700; color:var(--accent-t); min-height:32px; display:flex; align-items:center;} .opsmore .addl{margin-top:4px;}
 .opsopen{min-height:40px; font-weight:700;}
+
+.opsfilters{display:flex; flex-direction:column; gap:6px; margin:6px 0 10px;} .opsfrow{display:flex; flex-wrap:wrap; gap:6px; align-items:center;} .opsflab{font-size:11px; font-weight:700; color:var(--gold-t); min-width:96px; direction:ltr;}
+.opsf{font-size:12px; min-height:36px;} .opsf.on{background:var(--accent-soft); border-color:var(--accent); box-shadow:inset 0 0 0 1px var(--accent);}
+.opsfclear{display:flex; justify-content:space-between; align-items:center; gap:8px;} .opsreset{min-height:36px; font-size:12px;} .opsfcount{font-size:11px; color:var(--muted);}

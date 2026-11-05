@@ -736,14 +736,51 @@ function opsRowHtml(r, gi){
     `<details class="opsmore"><summary>التفاصيل · Details</summary><dl class="addl">${details}</dl></details>` +
     (link ? `<button type="button" class="optbtn openbtn opsopen" data-po="${esc(link.po)}">فتح بطاقة المشروع · Open the control card</button>` : '') + `</div></div>`;
 }
+function opsRegion(r){ const t = (r.area || '') + ' ' + (r.name || ''); if (t.includes('تبوك')) return 'Tabuk'; if (t.includes('المدينة')) return 'Madinah'; return ''; }
+function opsType(r, gi){
+  const t = (r.cls || '') + ' ' + (r.name || '');
+  if (/صرف/.test(r.cls || '') || (!r.cls && /الصرف/.test(r.name || ''))) return 'Waste';
+  if (/مياه/.test(r.cls || '') || (!r.cls && /المياه|مياه/.test(r.name || ''))) return 'Water';
+  if (/الصرف/.test(t)) return 'Waste'; if (/مياه/.test(t)) return 'Water'; return '';
+}
+function opsLinks(r, gi){                                    // linked project: Ongoing (under construction) and/or Future (future or under tender)
+  if (gi === 1) return ['Future'];                             // all five are linked to future projects (group title)
+  if (gi === 2) return [];
+  const t = (r.rcat || '') + ' ' + (r.linked || '');
+  const out = [];
+  if (/تحت التنفيذ/.test(t)) out.push('Ongoing');
+  if (/مستقبل|تم طرح|تم الطرح|لم يتم طرح|طرح/.test(t)) out.push('Future');
+  return out;
+}
 function addOpsTab(){
   if (typeof OPS === 'undefined') return addAdhocTab();
-  const tot = OPS.groups.reduce((a, g) => a + g.rows.length, 0), totVal = OPS.groups.reduce((a, g) => a + (g.totalValue || 0), 0);
-  const card = repCard('حالة تشغيل المشاريع', 'Operating Status', `Minutes slides 23–29 · ${tot} projects · ${totVal.toFixed(1)} M SAR`);
-  const groups = OPS.groups.map((g, gi) => `<details class="opsgrp"${gi === 0 ? ' open' : ''}><summary><span class="opsh"><b dir="rtl">${esc(g.title)}</b><small>${esc(g.titleEn)}</small></span><span class="opsc"><b>${g.totalCount}</b><small>${g.totalValue} M SAR</small></span></summary>` +
-    `<div class="opslist">${g.rows.map((r) => opsRowHtml(r, gi)).join('')}</div></details>`).join('');
-  card.querySelector('.rbody').innerHTML = `<div class="opstot"><div><b>${tot}</b><small>projects not fully benefited from</small></div><div><b>${totVal.toFixed(1)}</b><small>M SAR in total</small></div></div>` + groups +
-    `<div class="rrule">Source: minutes presentation, slides 23–29. Totals agree with slide 22. A project opens its card only when its name matches the weekly report clearly.</div>`;
-  card.querySelectorAll('.opsopen').forEach(b => b.addEventListener('click', e => { e.preventDefault(); handleQuery(b.dataset.po); }));
-  finishReport(card);
+  const flt = {region: new Set(), type: new Set(), link: new Set()};
+  const card = repCard('حالة تشغيل المشاريع', 'Operating Status', `Minutes slides 23–29 · ${OPS.groups.reduce((a, g) => a + g.rows.length, 0)} projects · ${OPS.groups.reduce((a, g) => a + (g.totalValue || 0), 0).toFixed(1)} M SAR`);
+  const chip = (dim, val, ar, en) => `<button type="button" class="rpill opsf" data-dim="${dim}" data-val="${val}" aria-pressed="false"><span dir="rtl">${ar}</span> · ${en}</button>`;
+  const filters = `<div class="opsfilters"><div class="opsfrow"><span class="opsflab">المنطقة · Region</span>${chip('region', 'Madinah', 'المدينة المنورة', 'Madinah')}${chip('region', 'Tabuk', 'تبوك', 'Tabuk')}</div>` +
+    `<div class="opsfrow"><span class="opsflab">النوع · Type</span>${chip('type', 'Water', 'مياه', 'Water')}${chip('type', 'Waste', 'صرف صحي', 'Waste water')}</div>` +
+    `<div class="opsfrow"><span class="opsflab">المشروع المرتبط · Linked</span>${chip('link', 'Ongoing', 'تحت التنفيذ', 'Ongoing')}${chip('link', 'Future', 'مستقبلي', 'Future')}</div>` +
+    `<div class="opsfclear"><button type="button" class="optbtn opsreset">Clear filters · مسح</button><span class="opsfcount"></span></div></div>`;
+  const pass = (gi, r) => {
+    if (flt.region.size && !flt.region.has(opsRegion(r))) return false;
+    if (flt.type.size && !flt.type.has(opsType(r, gi))) return false;
+    if (flt.link.size && !opsLinks(r, gi).some(x => flt.link.has(x))) return false;
+    return true;
+  };
+  const paint = () => {
+    const rb = card.querySelector('.rbody'), openState = [...rb.querySelectorAll('.opsgrp')].map(d => d.open);
+    let shown = 0, total = 0;
+    const groups = OPS.groups.map((g, gi) => {
+      const rows = g.rows.filter(r => pass(gi, r)); shown += rows.length; total += g.rows.length;
+      const open = openState.length ? openState[gi] : (gi !== 0);                // group 1 (16 projects) collapsed by default
+      return `<details class="opsgrp"${open ? ' open' : ''}><summary><span class="opsh"><b dir="rtl">${esc(g.title)}</b><small>${esc(g.titleEn)}</small></span><span class="opsc"><b>${rows.length}${rows.length !== g.rows.length ? ' / ' + g.rows.length : ''}</b><small>${g.totalValue} M SAR</small></span></summary>` +
+        `<div class="opslist">${rows.length ? rows.map(r => opsRowHtml(r, gi)).join('') : '<div class="rempty">لا توجد مشاريع تطابق الفلتر · No project matches</div>'}</div></details>`;
+    }).join('');
+    rb.innerHTML = filters + `<div class="opstot"><div><b>${shown}</b><small>projects shown · of ${total}</small></div><div><b>${OPS.groups.reduce((a, g) => a + (g.totalValue || 0), 0).toFixed(1)}</b><small>M SAR in total</small></div></div>` + groups +
+      `<div class="rrule">Source: minutes presentation, slides 23–29. Filters combine: each row must match every chosen filter. Group 1 starts collapsed.</div>`;
+    rb.querySelectorAll('.opsf').forEach(b => { const on = flt[b.dataset.dim].has(b.dataset.val); b.setAttribute('aria-pressed', on); b.classList.toggle('on', on); b.addEventListener('click', () => { const s = flt[b.dataset.dim]; s.has(b.dataset.val) ? s.delete(b.dataset.val) : s.add(b.dataset.val); paint(); }); });
+    rb.querySelector('.opsreset').addEventListener('click', () => { Object.values(flt).forEach(s => s.clear()); paint(); });
+    rb.querySelectorAll('.opsopen').forEach(bt => bt.addEventListener('click', e => { e.preventDefault(); handleQuery(bt.dataset.po); }));
+  };
+  paint(); finishReport(card);
 }
