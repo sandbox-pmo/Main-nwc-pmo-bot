@@ -312,6 +312,7 @@ function renderActions(card, base){                                         // t
 
 /* ---------- typed instructions that open these screens ---------- */
 function routeReport(q){
+  const mt = routeMeet(q); if(mt) return mt;
   const mo = routeMOM(q); if(mo) return mo;
   const wh = routeWH(q); if(wh) return wh;
   const asst = routeAssist(q); if(asst) return asst;
@@ -338,12 +339,12 @@ function routeReport(q){
   if(any('بيانات','البيانات','الملفات','ملفات','الملف') && any('تحديث','التحديث','رفع')) return {type:'report', view:'data'};
   return null;
 }
-const REPORT_LABEL = {mom:'MOM · PMO Executive Meeting', wh:'White Helmet', sgrdays:'SGR within days', adhoc:'Operating Status', sgr:'SGR — Stage Gate Review', tc:'T&C — Testing & Commissioning', trouble:'Expected Trouble', handover:'Handover', data:'Data updates'};
+const REPORT_LABEL = {meet:'Weekly Meeting Data', mom:'MOM · PMO Executive Meeting', wh:'White Helmet', sgrdays:'SGR within days', adhoc:'Operating Status', sgr:'SGR — Stage Gate Review', tc:'T&C — Testing & Commissioning', trouble:'Expected Trouble', handover:'Handover', data:'Data updates'};
 function openReport(r){
-  const lead = {mom:'the MOM of the PMO Executive Meeting', wh:'the White Helmet dashboard', sgrdays:'the projects reaching SGR within the period', adhoc:'the Operating Status dashboard (projects not fully benefited from)', sgr:'the Stage Gate Review (SGR) view', tc:'the T&C (Testing & Commissioning) list', trouble:'the projects expected to move to Trouble', handover:'the Handover view', data:'the data updates panel'}[r.view];
+  const lead = {meet:'the weekly meeting data', mom:'the MOM of the PMO Executive Meeting', wh:'the White Helmet dashboard', sgrdays:'the projects reaching SGR within the period', adhoc:'the Operating Status dashboard (projects not fully benefited from)', sgr:'the Stage Gate Review (SGR) view', tc:'the T&C (Testing & Commissioning) list', trouble:'the projects expected to move to Trouble', handover:'the Handover view', data:'the data updates panel'}[r.view];
   addText(corr(r) + `Here is ${lead}:`, 'in');
-  ({mom:addMOMTab, wh:(a) => (a ? addWHSearch(a) : addWHTab()), sgrdays:addSgrDays, adhoc:addAdhocTab, sgr:addSgrTab, tc:addTcTab, trouble:addTroubleTab, handover:addHandoverTab, data:addDataPanel})[r.view](r.arg);
-  speakResponse({mom:'Minutes of the PMO executive meeting, Northwestern Cluster.', wh:'White Helmet reports and observations.', sgrdays:'Projects reaching stage gate review soon.', adhoc:'Operating status of projects not fully benefited from.', sgr:'Stage gate review. Red projects need an SGR within a week, yellow within three weeks.', tc:'Testing and commissioning, nearest to today first.', trouble:'Projects expected to move to trouble, soonest first.', handover:'Partial initial handover and initial handover projects.', data:'Data updates.'}[r.view]);
+  ({meet:addMeetingTab, mom:addMOMTab, wh:(a) => (a ? addWHSearch(a) : addWHTab()), sgrdays:addSgrDays, adhoc:addAdhocTab, sgr:addSgrTab, tc:addTcTab, trouble:addTroubleTab, handover:addHandoverTab, data:addDataPanel})[r.view](r.arg);
+  speakResponse({meet:'Weekly meeting data.', mom:'Minutes of the PMO executive meeting, Northwestern Cluster.', wh:'White Helmet reports and observations.', sgrdays:'Projects reaching stage gate review soon.', adhoc:'Operating status of projects not fully benefited from.', sgr:'Stage gate review. Red projects need an SGR within a week, yellow within three weeks.', tc:'Testing and commissioning, nearest to today first.', trouble:'Projects expected to move to trouble, soonest first.', handover:'Partial initial handover and initial handover projects.', data:'Data updates.'}[r.view]);
 }
 
 
@@ -395,7 +396,9 @@ function routeAssist(q){
   if(!list.length) return null;
   return {type:'list', list, label: `${key} consultant`, assist:true};
 }
-function assistOffer(qRaw){                                   // the bot cannot place the request: say so and offer choices
+function assistOffer(qRaw){                                   // the bot cannot place the request: search all the app's text first, then offer choices
+  const hits = typeof meetSearch === 'function' ? meetSearch(qRaw) : [];
+  if (hits.length) { const card = repCard('Search results', 'نتائج البحث', 'All the app data'); card.querySelector('.rbody').innerHTML = meetResultsHtml(qRaw); wireMeet(card, qRaw); finishReport(card); return; }
   const ar = isArabic(qRaw);
   const bubble = document.createElement('div'); bubble.className = 'msg in';
   const head = ar ? `أستطيع مساعدتك في هذه المعلومات… اختر أحد الخيارات أو اكتب سؤالاً جديداً.` : `I can help you with getting this information… Please choose between these options or write a new question.`;
@@ -422,7 +425,7 @@ function addSgrDays(arg){
 /* idle: after one minute without any action the bot says hello once */
 let assistLastAct = Date.now(), assistGreeted = false;
 ['keydown', 'click', 'touchstart', 'input'].forEach(ev => document.addEventListener(ev, () => { assistLastAct = Date.now(); assistGreeted = false; }, true));
-setInterval(() => { if(!assistGreeted && Date.now() - assistLastAct > 60000){ assistGreeted = true; addText('Hi, this is your PMO Buddy. How can I help you?\n\n\u2067مرحبا، أنا PMO رفيقك ، كيف أقدر أساعدك  ؟\u2069', 'in'); } }, 5000);
+setInterval(() => { if(!assistGreeted && Date.now() - assistLastAct > 120000){ assistGreeted = true; addText('Hi, this is your PMO Buddy. How can I help you?\n\n\u2067مرحبا، أنا PMO رفيقك ، كيف أقدر أساعدك  ؟\u2069', 'in'); } }, 5000);
 
 /* =====================================================================
    White Helmet tab: floor-plan reports, 360 observations, issuers, contractors, consultants, regions.
@@ -574,3 +577,123 @@ function addMOMTab(){
 }
 
 /* build: MOM minutes read by the update job (python-docx) */
+
+/* =====================================================================
+   Weekly Meeting Data: verified figures from the minutes (14 Oct 2026) and support report (25 Oct 2026),
+   plus search over all the text of both files, the MOM and the White Helmet data.
+   Arabic first, English beneath. More than 5 matches: ask which category.
+   ===================================================================== */
+const MEET_CAT_AR = {projects:'مشاريع', contractors:'مقاولون', consultants:'استشاريون', statements:'مستخلصات ختامية', withdrawn:'مشاريع مسحوبة', budget:'ميزانية', audit:'ملاحظات التدقيق', minutes_actions:'إجراءات المحضر', other:'أخرى'};
+const MEET_CAT_EN = {projects:'Projects', contractors:'Contractors', consultants:'Consultants', statements:'Final statements', withdrawn:'Withdrawn projects', budget:'Budget', audit:'Audit notes', minutes_actions:'Minutes actions', other:'Other'};
+const MEET_SYN = {                                                   // English / variant words -> Arabic words used in the files
+  dorsh:['دورش','دورتش'], dorch:['دورش'], fcc:['فيوتشر','فيوتشير'], future:['فيوتشر','مستقبلي','مستقبلية'], consultant:['استشاري','الاستشاري','الاستشارى'], consultants:['استشاري','الاستشاري'],
+  contractor:['مقاول','المقاول','شركة'], contractors:['مقاول','المقاولين','شركة'], ceiling:['أسقف','سقف','اسقف','أسقف'], ceilings:['أسقف','سقف'], cap:['سقف','أسقف'],
+  supervision:['إشراف','اشراف','الإشراف','الاشراف'], audit:['تدقيق','التدقيق'], notes:['ملاحظات','ملاحظة','ملاحظات'], note:['ملاحظة','ملاحظات'],
+  statement:['مستخلص','المستخلص','مستخلصات'], statements:['مستخلص','مستخلصات','المستخلصات'], final:['ختامي','الختامي','نهائي','نهائياً'], closing:['إغلاق','اغلاق'], close:['إغلاق','اغلاق'],
+  withdrawn:['مسحوبة','المسحوبة','منهاة','المنهاة','مسحوب'], withdraw:['مسحوبة','مسحوب'], retender:['طرح','اعادة','إعادة'], tender:['طرح','الطرح'], reaward:['ترسية','ترسيتها','الترسية'],
+  meeting:['اجتماع','الاجتماع','محضر','المحضر'], minutes:['محضر','المحضر','اجتماع'], budget:['ميزانية','الميزانية'], project:['مشروع','مشاريع','المشروع'], projects:['مشروع','مشاريع','المشاريع'],
+  audit:['تدقيق','التدقيق','تدقيق'], internal:['داخلي','الداخلي'], delivered:['مسلم','مسلّمة','مسلمة'], handover:['استلام','الاستلام'], operation:['تشغيل','التشغيل'], saving:['وفورات','الوفورات'], savings:['وفورات','الوفورات'],
+  northwest:['الشمالي','الغربي','شمالي','غربي'], madinah:['المدينة','المدينة المنورة'], tabuk:['تبوك'], riyadh:['الرياض'], paid:['صرف','المصروف'], unpaid:['صرف'],
+};
+const MEET_FILLER = new Set(['في','من','الى','إلى','على','عن','مع','و','او','أو','the','of','in','for','and','or','a','an','is','what','which','show','me','ما','هي','هو','كم','لدي','عرض']);
+function meetIndex(){                                                    // every searchable text: both presentations, MOM updates, White Helmet names
+  if (meetIndex._d) return meetIndex._d;
+  const out = [];
+  if (typeof MEET !== 'undefined') MEET.items.forEach(it => out.push({ar: it.ar, title: it.title, en: `${MEET_CAT_EN[it.cat] || 'Other'} · ${it.file === 'minutes' ? 'Minutes 14 Oct 2026' : 'Support report 25 Oct 2026'} · slide ${it.slide}`, cat: it.cat, src: it.src}));
+  if (typeof MOM !== 'undefined') MOM.groups.forEach(g => g.subs.forEach(s => s.updates.forEach(u => out.push({ar: u.t, en: `Minutes update · ${u.d}`, cat: 'minutes_actions', src: 'محضر الاجتماع'}))));
+  if (typeof WH !== 'undefined') WH.projects.forEach(p => out.push({ar: p.name, en: `White Helmet · PO ${p.po} · ${p.pno} · ${p.consultant}`, cat: 'projects', src: 'White Helmet', po: p.po}));
+  meetIndex._d = out; return out;
+}
+const meetNorm = w => (w.length > 4 && w.startsWith('ال') ? w.slice(2) : w);     // ignore the Arabic article ال
+const meetToks = s => adTokens(s).map(meetNorm);
+function meetSearch(q, cat){
+  const qt = meetToks(q).filter(t => !MEET_FILLER.has(t)); if (!qt.length) return [];
+  const forms = qt.map(t => [t, ...(MEET_SYN[t] || []).flatMap(x => meetToks(x))]);
+  const need = qt.length === 1 ? 1 : Math.max(1, Math.ceil(qt.length * 0.6));
+  const hits = [];
+  meetIndex().forEach(it => {
+    if (cat && it.cat !== cat) return;
+    const ws = meetToks(it.ar + ' ' + (it.title || ''));
+    let m = 0;
+    forms.forEach(fs => { if (fs.some(f => adTokOK(f, ws))) m++; });
+    if (m >= need) hits.push({it, score: m / qt.length});
+  });
+  return hits.sort((a, b) => b.score - a.score).map(h => h.it);
+}
+function meetResultsHtml(q, cat){
+  const hits = meetSearch(q, cat), head = `<div class="adsres-h"><b dir="rtl">نتائج البحث</b><small>Search results · ${hits.length} for “${esc(q)}”${cat ? ' · ' + (MEET_CAT_EN[cat] || cat) : ''}</small></div>`;
+  if (!hits.length) return head + `<div class="rempty"><span dir="rtl">لا توجد نتائج مطابقة — جرّب كلمات أخرى أو اسم المشروع أو المقاول</span><br><small>No match. Try other words, a project name or a contractor.</small></div>`;
+  if (hits.length > 5 && !cat) {
+    const counts = {}; hits.forEach(h => counts[h.cat] = (counts[h.cat] || 0) + 1);
+    const chips = Object.keys(counts).sort((a, b) => counts[b] - counts[a]).map(c => `<button type="button" class="optbtn meetcat" data-cat="${c}" data-q="${esc(q)}"><span dir="rtl">${MEET_CAT_AR[c] || c}</span><small>${MEET_CAT_EN[c] || c} · ${counts[c]}</small></button>`).join('');
+    return head + `<div class="momq" dir="rtl"><b>وجدنا ${hits.length} نتيجة. أي فئة تقصد؟</b><br><small>${hits.length} matches. Which category do you mean?</small></div><div class="meetcats">${chips}</div>`;
+  }
+  return head + `<div class="meetres">` + hits.slice(0, cat ? 50 : 5).map(h => `<div class="meetrow"><div class="mt" dir="rtl">${esc(h.ar.slice(0, 320))}</div><div class="me">${esc(h.en)}</div></div>`).join('') + `</div>`;
+}
+function wireMeet(root, q){
+  root.querySelectorAll('.meetcat').forEach(b => b.addEventListener('click', e => { e.preventDefault(); root.innerHTML = meetResultsHtml(b.dataset.q, b.dataset.cat); wireMeet(root, b.dataset.q); }));
+}
+function meetFigures(){
+  const F = MEET.figures, K = [
+    [F.to_close, 'مشروع للإغلاق', 'projects to close', F.to_close_val ? F.to_close_val + ' مليون ريال' : ''],
+    [F.closed, 'مغلق نهائياً', 'closed finally', F.closed_val + ' مليون ريال · ' + F.closed_pct + '%'],
+    [F.no_statement, 'بانتظار المستخلص الختامي', 'awaiting final statement', F.no_statement_val + ' مليون ريال · ' + F.no_statement_pct + '%'],
+    [F.not_meeting_criteria, 'غير مستوفية لشروط الإغلاق', 'not meeting closing criteria', ''],
+    [F.not_settled, 'لم تتم التسوية مع المقاول', 'not settled with contractor', ''],
+    [F.audit_notes, 'ملاحظة تدقيق داخلي', 'internal audit notes', ''],
+    [F.nw_under_procedure, 'مشروع تحت الإجراء · القطاع الشمالي الغربي', 'NW projects under procedure', ''],
+    [F.linked_delivered, 'مليون ريال · مشاريع مسلمة مرتبطة', 'M SAR · linked delivered projects', ''],
+    [F.supervision_cost_end, 'مليون ريال · تكلفة الإشراف طبقا للنهاية التعاقدية', 'M SAR · supervision cost (contract end)', ''],
+  ];
+  return K.filter(k => k[0] !== undefined && k[0] !== null);
+}
+function kmBlock(){
+  const F = MEET.figures; if (F.km_water === undefined || F.km_sewer === undefined) return '';
+  const w = F.km_water, s = F.km_sewer, t = w + s;
+  const panel = (key) => {
+    const n = key === 'water' ? w : key === 'sewer' ? s : t;
+    const label = key === 'water' ? ['خطوط وشبكات المياه', 'Water lines & networks'] : key === 'sewer' ? ['خطوط وشبكات الصرف الصحي', 'Waste water lines & networks'] : ['إجمالي الكيلومترات', 'Total kilometres'];
+    const pw = key === 'all' ? 100 : Math.round(n / t * 100);
+    return `<div class="kmbig"><span class="kmn">${n}</span><span class="kmu">كم · km</span></div><div class="kml"><b dir="rtl">${label[0]}</b><small>${label[1]}</small></div>` +
+      `<div class="kmbar"><i style="width:${key === 'all' ? 100 : pw}%"></i></div>` +
+      `<div class="kmsplit"><span>مياه · Water <b>${w} كم</b> (${Math.round(w / t * 100)}%)</span><span>صرف · Waste water <b>${s} كم</b> (${Math.round(s / t * 100)}%)</span></div>`;
+  };
+  return `<div class="kmcard" data-km="all"><div class="kmtitle"><b dir="rtl">الكيلومترات المنجزة</b><small>Kilometres completed · 2026 حتى 25 أكتوبر 2026</small></div>` +
+    `<div class="kmbtns"><button type="button" class="rpill kmb on" data-k="all"><span dir="rtl">الكل</span> · All</button><button type="button" class="rpill kmb" data-k="water"><span dir="rtl">مياه</span> · Water</button><button type="button" class="rpill kmb" data-k="sewer"><span dir="rtl">صرف صحي</span> · Waste water</button></div>` +
+    `<div class="kmbody">${panel('all')}</div></div>`;
+}
+function wireKm(root){
+  root.querySelectorAll('.kmb').forEach(b => b.addEventListener('click', () => {
+    const card = b.closest('.kmcard'), k = b.dataset.k, F = MEET.figures, w = F.km_water, s = F.km_sewer, t = w + s;
+    card.querySelectorAll('.kmb').forEach(x => x.classList.toggle('on', x === b));
+    const n = k === 'water' ? w : k === 'sewer' ? s : t;
+    const label = k === 'water' ? ['خطوط وشبكات المياه', 'Water lines & networks'] : k === 'sewer' ? ['خطوط وشبكات الصرف الصحي', 'Waste water lines & networks'] : ['إجمالي الكيلومترات', 'Total kilometres'];
+    card.querySelector('.kmn').textContent = n; card.querySelector('.kml').innerHTML = `<b dir="rtl">${label[0]}</b><small>${label[1]}</small>`;
+    card.querySelector('.kmbar i').style.width = (k === 'all' ? 100 : Math.round(n / t * 100)) + '%';
+  }));
+}
+function paintMeet(card, q){
+  const rb = card.querySelector('.rbody');
+  if (typeof MEET === 'undefined') { rb.innerHTML = '<div class="rempty">Weekly meeting files not loaded yet. Drop the minutes and support report .pptx files in the drop folder.</div>'; return; }
+  const F = MEET.figures, pct = (n, t) => t ? Math.round(n / t * 100) : 0;
+  const kpis = meetFigures().map(k => `<div class="kpi"><span class="kv">${typeof k[0] === 'number' ? k[0].toLocaleString('en-US') : k[0]}</span><span class="kl"><b dir="rtl">${k[1]}</b><small>${k[2]}${k[3] ? ' · ' + k[3] : ''}</small></span></div>`).join('');
+  rb.innerHTML = kmBlock() + `<div class="rrule">Verified figures only · محضر ${esc(MEET.sources[0].date)} · تقرير داعم ${esc(MEET.sources[1].date)}</div>` +
+    `<div class="adkpis">${kpis}</div>` +
+    `<div class="momsub2"><div class="momsh"><b dir="rtl">حالة إغلاق أوامر الشراء</b></div><div class="brow"><div class="btop"><span class="bl"><b dir="rtl">مغلق نهائياً</b><small>Closed finally</small></span><span class="bn"><b>${F.closed_pct}%</b></span></div><div class="btrack"><i style="width:${F.closed_pct}%;background:#2E8B57"></i></div></div>` +
+    `<div class="brow"><div class="btop"><span class="bl"><b dir="rtl">بانتظار المستخلص الختامي</b><small>Awaiting final statement</small></span><span class="bn"><b>${F.no_statement_pct}%</b></span></div><div class="btrack"><i style="width:${F.no_statement_pct}%;background:#E5484D"></i></div></div></div>` +
+    `<div class="whsbox"><input type="search" class="adsearch meetsearch" placeholder="ابحث: مشروع، مقاول، استشاري، ملاحظة · Search" aria-label="Search the weekly meeting data"></div>` +
+    `<div class="meetout"></div>`;
+  wireKm(rb);
+  const inp = rb.querySelector('.meetsearch'), out = rb.querySelector('.meetout');
+  inp.addEventListener('input', () => { const v = inp.value.trim(); out.innerHTML = v ? meetResultsHtml(v) : ''; wireMeet(out, v); });
+  if (q) { inp.value = q; inp.dispatchEvent(new Event('input')); }
+}
+function addMeetingTab(q){
+  const card = repCard('Weekly Meeting Data', 'بيانات الاجتماع الأسبوعي', 'Minutes 14 Oct 2026 · Support report 25 Oct 2026');
+  paintMeet(card, q || ''); finishReport(card);
+}
+function routeMeet(q){
+  const t = nrm(q).split(/[\s,?؟!.]+/).filter(Boolean);
+  if (t.some(w => ['meeting','meetings','minutes','اجتماع','الاجتماع','محضر','المحضر'].includes(w)) && t.length <= 4 && !t.some(w => /^\d{9}$/.test(w))) return {type:'report', view:'meet', arg:null};
+  return null;
+}

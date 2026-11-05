@@ -50,7 +50,14 @@ def sha(path):
 
 def candidates(drop, root):
     """{'weekly': [...], 'gates': [...]} - every recognised file in drop/, NEWEST FIRST (by when it was added to the repository)"""
-    found = {'weekly': [], 'gates': [], 'wh': [], 'mom': []}
+    found = {'weekly': [], 'gates': [], 'wh': [], 'mom': [], 'minutes': [], 'support': []}
+    for p in sorted(glob.glob(os.path.join(drop, '**', '*.pptx'), recursive=True)):
+        try:
+            import meeting as _meet, pptx as _pptx
+            k = _meet.kind_of(_pptx.Presentation(p))
+            if k in ('minutes', 'support'): found[k].append(p)
+        except Exception:
+            pass
     for p in sorted(glob.glob(os.path.join(drop, '**', '*.docx'), recursive=True)):
         try:
             import docx as _docx
@@ -79,7 +86,7 @@ def main():
     state_path = os.path.join(drop, '.processed.json')
     try:
         cands = candidates(drop, root)
-        cands.setdefault('wh', []); cands.setdefault('mom', [])
+        cands.setdefault('wh', []); cands.setdefault('mom', []); cands.setdefault('minutes', []); cands.setdefault('support', [])
         missing = [k for k, v in cands.items() if not v and k in ('weekly', 'gates')]
         if missing:
             raise ingest.IngestError('the drop folder needs both files; missing: ' + ', '.join('weekly progress file' if m == 'weekly' else 'gates schedule file' for m in missing))
@@ -125,7 +132,14 @@ def main():
                 import mom as _mom; momjs = _mom.js(p)[0]; break
             except Exception as e:
                 ignored.append({'file': os.path.basename(p), 'kind': 'mom', 'why': why(e)})
-        build_site.write_site(src, res['js'] + whjs + momjs, root)
+        meetjs = ''
+        if cands.get('minutes') and cands.get('support'):                    # the weekly meeting presentations (uploaded by hand each week): newest of each
+            try:
+                import meeting as _meet
+                meetjs = _meet.js(cands['minutes'][0], cands['support'][0])[0]
+            except Exception as e:
+                ignored.append({'file': 'meeting files', 'kind': 'meeting', 'why': why(e)})
+        build_site.write_site(src, res['js'] + whjs + momjs + meetjs, root)
         json.dump({'key': key, 'weekly': os.path.basename(weekly), 'gates': os.path.basename(gates), 'built': res['build']['built'], 'reportDate': res['build']['reportDate'], 'projects': res['build']['projects'],
                    'ignored': [i['file'] for i in ignored]}, open(state_path, 'w'), indent=1)
         n = res['build']['notes']
