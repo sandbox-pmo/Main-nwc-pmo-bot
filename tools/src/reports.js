@@ -314,7 +314,7 @@ function renderActions(card, base){                                         // t
 function routeReport(q){
   const raw = String(q || '').trim(), toks = nrm(raw).split(/\s+/).filter(Boolean);
   const poLike = toks.some(t => /\d{4,}/.test(t)), special = ['help','portfolio','sgr','tc','t&c','handover','critical','data','mom','meeting','minutes','helmet','white','wh'].includes(toks.join(' '));
-  if (raw && !poLike && !special && toks.length) return {type:'report', view:'unified', arg:raw};
+  if (window._routeTyped && raw && !poLike && !special && toks.length) return {type:'report', view:'unified', arg:raw};     // only typed text starts the unified search; tab buttons do not
   const mt = routeMeet(q); if(mt) return mt;
   const mo = routeMOM(q); if(mo) return mo;
   const wh = routeWH(q); if(wh) return wh;
@@ -601,7 +601,7 @@ const MEET_SYN = {
   audit:['تدقيق','التدقيق','تدقيق'], internal:['داخلي','الداخلي'], delivered:['مسلم','مسلّمة','مسلمة'], handover:['استلام','الاستلام'], operation:['تشغيل','التشغيل'], saving:['وفورات','الوفورات'], savings:['وفورات','الوفورات'],
   northwest:['الشمالي','الغربي','شمالي','غربي'], madinah:['المدينة','المدينة المنورة'], tabuk:['تبوك'], riyadh:['الرياض'], paid:['صرف','المصروف'], unpaid:['صرف'],
 };
-const MEET_FILLER = new Set(['في','من','الى','إلى','على','عن','مع','و','او','أو','the','of','in','for','and','or','a','an','is','what','which','show','me','ما','هي','هو','كم','لدي','عرض']);
+const MEET_FILLER = new Set(['all','show','list','everything','في','من','الى','إلى','على','عن','مع','و','او','أو','the','of','in','for','and','or','a','an','is','what','which','show','me','ما','هي','هو','كم','لدي','عرض']);
 function meetIndex(){                                                    // every searchable text: both presentations, MOM updates, White Helmet names
   if (meetIndex._d) return meetIndex._d;
   const out = [];
@@ -953,5 +953,6 @@ function wireUnified(root){
   root.querySelectorAll('.unichg').forEach(b => b.addEventListener('click', e => { e.preventDefault(); root.innerHTML = unifiedHtml(b.dataset.q); wireUnified(root); }));
 }
 function addUnifiedResults(q){
+  if (!unifiedSearch(q).length) { assistOffer(q); return; }            // nothing meaningful found: say how I can help
   const card = repCard('نتائج البحث', 'Search results', 'All tabs and project cards'); card.querySelector('.rbody').innerHTML = unifiedHtml(q); wireUnified(card); finishReport(card);
 }

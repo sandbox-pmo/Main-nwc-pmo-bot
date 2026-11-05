@@ -379,8 +379,9 @@ function search(qRaw){
   const raw = String(qRaw || '').trim(), q = nrm(raw);
   if(!q) return {type:'none'};
   const ac = autocorrect(q);
-  if(ac.ask) return askConfirm(raw, ac);
-  const q2 = ac.fixes.length ? ac.tokens.join(' ') : q;
+  const keepRaw = typeof unifiedSearch === 'function' && unifiedSearch(raw).some(h => h.kind !== 'list');   // a name, PO or tile word typed as is: keep it, do not correct it
+  if(ac.ask && !keepRaw) return askConfirm(raw, ac);
+  const q2 = (ac.fixes.length && !keepRaw) ? ac.tokens.join(' ') : q;
   let r = searchExact(q2), hinted = null;
   if(r.type === 'none' && !r.hasFilter){
     const opts = hintOptions(q2);
@@ -755,6 +756,7 @@ const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
 function handleQuery(qRaw, label, direct){
   qRaw = String(qRaw||'').trim();
   if(!qRaw) return;
+  window._routeTyped = (window._typedText === qRaw); window._typedText = null;      // only text typed in the box starts the unified search
   addText(label || qRaw, 'out');
   showTyping();
   setTimeout(() => {
@@ -892,7 +894,7 @@ if(SpeechRecognitionAPI){
 /* =====================================================================
    Wiring + welcome
    ===================================================================== */
-$('sendBtn').addEventListener('click', () => { const i=$('inp'); if(i.value.trim()){ handleQuery(i.value.trim()); i.value=''; } });
+$('sendBtn').addEventListener('click', () => { const i=$('inp'); if(i.value.trim()){ window._typedText = i.value.trim(); handleQuery(i.value.trim()); i.value=''; } });
 $('inp').addEventListener('keydown', e => { if(e.key==='Enter') $('sendBtn').click(); });
 document.querySelectorAll('.quickchip').forEach(c => {
   const tabLabel = c => c.textContent.replace(/^[^\p{L}\p{N}]+/u, '').trim();
