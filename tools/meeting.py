@@ -73,7 +73,8 @@ def build(path_minutes, path_support):
     return {'figures': F, 'missing': miss, 'items': items, 'sources': [{'id': 'minutes', 'ar': 'محضر الاجتماع', 'en': 'Meeting minutes', 'date': '14 Oct 2026'}, {'id': 'support', 'ar': 'التقارير الداعمة', 'en': 'Support report', 'date': '25 Oct 2026'}]}
 def js(path_minutes, path_support):
     d = build(path_minutes, path_support)
-    return 'const MEET = ' + json.dumps(d, ensure_ascii=False, separators=(',', ':')) + ';\n', d
+    import opstatus
+    return 'const MEET = ' + json.dumps(d, ensure_ascii=False, separators=(',', ':')) + ';\n' + opstatus.js(path_minutes)[0], d
 if __name__ == '__main__':
     import sys
     d = build(sys.argv[1], sys.argv[2])

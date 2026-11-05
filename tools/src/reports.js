@@ -343,7 +343,7 @@ const REPORT_LABEL = {meet:'Weekly Meeting Data', mom:'MOM · PMO Executive Meet
 function openReport(r){
   const lead = {meet:'the weekly meeting data', mom:'the MOM of the PMO Executive Meeting', wh:'the White Helmet dashboard', sgrdays:'the projects reaching SGR within the period', adhoc:'the Operating Status dashboard (projects not fully benefited from)', sgr:'the Stage Gate Review (SGR) view', tc:'the T&C (Testing & Commissioning) list', trouble:'the projects expected to move to Trouble', handover:'the Handover view', data:'the data updates panel'}[r.view];
   addText(corr(r) + `Here is ${lead}:`, 'in');
-  ({meet:addMeetingTab, mom:addMOMTab, wh:(a) => (a ? addWHSearch(a) : addWHTab()), sgrdays:addSgrDays, adhoc:addAdhocTab, sgr:addSgrTab, tc:addTcTab, trouble:addTroubleTab, handover:addHandoverTab, data:addDataPanel})[r.view](r.arg);
+  ({meet:addMeetingTab, mom:addMOMTab, wh:(a) => (a ? addWHSearch(a) : addWHTab()), sgrdays:addSgrDays, adhoc:addOpsTab, sgr:addSgrTab, tc:addTcTab, trouble:addTroubleTab, handover:addHandoverTab, data:addDataPanel})[r.view](r.arg);
   speakResponse({meet:'Weekly meeting data.', mom:'Minutes of the PMO executive meeting, Northwestern Cluster.', wh:'White Helmet reports and observations.', sgrdays:'Projects reaching stage gate review soon.', adhoc:'Operating status of projects not fully benefited from.', sgr:'Stage gate review. Red projects need an SGR within a week, yellow within three weeks.', tc:'Testing and commissioning, nearest to today first.', trouble:'Projects expected to move to trouble, soonest first.', handover:'Partial initial handover and initial handover projects.', data:'Data updates.'}[r.view]);
 }
 
@@ -698,4 +698,52 @@ function routeMeet(q){
   return null;
 }
 
-/* build: meeting presentations read by the update job (python-pptx) */
+/* =====================================================================
+   Operating Status (from the minutes, slides 23-29). Three groups with totals; rows show their details.
+   A project opens its weekly control card only when its name matches one weekly project clearly.
+   ===================================================================== */
+function opsWeeklyLink(name){
+  const nt = meetToks(name).filter(t => t.length >= 3); if (nt.length < 2) return null;
+  let best = null, second = 0;
+  PROJECTS.forEach(p => {
+    const pt = meetToks(p.name); const m = nt.filter(t => pt.some(w => adTokOK(t, [w]))).length;
+    const sc = m / Math.max(nt.length, 1);
+    if (!best || sc > best.sc) { second = best ? best.sc : second; best = {p, sc}; } else if (sc > second) second = sc;
+  });
+  return best && best.sc >= 0.85 && best.sc > second ? best.p : null;
+}
+function opsRowHtml(r, gi){
+  const link = opsWeeklyLink(r.name);
+  const chips = [
+    r.cls ? `<span class="opc c-blue">${esc(r.cls)}</span>` : '',
+    r.area ? `<span class="opc">${esc(r.area)}</span>` : '',
+    r.val ? `<span class="opc">${esc(r.val)} M SAR</span>` : '',
+    r.rcat ? `<span class="opc c-gold">${esc(r.rcat)}</span>` : '',
+    r.dup ? `<span class="opc c-red">مكرر · duplicate</span>` : '',
+    r.transferred ? `<span class="opc c-purple">نُقل لجهة أخرى · transferred</span>` : '',
+    r.pct ? `<span class="opc">${esc(r.pct)}% تشغيل · in service</span>` : '',
+  ].join('');
+  const details = [
+    r.reason ? `<div><dt>السبب / الدعم المطلوب · Reason</dt><dd dir="rtl">${esc(r.reason)}</dd></div>` : '',
+    r.impact ? `<div><dt>الأثر · Impact</dt><dd dir="rtl">${esc(r.impact)}</dd></div>` : '',
+    r.end ? `<div><dt>تاريخ نهاية الارتباط · Linked end</dt><dd>${esc(r.end)}</dd></div>` : '',
+    r.liq ? `<div><dt>السيولة المطلوبة · Liquidity (M)</dt><dd>${esc(r.liq)}</dd></div>` : '',
+    r.linked ? `<div><dt>حالة المشروع المرتبط · Linked status</dt><dd dir="rtl">${esc(r.linked)}</dd></div>` : '',
+    r.status ? `<div><dt>وضع المشروع · Status</dt><dd dir="rtl">${esc(r.status)}</dd></div>` : '',
+    r.op ? `<div><dt>التشغيل فور الانتهاء · Operate on completion</dt><dd dir="rtl">${esc(r.op)}</dd></div>` : '',
+  ].join('');
+  return `<div class="opsrow"><div class="opsn">${r.no}</div><div class="opsbody"><b dir="rtl">${esc(r.name)}</b><div class="opschips">${chips}</div>` +
+    `<details class="opsmore"><summary>التفاصيل · Details</summary><dl class="addl">${details}</dl></details>` +
+    (link ? `<button type="button" class="optbtn openbtn opsopen" data-po="${esc(link.po)}">فتح بطاقة المشروع · Open the control card</button>` : '') + `</div></div>`;
+}
+function addOpsTab(){
+  if (typeof OPS === 'undefined') return addAdhocTab();
+  const tot = OPS.groups.reduce((a, g) => a + g.rows.length, 0), totVal = OPS.groups.reduce((a, g) => a + (g.totalValue || 0), 0);
+  const card = repCard('حالة تشغيل المشاريع', 'Operating Status', `Minutes slides 23–29 · ${tot} projects · ${totVal.toFixed(1)} M SAR`);
+  const groups = OPS.groups.map((g, gi) => `<details class="opsgrp"${gi === 0 ? ' open' : ''}><summary><span class="opsh"><b dir="rtl">${esc(g.title)}</b><small>${esc(g.titleEn)}</small></span><span class="opsc"><b>${g.totalCount}</b><small>${g.totalValue} M SAR</small></span></summary>` +
+    `<div class="opslist">${g.rows.map((r) => opsRowHtml(r, gi)).join('')}</div></details>`).join('');
+  card.querySelector('.rbody').innerHTML = `<div class="opstot"><div><b>${tot}</b><small>projects not fully benefited from</small></div><div><b>${totVal.toFixed(1)}</b><small>M SAR in total</small></div></div>` + groups +
+    `<div class="rrule">Source: minutes presentation, slides 23–29. Totals agree with slide 22. A project opens its card only when its name matches the weekly report clearly.</div>`;
+  card.querySelectorAll('.opsopen').forEach(b => b.addEventListener('click', e => { e.preventDefault(); handleQuery(b.dataset.po); }));
+  finishReport(card);
+}
