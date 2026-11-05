@@ -314,7 +314,10 @@ function renderActions(card, base){                                         // t
 function routeReport(q){
   const raw = String(q || '').trim(), toks = nrm(raw).split(/\s+/).filter(Boolean);
   const poLike = toks.some(t => /\d{4,}/.test(t)), special = ['help','portfolio','sgr','tc','t&c','handover','critical','data','mom','meeting','minutes','helmet','white','wh'].includes(toks.join(' '));
-  if (window._routeTyped && raw && !poLike && !special && toks.length) return {type:'report', view:'unified', arg:raw};     // only typed text starts the unified search; tab buttons do not
+  let exactFirst = null;
+  if (raw && !window._inRouteExact) { window._inRouteExact = true; try { exactFirst = searchExact(raw); } catch (e) { exactFirst = null; } finally { window._inRouteExact = false; } }
+  const exactHit = exactFirst && (exactFirst.type === 'list' || exactFirst.type === 'one');     // a status + area list or one PO: the exact answer comes first
+  if (window._routeTyped && !window._inRouteExact && raw && !poLike && !special && toks.length && !exactHit) return {type:'report', view:'unified', arg:raw};     // only typed text starts the unified search; tab buttons do not
   const mt = routeMeet(q); if(mt) return mt;
   const mo = routeMOM(q); if(mo) return mo;
   const wh = routeWH(q); if(wh) return wh;
