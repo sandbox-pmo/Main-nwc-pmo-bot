@@ -379,7 +379,7 @@ function search(qRaw){
   const raw = String(qRaw || '').trim(), q = nrm(raw);
   if(!q) return {type:'none'};
   const ac = autocorrect(q);
-  const keepRaw = typeof unifiedSearch === 'function' && unifiedSearch(raw).some(h => h.kind !== 'list');   // a name, PO or tile word typed as is: keep it, do not correct it
+  const keepRaw = typeof unifiedSearch === 'function' && (unifiedSearch(raw).some(h => h.kind !== 'list') || (typeof uniIsKnown === 'function' && uniIsKnown(raw)));   // a name, PO or tile word typed as is: keep it, do not correct it
   if(ac.ask && !keepRaw) return askConfirm(raw, ac);
   const q2 = (ac.fixes.length && !keepRaw) ? ac.tokens.join(' ') : q;
   let r = searchExact(q2), hinted = null;

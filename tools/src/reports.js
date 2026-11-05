@@ -601,6 +601,28 @@ const MEET_SYN = {
   audit:['تدقيق','التدقيق','تدقيق'], internal:['داخلي','الداخلي'], delivered:['مسلم','مسلّمة','مسلمة'], handover:['استلام','الاستلام'], operation:['تشغيل','التشغيل'], saving:['وفورات','الوفورات'], savings:['وفورات','الوفورات'],
   northwest:['الشمالي','الغربي','شمالي','غربي'], madinah:['المدينة','المدينة المنورة'], tabuk:['تبوك'], riyadh:['الرياض'], paid:['صرف','المصروف'], unpaid:['صرف'],
 };
+const UNI_VOCAB = {
+  airport:['مطار','المطار','مطارات'], airports:['مطار','مطارات'], road:['طريق','الطريق','طرق'], roads:['طرق','طريق'], school:['مدرسة','مدرسه'], hospital:['مستشفى','مستشفي'],
+  tank:['خزان','خزانات'], tanks:['خزانات','خزان'], reservoir:['خزان','خزانات'], pump:['ضخ','الضخ','محطة الضخ'], pumping:['ضخ','الضخ'], station:['محطة','محطات'], stations:['محطات','محطة'],
+  treatment:['معالجة','المعالجة'], plant:['محطة','مصنع','معالجة'], sewer:['صرف','الصرف','صحي'], sewage:['صرف','الصرف','صحي'], drainage:['صرف','الصرف'], wastewater:['صرف','الصرف'],
+  water:['مياه','المياه','ماء'], potable:['شرب','الشرب'], drinking:['شرب','الشرب'], network:['شبكات','شبكة','شبكه'], networks:['شبكات','شبكة'], pipe:['خط','خطوط'], pipes:['خطوط','خط'],
+  pipeline:['خط','خطوط'], pipelines:['خطوط','خط'], main:['رئيسي','رئيسية','الرئيسي'], distribution:['توزيع','التوزيع'], connection:['توصيل','توصيلات','التوصيلات'], connections:['توصيلات','توصيل'],
+  village:['قرية','قرى'], villages:['قرى','قرية'], city:['مدينة','المدينة'], quarry:['محجر'], gypsum:['جص','جبس'], expansion:['توسعة','توسعه','التوسعة'], extension:['توسعة','تمديد'], phase:['مرحلة','المرحلة'],
+  stage:['مرحلة','المرحلة'], tabuk:['تبوك'], madinah:['المدينة','المدينة المنورة'], medina:['المدينة','المدينة المنورة'], fcc:['فيوتشر'], future:['فيوتشر','مستقبلي'], dorsh:['دورش'],
+  reservoirs:['خزانات'], elevated:['مرتفع'], irrigation:['ري','الري'], lift:['ضخ','رفع'], intake:['سحب'], outfall:['تصريف','طرد'], rehabilitation:['تأهيل','اعادة تأهيل'], substation:['محطة فرعية'], control:['تحكم','التحكم'],
+  ceiling:['أسقف','سقف'], audit:['تدقيق'], supervision:['إشراف','اشراف'], contractor:['مقاول'], consultant:['استشاري'], contract:['عقد','تعاقد'], termination:['انهاء','إنهاء'],
+};
+function uniTerms(qt){                                              // query words + their Arabic / English equivalents, misspellings included
+  const out = new Set(qt);
+  qt.forEach(t => {
+    Object.keys(UNI_VOCAB).forEach(k => { if (k === t || (t.length >= 4 && adTokOK(t, [k]))) UNI_VOCAB[k].forEach(a => meetToks(a).forEach(x => out.add(x))); });
+    Object.keys(MEET_SYN).forEach(k => { if (k === t || (t.length >= 4 && adTokOK(t, [k]))) (MEET_SYN[k] || []).forEach(a => meetToks(a).forEach(x => out.add(x))); });
+  });
+  return [...out];
+}
+function uniIsKnown(raw){                                           // a word the bot knows (English or Arabic): do not spell-correct it
+  const t = meetToks(raw); return t.some(w => Object.keys(UNI_VOCAB).some(k => k === w || (w.length >= 4 && adTokOK(w, [k]))) || Object.values(MEET_SYN).some(v => v.some(x => meetToks(x).includes(w))));
+}
 const MEET_FILLER = new Set(['all','show','list','everything','في','من','الى','إلى','على','عن','مع','و','او','أو','the','of','in','for','and','or','a','an','is','what','which','show','me','ما','هي','هو','كم','لدي','عرض']);
 function meetIndex(){                                                    // every searchable text: both presentations, MOM updates, White Helmet names
   if (meetIndex._d) return meetIndex._d;
@@ -904,16 +926,26 @@ function unifiedItems(){
   return out;
 }
 function unifiedSearch(q){
-  const qt = meetToks(q).filter(t => !MEET_FILLER.has(t)); if (!qt.length) return [];
-  const forms = qt.map(t => [t, ...(MEET_SYN[t] || []).flatMap(x => meetToks(x))]);
+  const qt0 = meetToks(q).filter(t => !MEET_FILLER.has(t)); if (!qt0.length) return [];
+  const qt = qt0, terms = uniTerms(qt), forms = qt.map(t => [t, ...terms.filter(x => x !== t && (x.length >= 3 || x === t))]);
   const need = qt.length === 1 ? 1 : Math.max(1, Math.ceil(qt.length * 0.6));
   const hits = [];
   unifiedItems().forEach(it => {
     const ws = meetToks(it.words);
+    if (it.kind === 'card') {                                        // a card must match on its name, PO or project number
+      const nameToks = meetToks(it.ar), codeToks = meetToks(String(it.tab) + ' ' + String(it.value));
+      let mName = 0; forms.forEach(fs => { if (fs.some(f => adTokOK(f, nameToks))) mName++; });
+      let mCode = 0; qt.forEach(t => { if (adTokOK(t, codeToks)) mCode++; });
+      let mAll = 0; forms.forEach(fs => { if (fs.some(f => adTokOK(f, ws))) mAll++; });
+      if (mName + mCode === 0) return;
+      if (mAll >= need) hits.push({it, score: mAll / qt.length + (mName ? 0.5 : 0)});
+      return;
+    }
     let m = 0; forms.forEach(fs => { if (fs.some(f => adTokOK(f, ws))) m++; });
-    if (m >= need) hits.push({it, score: m / qt.length});
+    if (m >= need && (qt.length === 1 ? m === 1 : m >= Math.max(need, Math.ceil(qt.length * 0.8)))) hits.push({it, score: m / qt.length});
   });
-  return hits.sort((a, b) => b.score - a.score || a.it.rank - b.it.rank).map(h => h.it);
+  const rank = it => it.kind === 'card' ? 0 : it.kind === 'tab' ? 1 : 2;
+  return hits.sort((x, y) => rank(x.it) - rank(y.it) || y.score - x.score).map(h => h.it);
 }
 function uniRowHtml(it){
   if (it.kind === 'card') return `<div class="tilehit"><div class="th-l"><b dir="rtl">${esc(it.ar)}</b><small>${esc(it.en)} · Project no. ${esc(it.value)}</small></div><button type="button" class="optbtn tilego" data-go="${esc(it.tab)}">فتح بطاقة المشروع · Open card</button></div>`;
