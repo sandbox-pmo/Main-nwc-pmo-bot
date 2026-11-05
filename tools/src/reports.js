@@ -312,6 +312,9 @@ function renderActions(card, base){                                         // t
 
 /* ---------- typed instructions that open these screens ---------- */
 function routeReport(q){
+  const raw = String(q || '').trim(), toks = nrm(raw).split(/\s+/).filter(Boolean);
+  const poLike = toks.some(t => /\d{4,}/.test(t)), special = ['help','portfolio','sgr','tc','t&c','handover','critical','data','mom','meeting','minutes','helmet','white','wh'].includes(toks.join(' '));
+  if (raw && !poLike && !special && toks.length) return {type:'report', view:'unified', arg:raw};
   const mt = routeMeet(q); if(mt) return mt;
   const mo = routeMOM(q); if(mo) return mo;
   const wh = routeWH(q); if(wh) return wh;
@@ -339,12 +342,12 @@ function routeReport(q){
   if(any('بيانات','البيانات','الملفات','ملفات','الملف') && any('تحديث','التحديث','رفع')) return {type:'report', view:'data'};
   return null;
 }
-const REPORT_LABEL = {meet:'Weekly Meeting Data', mom:'MOM · PMO Executive Meeting', wh:'White Helmet', sgrdays:'SGR within days', adhoc:'Operating Status', sgr:'SGR — Stage Gate Review', tc:'T&C — Testing & Commissioning', trouble:'Expected Trouble', handover:'Handover', data:'Data updates'};
+const REPORT_LABEL = {unified:'Search results', meet:'Weekly Meeting Data', mom:'MOM · PMO Executive Meeting', wh:'White Helmet', sgrdays:'SGR within days', adhoc:'Operating Status', sgr:'SGR — Stage Gate Review', tc:'T&C — Testing & Commissioning', trouble:'Expected Trouble', handover:'Handover', data:'Data updates'};
 function openReport(r){
-  const lead = {meet:'the weekly meeting data', mom:'the MOM of the PMO Executive Meeting', wh:'the White Helmet dashboard', sgrdays:'the projects reaching SGR within the period', adhoc:'the Operating Status dashboard (projects not fully benefited from)', sgr:'the Stage Gate Review (SGR) view', tc:'the T&C (Testing & Commissioning) list', trouble:'the projects expected to move to Trouble', handover:'the Handover view', data:'the data updates panel'}[r.view];
+  const lead = {unified:'the search results', meet:'the weekly meeting data', mom:'the MOM of the PMO Executive Meeting', wh:'the White Helmet dashboard', sgrdays:'the projects reaching SGR within the period', adhoc:'the Operating Status dashboard (projects not fully benefited from)', sgr:'the Stage Gate Review (SGR) view', tc:'the T&C (Testing & Commissioning) list', trouble:'the projects expected to move to Trouble', handover:'the Handover view', data:'the data updates panel'}[r.view];
   addText(corr(r) + `Here is ${lead}:`, 'in');
-  ({meet:addMeetingTab, mom:addMOMTab, wh:(a) => (a ? addWHSearch(a) : addWHTab()), sgrdays:addSgrDays, adhoc:addOpsTab, sgr:addSgrTab, tc:addTcTab, trouble:addTroubleTab, handover:addHandoverTab, data:addDataPanel})[r.view](r.arg);
-  speakResponse({meet:'Weekly meeting data.', mom:'Minutes of the PMO executive meeting, Northwestern Cluster.', wh:'White Helmet reports and observations.', sgrdays:'Projects reaching stage gate review soon.', adhoc:'Operating status of projects not fully benefited from.', sgr:'Stage gate review. Red projects need an SGR within a week, yellow within three weeks.', tc:'Testing and commissioning, nearest to today first.', trouble:'Projects expected to move to trouble, soonest first.', handover:'Partial initial handover and initial handover projects.', data:'Data updates.'}[r.view]);
+  ({unified:addUnifiedResults, meet:addMeetingTab, mom:addMOMTab, wh:(a) => (a ? addWHSearch(a) : addWHTab()), sgrdays:addSgrDays, adhoc:addOpsTab, sgr:addSgrTab, tc:addTcTab, trouble:addTroubleTab, handover:addHandoverTab, data:addDataPanel})[r.view](r.arg);
+  speakResponse({unified:'Search results.', meet:'Weekly meeting data.', mom:'Minutes of the PMO executive meeting, Northwestern Cluster.', wh:'White Helmet reports and observations.', sgrdays:'Projects reaching stage gate review soon.', adhoc:'Operating status of projects not fully benefited from.', sgr:'Stage gate review. Red projects need an SGR within a week, yellow within three weeks.', tc:'Testing and commissioning, nearest to today first.', trouble:'Projects expected to move to trouble, soonest first.', handover:'Partial initial handover and initial handover projects.', data:'Data updates.'}[r.view]);
 }
 
 
@@ -587,7 +590,8 @@ function addMOMTab(){
    ===================================================================== */
 const MEET_CAT_AR = {projects:'مشاريع', contractors:'مقاولون', consultants:'استشاريون', statements:'مستخلصات ختامية', withdrawn:'مشاريع مسحوبة', budget:'ميزانية', audit:'ملاحظات التدقيق', minutes_actions:'إجراءات المحضر', other:'أخرى'};
 const MEET_CAT_EN = {projects:'Projects', contractors:'Contractors', consultants:'Consultants', statements:'Final statements', withdrawn:'Withdrawn projects', budget:'Budget', audit:'Audit notes', minutes_actions:'Minutes actions', other:'Other'};
-const MEET_SYN = {                                                   // English / variant words -> Arabic words used in the files
+const MEET_SYN = {
+  water:['مياه','المياه','ماء'], waste:['صرف','الصرف','صحي','الصحي'], sewer:['صرف','الصرف','صحي'], wastewater:['صرف','الصرف'], drainage:['صرف','الصرف'], km:['كم','كيلومتر'], kilometers:['كم'], kilometres:['كم'],                                                   // English / variant words -> Arabic words used in the files
   dorsh:['دورش','دورتش'], dorch:['دورش'], fcc:['فيوتشر','فيوتشير'], future:['فيوتشر','مستقبلي','مستقبلية'], consultant:['استشاري','الاستشاري','الاستشارى'], consultants:['استشاري','الاستشاري'],
   contractor:['مقاول','المقاول','شركة'], contractors:['مقاول','المقاولين','شركة'], ceiling:['أسقف','سقف','اسقف','أسقف'], ceilings:['أسقف','سقف'], cap:['سقف','أسقف'],
   supervision:['إشراف','اشراف','الإشراف','الاشراف'], audit:['تدقيق','التدقيق'], notes:['ملاحظات','ملاحظة','ملاحظات'], note:['ملاحظة','ملاحظات'],
@@ -882,4 +886,59 @@ function tileNarrowHtml(q, tab){
   const hits = tileSearch(q).filter(h => h.tab === tab), top = hits.slice(0, 3), rest = hits.slice(3);
   return `<div class="adsres-h"><b dir="rtl">${esc(tab)}</b><small>${hits.length} result(s) · ${esc(tab)}</small></div><div class="tilelist">${top.map(tileRowHtml).join('')}</div>` +
     (rest.length ? `<details class="tilemore"><summary>More results · نتائج أخرى (${rest.length})</summary><div class="tilelist">${rest.map(tileRowHtml).join('')}</div></details>` : '');
+}
+
+/* =====================================================================
+   Unified search: every tab, the meeting presentations, MOM, White Helmet, Operating Status and every project card.
+   Order: tabs first, then the list commands (status / area), then project cards.
+   Project cards match on PO, project name, project number, contractor, consultant and area.
+   ===================================================================== */
+const UNI_COMMANDS = [['troubled','متعثر','Troubled'],['delayed','متأخر','Delayed'],['ahead','متقدم','Ahead of schedule'],['ontrack','منتظم','On schedule'],['fully suspended','ايقاف كلي','Fully suspended'],['partially suspended','ايقاف جزئي','Partially suspended'],['zero progress','بدون تقدم','Zero progress'],['handover','استلام','Handover'],['terminated','انهاء تعاقد','Contract termination'],['critical','حرجة','Critical'],['Madinah','المدينة المنورة','Madinah'],['Tabuk','تبوك','Tabuk']];
+function unifiedItems(){
+  const out = [];
+  tileIndex().forEach(it => out.push({kind: 'tab', rank: 0, ar: it.ar, en: it.en, value: it.value, unit: it.unit, tab: it.tab, words: it.ar + ' ' + it.en + ' ' + it.tab}));
+  meetIndex().forEach(it => { if (it.po) return; out.push({kind: 'tab', rank: 0, ar: it.ar, en: it.en, value: '', unit: '', tab: it.src || 'tab', words: it.ar + ' ' + it.en}); });
+  UNI_COMMANDS.forEach(([key, ar, en]) => out.push({kind: 'list', rank: 1, ar, en, value: '', unit: '', tab: key, words: ar + ' ' + en + ' ' + key}));
+  if (typeof WH !== 'undefined') WH.issuers.forEach(x => out.push({kind: 'tab', rank: 0, ar: x.name, en: `White Helmet · ${x.obs} obs · ${x.rep} reports`, value: '', unit: '', tab: 'white helmet', words: x.name + ' white helmet employee issuer'}));
+  if (typeof PROJECTS !== 'undefined') PROJECTS.forEach(p => out.push({kind: 'card', rank: 2, ar: p.name, en: `PO ${p.po} · ${p.areaEn}`, value: p.pno, unit: '', tab: p.po, words: [p.po, p.pno, p.name, p.contractor, p.consultant, p.areaEn, p.area].join(' ')}));
+  return out;
+}
+function unifiedSearch(q){
+  const qt = meetToks(q).filter(t => !MEET_FILLER.has(t)); if (!qt.length) return [];
+  const forms = qt.map(t => [t, ...(MEET_SYN[t] || []).flatMap(x => meetToks(x))]);
+  const need = qt.length === 1 ? 1 : Math.max(1, Math.ceil(qt.length * 0.6));
+  const hits = [];
+  unifiedItems().forEach(it => {
+    const ws = meetToks(it.words);
+    let m = 0; forms.forEach(fs => { if (fs.some(f => adTokOK(f, ws))) m++; });
+    if (m >= need) hits.push({it, score: m / qt.length});
+  });
+  return hits.sort((a, b) => b.score - a.score || a.it.rank - b.it.rank).map(h => h.it);
+}
+function uniRowHtml(it){
+  if (it.kind === 'card') return `<div class="tilehit"><div class="th-l"><b dir="rtl">${esc(it.ar)}</b><small>${esc(it.en)} · Project no. ${esc(it.value)}</small></div><button type="button" class="optbtn tilego" data-go="${esc(it.tab)}">فتح بطاقة المشروع · Open card</button></div>`;
+  if (it.kind === 'list') return `<div class="tilehit"><div class="th-l"><b dir="rtl">${esc(it.ar)}</b><small>${esc(it.en)} · list</small></div><button type="button" class="optbtn tilego" data-go="${esc(it.tab)}">عرض القائمة · Show list</button></div>`;
+  return `<div class="tilehit"><div class="th-l"><b dir="rtl">${esc(it.ar)}</b><small>${esc(it.en)} · ${esc(it.tab)}</small></div>` +
+    (it.value !== '' && it.value !== undefined ? `<div class="th-v"><b>${typeof it.value === 'number' ? it.value.toLocaleString('en-US') : esc(String(it.value))}</b>${it.unit ? `<small>${esc(it.unit)}</small>` : ''}</div>` : '') +
+    `<button type="button" class="optbtn tilego" data-go="${esc(it.tab)}" data-tabopen="1">فتح التبويب · Open tab</button></div>`;
+}
+function unifiedHtml(q){
+  const hits = unifiedSearch(q), n = hits.length, kinds = {tab: 'التبويبات · Tabs', list: 'القوائم · Lists', card: 'بطاقات المشاريع · Project cards'};
+  const head = `<div class="adsres-h"><b dir="rtl">نتائج البحث</b><small>Search results · ${n} for “${esc(q)}”</small></div>`;
+  if (!n) return head + `<div class="rempty"><span dir="rtl">لا توجد نتائج — جرّب رقم المشروع أو كلمة من الاسم أو الجهة أو المقاول</span><br><small>No result. Try a PO, a project name, a contractor or a consultant.</small></div>`;
+  if (n > 12) {
+    const counts = {}; hits.forEach(h => counts[h.kind] = (counts[h.kind] || 0) + 1);
+    const chips = Object.keys(counts).map(k => `<button type="button" class="optbtn unarrow" data-kind="${k}" data-q="${esc(q)}">${kinds[k]} · ${counts[k]}</button>`).join('');
+    return head + `<div class="momq" dir="rtl"><b>وجدنا ${n} نتيجة. ضيّق البحث بالنوع:</b><br><small>${n} matches. Narrow by type:</small></div><div class="meetcats">${chips}</div>`;
+  }
+  const top = hits.slice(0, 3), rest = hits.slice(3);
+  return head + `<div class="tilelist">${top.map(uniRowHtml).join('')}</div>` + (rest.length ? `<details class="tilemore"><summary>More results · نتائج أخرى (${rest.length})</summary><div class="tilelist">${rest.map(uniRowHtml).join('')}</div></details>` : '');
+}
+function wireUnified(root){
+  root.querySelectorAll('.tilego').forEach(b => b.addEventListener('click', e => { e.preventDefault(); handleQuery(b.dataset.go); }));
+  root.querySelectorAll('.unarrow').forEach(b => b.addEventListener('click', e => { e.preventDefault(); const k = b.dataset.kind; const hits = unifiedSearch(b.dataset.q).filter(h => h.kind === k); const top = hits.slice(0, 3), rest = hits.slice(3); root.innerHTML = `<div class="adsres-h"><b dir="rtl">${kinds2[k]}</b><small>${hits.length} result(s)</small></div><div class="tilelist">${top.map(uniRowHtml).join('')}</div>` + (rest.length ? `<details class="tilemore"><summary>More results · نتائج أخرى (${rest.length})</summary><div class="tilelist">${rest.map(uniRowHtml).join('')}</div></details>` : ''); wireUnified(root); }));
+}
+const kinds2 = {tab: 'التبويبات · Tabs', list: 'القوائم · Lists', card: 'بطاقات المشاريع · Project cards'};
+function addUnifiedResults(q){
+  const card = repCard('نتائج البحث', 'Search results', 'All tabs and project cards'); card.querySelector('.rbody').innerHTML = unifiedHtml(q); wireUnified(card); finishReport(card);
 }
