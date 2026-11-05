@@ -922,23 +922,36 @@ function uniRowHtml(it){
     (it.value !== '' && it.value !== undefined ? `<div class="th-v"><b>${typeof it.value === 'number' ? it.value.toLocaleString('en-US') : esc(String(it.value))}</b>${it.unit ? `<small>${esc(it.unit)}</small>` : ''}</div>` : '') +
     `<button type="button" class="optbtn tilego" data-go="${esc(it.tab)}" data-tabopen="1">فتح التبويب · Open tab</button></div>`;
 }
-function unifiedHtml(q){
-  const hits = unifiedSearch(q), n = hits.length, kinds = {tab: 'التبويبات · Tabs', list: 'القوائم · Lists', card: 'بطاقات المشاريع · Project cards'};
-  const head = `<div class="adsres-h"><b dir="rtl">نتائج البحث</b><small>Search results · ${n} for “${esc(q)}”</small></div>`;
-  if (!n) return head + `<div class="rempty"><span dir="rtl">لا توجد نتائج — جرّب رقم المشروع أو كلمة من الاسم أو الجهة أو المقاول</span><br><small>No result. Try a PO, a project name, a contractor or a consultant.</small></div>`;
-  if (n > 12) {
-    const counts = {}; hits.forEach(h => counts[h.kind] = (counts[h.kind] || 0) + 1);
-    const chips = Object.keys(counts).map(k => `<button type="button" class="optbtn unarrow" data-kind="${k}" data-q="${esc(q)}">${kinds[k]} · ${counts[k]}</button>`).join('');
-    return head + `<div class="momq" dir="rtl"><b>وجدنا ${n} نتيجة. ضيّق البحث بالنوع:</b><br><small>${n} matches. Narrow by type:</small></div><div class="meetcats">${chips}</div>`;
-  }
+const UNI_SECTIONS = [['portfolio','Projects Portfolio','المحفظة والمشاريع'],['meet','Weekly Meeting','الاجتماع الأسبوعي'],['sgr','SGR','بوابات المراجعة'],['wh','White Helmet','وايت هيلمت'],['all','All Sections','كل الأقسام']];
+function sectionOf(it){
+  if (it.kind === 'card' || it.kind === 'list') return 'portfolio';
+  const t = String(it.tab || '');
+  if (t.startsWith('white helmet')) return 'wh';
+  if (t === 'sgr') return 'sgr';
+  if (t === 'weekly meeting' || t === 'MOM' || /محضر|التقارير/.test(t)) return 'meet';
+  return 'portfolio';
+}
+function uniSectionHits(q, sec){ const h = unifiedSearch(q); return sec === 'all' ? h : h.filter(x => sectionOf(x) === sec); }
+function uniResultsBody(q, sec){
+  const hits = uniSectionHits(q, sec), label = (UNI_SECTIONS.find(s => s[0] === sec) || [])[1] || '';
+  const head = `<div class="adsres-h"><b dir="rtl">${label}</b><small>${label} · ${hits.length} result(s) for “${esc(q)}”</small></div>`;
+  if (!hits.length) return head + `<div class="rempty"><span dir="rtl">لا توجد نتائج في هذا القسم</span><br><small>No result in this section. Try another section.</small></div>`;
   const top = hits.slice(0, 3), rest = hits.slice(3);
-  return head + `<div class="tilelist">${top.map(uniRowHtml).join('')}</div>` + (rest.length ? `<details class="tilemore"><summary>More results · نتائج أخرى (${rest.length})</summary><div class="tilelist">${rest.map(uniRowHtml).join('')}</div></details>` : '');
+  return head + `<div class="tilelist">${top.map(uniRowHtml).join('')}</div>` + (rest.length ? `<details class="tilemore"><summary>More results · نتائج أخرى (${rest.length})</summary><div class="tilelist">${rest.map(uniRowHtml).join('')}</div></details>` : '') +
+    `<div class="unichange"><button type="button" class="optbtn unichg" data-q="${esc(q)}">تغيير القسم · Change section</button></div>`;
+}
+function unifiedHtml(q){
+  const all = unifiedSearch(q);
+  if (!all.length) return `<div class="adsres-h"><b dir="rtl">نتائج البحث</b><small>Search results · 0 for “${esc(q)}”</small></div><div class="rempty"><span dir="rtl">لا توجد نتائج — جرّب رقم المشروع أو كلمة من الاسم أو الجهة أو المقاول</span><br><small>No result. Try a PO, a project name, a contractor or a consultant.</small></div>`;
+  const chips = UNI_SECTIONS.map(([k, en, ar]) => { const n = k === 'all' ? all.length : all.filter(x => sectionOf(x) === k).length; return `<button type="button" class="optbtn unisec" data-sec="${k}" data-q="${esc(q)}"><span dir="rtl">${ar}</span><small>${en} · ${n}</small></button>`; }).join('');
+  return `<div class="adsres-h"><b dir="rtl">أين تريد البحث؟</b><small>Where should I search? · ${all.length} match(es) for “${esc(q)}”</small></div><div class="meetcats">${chips}</div>`;
 }
 function wireUnified(root){
   root.querySelectorAll('.tilego').forEach(b => b.addEventListener('click', e => { e.preventDefault(); handleQuery(b.dataset.go); }));
-  root.querySelectorAll('.unarrow').forEach(b => b.addEventListener('click', e => { e.preventDefault(); const k = b.dataset.kind; const hits = unifiedSearch(b.dataset.q).filter(h => h.kind === k); const top = hits.slice(0, 3), rest = hits.slice(3); root.innerHTML = `<div class="adsres-h"><b dir="rtl">${kinds2[k]}</b><small>${hits.length} result(s)</small></div><div class="tilelist">${top.map(uniRowHtml).join('')}</div>` + (rest.length ? `<details class="tilemore"><summary>More results · نتائج أخرى (${rest.length})</summary><div class="tilelist">${rest.map(uniRowHtml).join('')}</div></details>` : ''); wireUnified(root); }));
+  const show = (q, sec) => { const host = root.querySelector('.unibody') || root; host.innerHTML = uniResultsBody(q, sec); wireUnified(host); };
+  root.querySelectorAll('.unisec').forEach(b => b.addEventListener('click', e => { e.preventDefault(); root.innerHTML = `<div class="unibody"></div>`; const host = root.querySelector('.unibody'); host.innerHTML = uniResultsBody(b.dataset.q, b.dataset.sec); wireUnified(host); }));
+  root.querySelectorAll('.unichg').forEach(b => b.addEventListener('click', e => { e.preventDefault(); root.innerHTML = unifiedHtml(b.dataset.q); wireUnified(root); }));
 }
-const kinds2 = {tab: 'التبويبات · Tabs', list: 'القوائم · Lists', card: 'بطاقات المشاريع · Project cards'};
 function addUnifiedResults(q){
   const card = repCard('نتائج البحث', 'Search results', 'All tabs and project cards'); card.querySelector('.rbody').innerHTML = unifiedHtml(q); wireUnified(card); finishReport(card);
 }
