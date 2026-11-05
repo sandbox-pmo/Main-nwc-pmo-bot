@@ -397,6 +397,8 @@ function routeAssist(q){
   return {type:'list', list, label: `${key} consultant`, assist:true};
 }
 function assistOffer(qRaw){                                   // the bot cannot place the request: search all the app's text first, then offer choices
+  const th = tileSearch(qRaw).length;
+  if (th) { const card = repCard('نتائج البحث في التبويبات', 'Tile search', 'Figures shown in the tiles of all tabs'); card.querySelector('.rbody').innerHTML = tileResultsHtml(qRaw); wireTileRes(card); finishReport(card); return; }
   const hits = typeof meetSearch === 'function' ? meetSearch(qRaw) : [];
   if (hits.length) { const card = repCard('Search results', 'نتائج البحث', 'All the app data'); card.querySelector('.rbody').innerHTML = meetResultsHtml(qRaw); wireMeet(card, qRaw); finishReport(card); return; }
   const ar = isArabic(qRaw);
@@ -783,4 +785,101 @@ function addOpsTab(){
     rb.querySelectorAll('.opsopen').forEach(bt => bt.addEventListener('click', e => { e.preventDefault(); handleQuery(bt.dataset.po); }));
   };
   paint(); finishReport(card);
+}
+
+/* =====================================================================
+   Tile search: the figures shown in the tiles of every tab, searchable in Arabic and English.
+   Top 3 results, the rest behind a collapsed "More results"; narrow down when there are many.
+   ===================================================================== */
+function tileIndex(){
+  const T = todayDate(), out = [], add = (tab, ar, en, value, unit) => out.push({tab, ar, en, value, unit: unit || ''});
+  if (typeof PORTFOLIO !== 'undefined') {
+    const P = PORTFOLIO;
+    add('portfolio', 'عدد المشاريع', 'Total projects', P.total);
+    add('portfolio', 'قيمة العقود المعدلة مع الضريبة', 'Portfolio budget with taxes', P.budgetM, 'M SAR');
+    add('portfolio', 'النسبة المخططة', 'Planned %', P.planned, '%');
+    add('portfolio', 'النسبة الفعلية', 'Performance %', P.actual, '%');
+    add('portfolio', 'التباين', 'Variance %', P.variance, '%');
+    add('portfolio', 'المستخلصات المرفوعة', 'Approved invoices', P.approvedCount + ' · ' + P.approvedM + ' M SAR');
+    add('portfolio', 'المستخلصات المصروفة', 'Paid invoices', P.paidCount + ' · ' + P.paidM + ' M SAR');
+    const S = P.status || {};
+    [['ahead','متقدم','Ahead of schedule'],['ontrack','منتظم','On schedule'],['delay','متأخر','Delayed'],['trouble','متعثر','Troubled'],['susp','ايقاف كلي','Fully suspended'],['handover','استلام ابتدائي','Initial handover'],['terminated','انهاء تعاقد','Contract termination']]
+      .forEach(([k, ar, en]) => add('portfolio', ar, en, S[k] || 0));
+  }
+  if (typeof PORTFOLIOS !== 'undefined') ['madinah','tabuk'].forEach(k => { const s = PORTFOLIOS[k]; if (s) { add(k === 'madinah' ? 'portfolio madinah' : 'portfolio tabuk', k === 'madinah' ? 'المدينة المنورة · عدد المشاريع' : 'تبوك · عدد المشاريع', k === 'madinah' ? 'Madinah projects' : 'Tabuk projects', s.total); } });
+  if (typeof PROJECTS !== 'undefined') {
+    const c = {red: 0, yellow: 0, green: 0, grey: 0};
+    PROJECTS.forEach(p => { const f = sgrFlag(gateInfo(p, T)); c[f.k] = (c[f.k] || 0) + 1; });
+    add('sgr', 'مراجعة بوابات — حمراء (أقل من أسبوع)', 'SGR red (within 1 week)', c.red);
+    add('sgr', 'مراجعة بوابات — صفراء (أقل من 3 أسابيع)', 'SGR yellow (within 3 weeks)', c.yellow);
+    add('sgr', 'مراجعة بوابات — خضراء', 'SGR green', c.green);
+    add('sgr', 'بدون بوابة نشطة', 'No active gate', c.grey);
+    add('expected trouble', 'المتوقع تعثرها', 'Expected trouble', troubleRows(T).length);
+    add('tc', 'الاختبار والتشغيل التجريبي', 'Testing & commissioning', tcRows(T).rows.length);
+    add('handover', 'استلام جزئي', 'Partial initial handover', PROJECTS.filter(p => handoverCat(p) === 'partial').length);
+    add('handover', 'استلام ابتدائي', 'Initial handover', PROJECTS.filter(p => handoverCat(p) === 'initial').length);
+  }
+  if (typeof WH !== 'undefined') { const k = WH.kpi;
+    add('white helmet', 'إجمالي الملاحظات', 'Total observations', k.obs);
+    add('white helmet', 'إجمالي التقارير', 'Total reports', k.reports);
+    add('white helmet', 'المصدرون', 'Issuers involved', k.issuers);
+    add('white helmet', 'المشاريع المشاركة', 'Projects involved', k.projects);
+    add('white helmet', 'المقاولون المشاركون', 'Contractors involved', k.contractors);
+    add('white helmet', 'مخططات الطوابق المرفوعة', 'Floor plans uploaded', k.floors); }
+  if (typeof MEET !== 'undefined') { const F = MEET.figures;
+    add('weekly meeting', 'مشروع للإغلاق', 'Projects to close', F.to_close, 'مشروع');
+    add('weekly meeting', 'مغلق نهائياً', 'Closed finally', F.closed, F.closed_val + ' M SAR');
+    add('weekly meeting', 'بانتظار المستخلص الختامي', 'Awaiting final statement', F.no_statement, F.no_statement_val + ' M SAR');
+    add('weekly meeting', 'غير مستوفية لشروط الإغلاق', 'Not meeting closing criteria', F.not_meeting_criteria);
+    add('weekly meeting', 'لم تتم التسوية مع المقاول', 'Not settled with contractor', F.not_settled);
+    add('weekly meeting', 'ملاحظة تدقيق داخلي', 'Internal audit notes', F.audit_notes);
+    add('weekly meeting', 'مشروع تحت الإجراء · القطاع الشمالي الغربي', 'NW projects under procedure', F.nw_under_procedure);
+    add('weekly meeting', 'المشاريع المسلمة المرتبطة', 'Linked delivered projects', F.linked_delivered, 'M SAR');
+    add('weekly meeting', 'تكلفة الإشراف طبقا للنهاية التعاقدية', 'Supervision cost (contract end)', F.supervision_cost_end, 'M SAR');
+    add('weekly meeting', 'خطوط وشبكات المياه (كم)', 'Water lines & networks (km)', F.km_water, 'كم');
+    add('weekly meeting', 'خطوط وشبكات الصرف الصحي (كم)', 'Waste water lines & networks (km)', F.km_sewer, 'كم');
+    add('weekly meeting', 'إجمالي الكيلومترات المنجزة', 'Total kilometres completed', (F.km_water || 0) + (F.km_sewer || 0), 'كم'); }
+  if (typeof OPS !== 'undefined') OPS.groups.forEach((g, i) => { add('operating status', g.title, g.titleEn, g.rows.length, g.totalValue + ' M SAR'); });
+  if (typeof MOM !== 'undefined') { const n = MOM.groups.reduce((a, g) => a + g.subs.reduce((b, s) => b + s.updates.length, 0), 0); add('MOM', 'محضر الاجتماع · تحديثات الإجراءات', 'MOM · action updates', n); }
+  return out;
+}
+function tileSearch(q){
+  const qt = meetToks(q).filter(t => !MEET_FILLER.has(t)); if (!qt.length) return [];
+  const forms = qt.map(t => [t, ...(MEET_SYN[t] || []).flatMap(x => meetToks(x))]);
+  const need = qt.length === 1 ? 1 : Math.max(1, Math.ceil(qt.length * 0.6));
+  const hits = [];
+  tileIndex().forEach(it => {
+    const ws = meetToks(it.ar + ' ' + it.en + ' ' + it.tab);
+    let m = 0; forms.forEach(fs => { if (fs.some(f => adTokOK(f, ws))) m++; });
+    if (m >= need) hits.push({it, score: m / qt.length});
+  });
+  return hits.sort((a, b) => b.score - a.score).map(h => h.it);
+}
+function tileRowHtml(it){
+  const tabLabel = it.tab;
+  return `<div class="tilehit"><div class="th-l"><b dir="rtl">${esc(it.ar)}</b><small>${esc(it.en)}</small></div>` +
+    `<div class="th-v"><b>${typeof it.value === 'number' ? it.value.toLocaleString('en-US') : esc(String(it.value))}</b>${it.unit ? `<small>${esc(it.unit)}</small>` : ''}</div>` +
+    `<button type="button" class="optbtn tilego" data-tab="${esc(tabLabel)}">فتح التبويب · Open tab</button></div>`;
+}
+function tileResultsHtml(q){
+  const hits = tileSearch(q), n = hits.length;
+  const head = `<div class="adsres-h"><b dir="rtl">نتائج البحث في التبويبات</b><small>Tile search · ${n} result(s) for “${esc(q)}”</small></div>`;
+  if (!n) return head + `<div class="rempty"><span dir="rtl">لا توجد نتائج</span><br><small>No result. Try the words shown in the tiles, in Arabic or English.</small></div>`;
+  if (n > 12) {                                                          // too many: narrow down by tab
+    const counts = {}; hits.forEach(h => counts[h.tab] = (counts[h.tab] || 0) + 1);
+    const chips = Object.keys(counts).sort((a, b) => counts[b] - counts[a]).map(t => `<button type="button" class="optbtn tilenarrow" data-tab="${esc(t)}" data-q="${esc(q)}">${esc(t)} · ${counts[t]}</button>`).join('');
+    return head + `<div class="momq" dir="rtl"><b>وجدنا ${n} نتيجة. أي تبويب تقصد؟</b><br><small>${n} matches. Which tab do you mean?</small></div><div class="meetcats">${chips}</div>`;
+  }
+  const top = hits.slice(0, 3), rest = hits.slice(3);
+  return head + `<div class="tilelist">${top.map(tileRowHtml).join('')}</div>` +
+    (rest.length ? `<details class="tilemore"><summary>More results · نتائج أخرى (${rest.length})</summary><div class="tilelist">${rest.map(tileRowHtml).join('')}</div></details>` : '');
+}
+function wireTileRes(root){
+  root.querySelectorAll('.tilego').forEach(b => b.addEventListener('click', e => { e.preventDefault(); handleQuery(b.dataset.tab); }));
+  root.querySelectorAll('.tilenarrow').forEach(b => b.addEventListener('click', e => { e.preventDefault(); root.innerHTML = tileNarrowHtml(b.dataset.q, b.dataset.tab); wireTileRes(root); }));
+}
+function tileNarrowHtml(q, tab){
+  const hits = tileSearch(q).filter(h => h.tab === tab), top = hits.slice(0, 3), rest = hits.slice(3);
+  return `<div class="adsres-h"><b dir="rtl">${esc(tab)}</b><small>${hits.length} result(s) · ${esc(tab)}</small></div><div class="tilelist">${top.map(tileRowHtml).join('')}</div>` +
+    (rest.length ? `<details class="tilemore"><summary>More results · نتائج أخرى (${rest.length})</summary><div class="tilelist">${rest.map(tileRowHtml).join('')}</div></details>` : '');
 }
