@@ -547,23 +547,28 @@ function routeMOM(q){
   if (!t.some(w => MOM_WORDS.includes(w))) return null;
   return {type:'report', view:'mom'};
 }
-function momCardHtml(a, i){
-  const ups = a.updates, first = ups.slice(0, 3), rest = ups.slice(3);
+function momUpdates(ups){
+  if (!ups.length) return '<div class="momnone">No dated update in the highlighted text of the minutes</div>';
   const li = u => `<li><span class="momdc">${esc(u.d)}</span><span class="momt">${esc(u.t)}</span></li>`;
-  return `<div class="momcard"><div class="momah" dir="rtl">${i + 1}. ${esc(a.action)}</div>` +
-    `<div class="momkv"><span>Owner: ${esc(a.owner || '—')}</span><span>${esc(a.created)} → ${esc(a.expected)}</span></div>` +
-    `<div class="momsub">Updates · newest first</div><ol class="momlist">${first.map(li).join('')}</ol>` +
-    (rest.length ? `<div class="momrest" hidden><ol class="momlist">${rest.map(li).join('')}</ol></div><button type="button" class="optbtn mommore" aria-expanded="false">Show ${rest.length} earlier updates ▾</button>` : '') + `</div>`;
+  const first = ups.slice(0, 3), rest = ups.slice(3);
+  return `<ol class="momlist">${first.map(li).join('')}</ol>` + (rest.length ? `<div class="momrest" hidden><ol class="momlist">${rest.map(li).join('')}</ol></div><button type="button" class="optbtn mommore" aria-expanded="false">Show ${rest.length} earlier updates ▾</button>` : '');
+}
+function momGroupHtml(g, i){
+  const hasSubs = g.subs.length > 1 || (g.subs[0] && g.subs[0].title);
+  const subs = g.subs.map((s, j) => hasSubs
+    ? `<div class="momsub2"><div class="momsh"><span class="momnum">${j + 1}</span><b dir="rtl">${esc(s.title)}</b></div>${momUpdates(s.updates)}</div>`
+    : `<div class="momsub2">${momUpdates(s.updates)}</div>`).join('');
+  return `<div class="momcard"><div class="momah" dir="rtl">${i + 1}. ${esc(g.title)}</div>${subs}</div>`;
 }
 function addMOMTab(){
   if (typeof MOM === 'undefined') { const c = repCard('MOM', 'محضر', 'Minutes not loaded yet — drop the minutes .docx in the drop folder.'); finishReport(c); return; }
   const card = repCard('MOM · PMO Executive Meeting', 'محضر اجتماع · الاجتماع الدوري لقطاع المشاريع', `Northwestern Cluster highlights · meeting of ${esc(MOM.meeting)} · latest update ${esc(MOM.latest)}`);
   const rb = card.querySelector('.rbody');
   rb.innerHTML = `<div class="momhead"><b>${esc(MOM.title)}</b><b dir="rtl">${esc(MOM.titleAr)}</b></div>` +
-    `<div class="momgrid">${MOM.actions.map(momCardHtml).join('')}</div>`;
+    `<div class="momgrid">${MOM.groups.map(momGroupHtml).join('')}</div>`;
   rb.querySelectorAll('.mommore').forEach(btn => btn.addEventListener('click', () => {
     const box = btn.previousElementSibling, open = box.hidden; box.hidden = !open;
-    btn.textContent = open ? 'Show less ▴' : btn.textContent.replace('Show', 'Show').replace(/Show.*/, `Show ${box.querySelectorAll('li').length} earlier updates ▾`); btn.setAttribute('aria-expanded', open);
+    btn.textContent = open ? 'Show less ▴' : `Show ${box.querySelectorAll('li').length} earlier updates ▾`; btn.setAttribute('aria-expanded', open);
   }));
   finishReport(card);
 }
