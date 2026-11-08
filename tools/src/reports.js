@@ -606,6 +606,7 @@ const MEET_SYN = {
   northwest:['الشمالي','الغربي','شمالي','غربي'], madinah:['المدينة','المدينة المنورة'], tabuk:['تبوك'], riyadh:['الرياض'], paid:['صرف','المصروف'], unpaid:['صرف'],
 };
 const UNI_VOCAB = {
+  guests:['ضيوف','الرحمن'], guest:['ضيوف','الرحمن'], pilgrims:['ضيوف','الرحمن','حجاج'], hajj:['ضيوف','الرحمن','حج'], umrah:['ضيوف','الرحمن','عمرة'], coastal:['ساحلية','الساحلية','الساحلي'], envelope:['سقف','أسقف','السقف'], budget:['ميزانية','الميزانية','معتمد','معتمدة'], approved:['معتمد','معتمدة'], private:['القطاع الخاص','خاص'], remaining:['المتبقي','متبقي'], urgent:['ملحة','ملحه','ملحة'],
   airport:['مطار','المطار','مطارات'], airports:['مطار','مطارات'], road:['طريق','الطريق','طرق'], roads:['طرق','طريق'], school:['مدرسة','مدرسه'], hospital:['مستشفى','مستشفي'],
   tank:['خزان','خزانات'], tanks:['خزانات','خزان'], reservoir:['خزان','خزانات'], pump:['ضخ','الضخ','محطة الضخ'], pumping:['ضخ','الضخ'], station:['محطة','محطات'], stations:['محطات','محطة'],
   treatment:['معالجة','المعالجة'], plant:['محطة','مصنع','معالجة'], sewer:['صرف','الصرف','صحي'], sewage:['صرف','الصرف','صحي'], drainage:['صرف','الصرف'], wastewater:['صرف','الصرف'],
@@ -924,6 +925,16 @@ function unifiedItems(){
   const out = [];
   tileIndex().forEach(it => out.push({kind: 'tab', rank: 0, ar: it.ar, en: it.en, value: it.value, unit: it.unit, tab: it.tab, words: it.ar + ' ' + it.en + ' ' + it.tab}));
   meetIndex().forEach(it => { if (it.po) return; out.push({kind: 'tab', rank: 0, ar: it.ar, en: it.en, value: '', unit: '', tab: it.src || 'tab', words: it.ar + ' ' + it.en}); });
+  (function walk(n, path){
+    if (!n) return;
+    const here = path ? path + ' › ' : '';
+    out.push({kind: 'tab', rank: 0, ar: n.label.ar, en: `${n.label.en} · Strategic View`, value: n.count !== undefined ? n.count : '', unit: n.count !== undefined ? 'مشروع · projects' : '', tab: 'strategic', words: `${n.label.ar} ${n.label.en} ${n.count !== undefined ? n.count + ' projects مشروع' : ''} ${n.bn} bn SAR مليار ريال ${n.bn} strategic view future projects مستقبلية ${here}${n.note || ''}`});
+    (n.kids || []).forEach(k => walk(k, here + n.label.ar));
+  })(STRAT_TREE, ''); (function walk2(n, path){ if (!n) return; (n.kids || []).forEach(k => walk2(k, path)); })(STRAT_APPROVED, '');
+  [STRAT_APPROVED].forEach(n => { (function walk(x, path){
+    out.push({kind: 'tab', rank: 0, ar: x.label.ar, en: `${x.label.en} · Strategic View`, value: x.count, unit: 'مشروع · projects', tab: 'strategic', words: `${x.label.ar} ${x.label.en} ${x.count} projects ${x.bn} bn SAR مليار ريال approved budgets معتمدة التكاليف strategic view`});
+    (x.kids || []).forEach(k => walk(k, x.label.ar));
+  })(n, ''); });
   UNI_COMMANDS.forEach(([key, ar, en]) => out.push({kind: 'list', rank: 1, ar, en, value: '', unit: '', tab: key, words: ar + ' ' + en + ' ' + key}));
   if (typeof WH !== 'undefined') WH.issuers.forEach(x => out.push({kind: 'tab', rank: 0, ar: x.name, en: `White Helmet · ${x.obs} obs · ${x.rep} reports`, value: '', unit: '', tab: 'white helmet', words: x.name + ' white helmet employee issuer'}));
   if (typeof PROJECTS !== 'undefined') PROJECTS.forEach(p => out.push({kind: 'card', rank: 2, ar: p.name, en: `PO ${p.po} · ${p.areaEn}`, value: p.pno, unit: '', tab: p.po, words: [p.po, p.pno, p.name, p.contractor, p.consultant, p.areaEn, p.area].join(' ')}));
@@ -964,6 +975,7 @@ function sectionOf(it){
   const t = String(it.tab || '');
   if (t.startsWith('white helmet')) return 'wh';
   if (t === 'sgr') return 'sgr';
+  if (t === 'strategic') return 'portfolio';
   if (t === 'weekly meeting' || t === 'MOM' || /محضر|التقارير/.test(t)) return 'meet';
   return 'portfolio';
 }
