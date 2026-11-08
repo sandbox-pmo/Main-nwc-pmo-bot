@@ -43,6 +43,13 @@ SPEC = [
     ('إغلاق ملاحظات فريق التدقيق الداخلي (16 ملاحظة)', [
         ('', r'[إا]غلاق ملاحظات فريق التدقيق الداخلي')]),
 ]
+MEET_DATE = re.compile(r'التاريخ[^\d]*(\d{1,2})\s*[–-]\s*(\d{1,2})\s*[–-]\s*(\d{4})')
+def meeting_iso(path):
+    d = docx.Document(path)
+    for p in d.paragraphs:
+        m = MEET_DATE.search(p.text)
+        if m: return f"{m.group(3)}-{int(m.group(2)):02d}-{int(m.group(1)):02d}"
+    return None
 def build(path):
     d = docx.Document(path)
     table = next(t for t in d.tables if any('الإجراء' in c.text for c in t.rows[0].cells))
@@ -58,9 +65,18 @@ def build(path):
             r = find(pattern)
             g['subs'].append({'title': stitle, 'updates': updates_of(r.cells[5]), 'owner': clean(r.cells[2].text), 'created': nice(iso_of(clean(r.cells[3].text))), 'expected': nice(iso_of(clean(r.cells[4].text)))})
         groups.append(g)
+    # new highlighted actions (not in the fixed groups above): each gets its own heading, named by its action
+    fixed_patterns = [pt for _, subs in SPEC for _, pt in subs]
+    for r in rows:
+        yl = [y for p in r.cells[5].paragraphs for y in yellow_text(p)]
+        if not any(iso_of(y) for y in yl): continue
+        text = clean(r.cells[1].text) or clean(r.cells[5].text[:200])
+        if any(re.search(pt, clean(r.cells[1].text)) or re.search(pt, clean(r.cells[5].text[:200])) for pt in fixed_patterns): continue
+        title = clean(re.sub(r'^(أولا[ً]?|ثانيا[ً]?|ثالثا[ً]?)\s*:?\s*', '', text.split('الاعداد')[0]))[:140]
+        groups.append({'title': title, 'subs': [{'title': '', 'updates': updates_of(r.cells[5]), 'owner': clean(r.cells[2].text), 'created': nice(iso_of(clean(r.cells[3].text))), 'expected': nice(iso_of(clean(r.cells[4].text)))}]})
     all_iso = [u['iso'] for g in groups for s in g['subs'] for u in s['updates']]
     return {'title': 'MOM · PMO Executive Meeting · Northwestern Cluster', 'titleAr': 'محضر اجتماع · الاجتماع الدوري لقطاع المشاريع · القطاع الشمالي الغربي',
-            'meeting': nice('2026-10-14'), 'latest': nice(max(all_iso)) if all_iso else '—', 'groups': groups}
+            'meeting': nice(meeting_iso(path) or '2026-10-14'), 'latest': nice(max(all_iso)) if all_iso else '—', 'groups': groups}
 def js(path):
     dd = build(path); return 'const MOM = ' + json.dumps(dd, ensure_ascii=False, separators=(',', ':')) + ';\n', dd
 if __name__ == '__main__':

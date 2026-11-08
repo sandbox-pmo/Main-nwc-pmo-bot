@@ -189,7 +189,7 @@ details.gdist{direction:ltr; text-align:left;} .gdist .gd{display:flex; gap:9px;
 .stsum{display:flex; align-items:center; gap:8px; padding:10px;}
 .stn{flex-shrink:0; min-width:34px; height:34px; border-radius:50%; color:#fff; font-weight:800; font-size:13px; display:inline-flex; align-items:center; justify-content:center;}
 .stt{flex:1; min-width:0; display:flex; flex-direction:column; gap:1px;} .stt b{font-size:16px; font-weight:800; color:var(--text); text-align:right; line-height:1.35;} .stt small{font-size:10px; color:var(--muted); direction:ltr; text-align:left;} .stc{font-size:11px; color:var(--muted); text-align:right;}
-.stnode.stroot > summary .stt b{color:#fff; font-size:17px;} .stnode.stroot > summary .stt small, .stnode.stroot > summary .stc{color:#cfe8f5;}
+.stnode.stroot > summary .stt b, .stnode.stroot > summary .stt b *{color:#ffffff !important; font-size:17px;} .stnode.stroot > summary .stt small, .stnode.stroot > summary .stc{color:#ffffff !important;} .stnode.stroot > summary .stn{background:#ffffff !important; color:#0E3F66 !important;} .stnode.stroot > summary .stchev{color:#ffffff !important;}
 .stv{flex-shrink:0; min-width:72px; border-radius:12px; padding:6px 8px; color:#fff; font-weight:800; font-size:16px; text-align:center; direction:ltr;} .stv em{display:block; font-style:normal; font-size:9px; font-weight:600; opacity:.9;}
 .stchev{font-size:15px; color:var(--muted);} .stnode.stroot .stchev{color:#cfe8f5;} .stnode[open] > summary .stchev{transform:rotate(180deg);}
 .stkids{margin:0 10px 10px 16px; padding-left:10px; border-left:2px dashed var(--line); display:flex; flex-direction:column; gap:2px;}

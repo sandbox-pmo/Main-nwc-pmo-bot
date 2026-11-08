@@ -87,6 +87,11 @@ def main():
     try:
         cands = candidates(drop, root)
         cands.setdefault('wh', []); cands.setdefault('mom', []); cands.setdefault('minutes', []); cands.setdefault('support', [])
+        try:
+            import mom as _mm
+            cands['mom'].sort(key=lambda p: _mm.meeting_iso(p) or '', reverse=True)     # newest meeting first
+        except Exception:
+            pass
         missing = [k for k, v in cands.items() if not v and k in ('weekly', 'gates')]
         if missing:
             raise ingest.IngestError('the drop folder needs both files; missing: ' + ', '.join('weekly progress file' if m == 'weekly' else 'gates schedule file' for m in missing))

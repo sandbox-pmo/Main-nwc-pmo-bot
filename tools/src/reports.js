@@ -1034,16 +1034,15 @@ function stratNode(n){
   const tile = `<span class="stv" style="background:${n.color}">${n.bn.toFixed(2)}<em>bn SAR</em></span>`;
   const cnt = n.count !== undefined ? `<span class="stc">${n.count} مشروع · ${n.count} project${n.count === 1 ? '' : 's'}</span>` : '';
   const head = `<span class="stn" style="background:${n.color}">${n.count !== undefined ? n.count : ''}</span><span class="stt"><b dir="rtl">${esc(n.label.ar)}</b><small>${esc(n.label.en)}${n.note ? ' · ' + esc(n.note) : ''}</small>${cnt}</span>${tile}`;
-  if (n.kids) return `<details class="stnode${n.root ? ' stroot' : ''}" style="--c:${n.color}" open><summary>${head}<span class="stchev">▾</span></summary><div class="stkids">${n.kids.map(stratNode).join('')}</div></details>`;
+  if (n.kids) return `<details class="stnode${n.root ? ' stroot' : ''}" style="--c:${n.color}"><summary>${head}<span class="stchev">▾</span></summary><div class="stkids">${n.kids.map(stratNode).join('')}</div></details>`;
   return `<div class="stleaf" style="--c:${n.color}"><div class="stsum">${head}</div></div>`;
 }
 function addStrategicTab(){
-  const card = repCard('الرؤية الاستراتيجية', 'Strategic View', 'Future projects · slides 38–42 · values in billion SAR');
+  const card = repCard('الرؤية الاستراتيجية', 'Strategic View', '');
   card.querySelector('.rbody').innerHTML =
     `<div class="strat-legend"><span>الأرقام بالمليار ريال · values in bn SAR</span><span>اضغط على أي فئة للطي أو الفتح · tap a category to collapse or expand</span></div>` +
     stratNode(STRAT_TREE) +
     `<div class="stlab">مشاريع معتمدة التكاليف · على الـ519 مشروعاً · on top of the 519</div>` +
     stratNode(STRAT_APPROVED) +
-    `<div class="rrule">Figures from slides 38–42 of the 28 Oct 2026 presentation. Subtotals are sums of the slide figures. Two labels need confirmation (urgent groups, 60 and 22); project lists per category will follow once the mapping is confirmed.</div>`;
   finishReport(card);
 }
