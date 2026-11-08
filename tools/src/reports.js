@@ -312,6 +312,7 @@ function renderActions(card, base){                                         // t
 
 /* ---------- typed instructions that open these screens ---------- */
 function routeReport(q){
+  if (/^(strategic|strategy|strategic view|استراتيجي|الرؤية الاستراتيجية|الاستراتيجية)$/.test(nrm(String(q||'')).trim())) return {type:'report', view:'strat', arg:null};
   const raw = String(q || '').trim(), toks = nrm(raw).split(/\s+/).filter(Boolean);
   const poLike = toks.some(t => /\d{4,}/.test(t)), special = ['help','portfolio','sgr','tc','t&c','handover','critical','data','mom','meeting','minutes','helmet','white','wh'].includes(toks.join(' '));
   let exactFirst = null;
@@ -345,12 +346,12 @@ function routeReport(q){
   if(any('بيانات','البيانات','الملفات','ملفات','الملف') && any('تحديث','التحديث','رفع')) return {type:'report', view:'data'};
   return null;
 }
-const REPORT_LABEL = {unified:'Search results', meet:'Weekly Meeting Data', mom:'MOM · PMO Executive Meeting', wh:'White Helmet', sgrdays:'SGR within days', adhoc:'Operating Status', sgr:'SGR — Stage Gate Review', tc:'T&C — Testing & Commissioning', trouble:'Expected Trouble', handover:'Handover', data:'Data updates'};
+const REPORT_LABEL = {strat:'Strategic View', unified:'Search results', meet:'Weekly Meeting Data', mom:'MOM · PMO Executive Meeting', wh:'White Helmet', sgrdays:'SGR within days', adhoc:'Operating Status', sgr:'SGR — Stage Gate Review', tc:'T&C — Testing & Commissioning', trouble:'Expected Trouble', handover:'Handover', data:'Data updates'};
 function openReport(r){
-  const lead = {unified:'the search results', meet:'the weekly meeting data', mom:'the MOM of the PMO Executive Meeting', wh:'the White Helmet dashboard', sgrdays:'the projects reaching SGR within the period', adhoc:'the Operating Status dashboard (projects not fully benefited from)', sgr:'the Stage Gate Review (SGR) view', tc:'the T&C (Testing & Commissioning) list', trouble:'the projects expected to move to Trouble', handover:'the Handover view', data:'the data updates panel'}[r.view];
+  const lead = {strat:'the Strategic View', unified:'the search results', meet:'the weekly meeting data', mom:'the MOM of the PMO Executive Meeting', wh:'the White Helmet dashboard', sgrdays:'the projects reaching SGR within the period', adhoc:'the Operating Status dashboard (projects not fully benefited from)', sgr:'the Stage Gate Review (SGR) view', tc:'the T&C (Testing & Commissioning) list', trouble:'the projects expected to move to Trouble', handover:'the Handover view', data:'the data updates panel'}[r.view];
   addText(corr(r) + `Here is ${lead}:`, 'in');
-  ({unified:addUnifiedResults, meet:addMeetingTab, mom:addMOMTab, wh:(a) => (a ? addWHSearch(a) : addWHTab()), sgrdays:addSgrDays, adhoc:addOpsTab, sgr:addSgrTab, tc:addTcTab, trouble:addTroubleTab, handover:addHandoverTab, data:addDataPanel})[r.view](r.arg);
-  speakResponse({unified:'Search results.', meet:'Weekly meeting data.', mom:'Minutes of the PMO executive meeting, Northwestern Cluster.', wh:'White Helmet reports and observations.', sgrdays:'Projects reaching stage gate review soon.', adhoc:'Operating status of projects not fully benefited from.', sgr:'Stage gate review. Red projects need an SGR within a week, yellow within three weeks.', tc:'Testing and commissioning, nearest to today first.', trouble:'Projects expected to move to trouble, soonest first.', handover:'Partial initial handover and initial handover projects.', data:'Data updates.'}[r.view]);
+  ({strat:addStrategicTab, unified:addUnifiedResults, meet:addMeetingTab, mom:addMOMTab, wh:(a) => (a ? addWHSearch(a) : addWHTab()), sgrdays:addSgrDays, adhoc:addOpsTab, sgr:addSgrTab, tc:addTcTab, trouble:addTroubleTab, handover:addHandoverTab, data:addDataPanel})[r.view](r.arg);
+  speakResponse({strat:'Strategic view of future projects.', unified:'Search results.', meet:'Weekly meeting data.', mom:'Minutes of the PMO executive meeting, Northwestern Cluster.', wh:'White Helmet reports and observations.', sgrdays:'Projects reaching stage gate review soon.', adhoc:'Operating status of projects not fully benefited from.', sgr:'Stage gate review. Red projects need an SGR within a week, yellow within three weeks.', tc:'Testing and commissioning, nearest to today first.', trouble:'Projects expected to move to trouble, soonest first.', handover:'Partial initial handover and initial handover projects.', data:'Data updates.'}[r.view]);
 }
 
 
@@ -990,4 +991,47 @@ function wireUnified(root){
 function addUnifiedResults(q){
   if (!unifiedSearch(q).length) { assistOffer(q); return; }            // nothing meaningful found: say how I can help
   const card = repCard('نتائج البحث', 'Search results', 'All tabs and project cards'); card.querySelector('.rbody').innerHTML = unifiedHtml(q); wireUnified(card); finishReport(card);
+}
+
+/* =====================================================================
+   Strategic View: future projects (presentation slides 38-42, 28 Oct 2026). Values in billion SAR.
+   Collapsible levels, Arabic first. Figures are the slide totals; subtotals are sums of those figures.
+   ===================================================================== */
+const STRAT_TREE = {
+  label: {ar: 'المشاريع المستقبلية', en: 'Future projects'}, bn: 42.37, color: '#0E3F66', root: true, slide: '38, 39, 40',
+  kids: [
+    {label: {ar: 'ضمن السقف', en: 'Within the budget envelope'}, bn: 5.30, count: 58, color: '#0F8B8D', slide: '38, 40', kids: [
+      {label: {ar: 'المدينة المنورة', en: 'Madinah'}, bn: 3.18, count: 30, color: '#4AA3DF', slide: '40'},
+      {label: {ar: 'تبوك', en: 'Tabuk'}, bn: 2.08, count: 27, color: '#4AA3DF', slide: '40'},
+      {label: {ar: 'عدة مناطق', en: 'Multi-region'}, bn: 0.03, count: 1, color: '#4AA3DF', slide: '40'}]},
+    {label: {ar: 'مشاريع مستقبلية أخرى', en: 'Other future projects'}, bn: 37.07, count: 461, color: '#2F6FB3', slide: '38, 39', kids: [
+      {label: {ar: 'ضيوف الرحمن', en: 'Within the water strategy ceiling'}, bn: 7.33, count: 99, color: '#6E56CF', slide: '38'},
+      {label: {ar: 'المتبقي في المحفظة', en: 'Remaining in the portfolio'}, bn: 24.32, count: 280, color: '#6E56CF', slide: '38'},
+      {label: {ar: 'القطاع الخاص', en: 'Private sector'}, bn: 1.68, count: 22, color: '#6E56CF', slide: '38'},
+      {label: {ar: 'المدن الساحلية حتى 2030', en: 'Coastal cities until 2030'}, bn: 3.74, count: 60, color: '#6E56CF', slide: '38'}]}]
+};
+const STRAT_APPROVED = {
+  label: {ar: 'مشاريع معتمدة التكاليف', en: 'Approved budgets'}, bn: 7.90, count: 123, color: '#B7892E', root: true, slide: '42', kids: [
+    {label: {ar: 'خارج خطة الطرح', en: 'Outside the tender plan (other departments)'}, bn: 0.29, count: 10, color: '#C98A3B', slide: '42'},
+    {label: {ar: 'داخل خطة الطرح', en: 'Inside the tender plan'}, bn: 7.61, count: 113, color: '#2E8B57', slide: '42', kids: [
+      {label: {ar: 'مشاريع ملحة', en: 'Urgent projects (2)'}, bn: 0.04, count: 2, color: '#2E8B57', slide: '42', note: 'label to confirm'},
+      {label: {ar: 'مشاريع ملحة', en: 'Urgent projects (3)'}, bn: 0.10, count: 3, color: '#2E8B57', slide: '42', note: 'label to confirm'},
+      {label: {ar: 'الحزمة الأولى', en: 'First package'}, bn: 7.47, count: 108, color: '#2E8B57', slide: '42'}]}]
+};
+function stratNode(n){
+  const tile = `<span class="stv" style="background:${n.color}">${n.bn.toFixed(2)}<em>bn SAR</em></span>`;
+  const cnt = n.count !== undefined ? `<span class="stc">${n.count} مشروع · ${n.count} project${n.count === 1 ? '' : 's'}</span>` : '';
+  const head = `<span class="stn" style="background:${n.color}">${n.count !== undefined ? n.count : ''}</span><span class="stt"><b dir="rtl">${esc(n.label.ar)}</b><small>${esc(n.label.en)}${n.note ? ' · ' + esc(n.note) : ''}</small>${cnt}</span>${tile}`;
+  if (n.kids) return `<details class="stnode${n.root ? ' stroot' : ''}" style="--c:${n.color}" open><summary>${head}<span class="stchev">▾</span></summary><div class="stkids">${n.kids.map(stratNode).join('')}</div></details>`;
+  return `<div class="stleaf" style="--c:${n.color}"><div class="stsum">${head}</div></div>`;
+}
+function addStrategicTab(){
+  const card = repCard('الرؤية الاستراتيجية', 'Strategic View', 'Future projects · slides 38–42 · values in billion SAR');
+  card.querySelector('.rbody').innerHTML =
+    `<div class="strat-legend"><span>الأرقام بالمليار ريال · values in bn SAR</span><span>اضغط على أي فئة للطي أو الفتح · tap a category to collapse or expand</span></div>` +
+    stratNode(STRAT_TREE) +
+    `<div class="stlab">مشاريع معتمدة التكاليف · على الـ519 مشروعاً · on top of the 519</div>` +
+    stratNode(STRAT_APPROVED) +
+    `<div class="rrule">Figures from slides 38–42 of the 28 Oct 2026 presentation. Subtotals are sums of the slide figures. Two labels need confirmation (urgent groups, 60 and 22); project lists per category will follow once the mapping is confirmed.</div>`;
+  finishReport(card);
 }
