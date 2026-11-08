@@ -196,3 +196,6 @@ details.gdist{direction:ltr; text-align:left;} .gdist .gd{display:flex; gap:9px;
 .stlab{font-size:12px; font-weight:800; color:var(--gold-t); margin:12px 4px 2px; direction:ltr; text-align:left;}
 .stnode.stroot > summary .stv{background:#ffffff !important; color:#0E3F66 !important; box-shadow:0 0 0 2px #C9A96A;} .stnode.stroot > summary .stv em{color:#49606f !important; opacity:1;}
 .stnode.stroot > summary .stn{background:#ffffff !important; color:#0E3F66 !important; font-size:14px;}
+.admgate{display:flex; flex-direction:column; gap:8px; margin:6px 0;} .admrow{display:flex; gap:8px; align-items:center;} .admrow .admpwd{flex:1;} .admmsg{font-size:12px; color:var(--muted);}
+.admbars{display:flex; align-items:flex-end; gap:3px; height:90px; border-bottom:1px solid var(--line); padding-top:6px;} .admbars i{flex:1; background:var(--accent); border-radius:4px 4px 0 0; display:block; min-width:3px;}
+.admrow2{display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:12px; padding:6px 0; border-bottom:1px dashed var(--line);} .admrow2 small{color:var(--muted);}

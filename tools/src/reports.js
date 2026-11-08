@@ -314,6 +314,7 @@ function renderActions(card, base){                                         // t
 
 /* ---------- typed instructions that open these screens ---------- */
 function routeReport(q){
+  const ad = routeAdmin(q); if (ad) return ad;
   if (/^(strategic|strategy|strategic view|استراتيجي|الرؤية الاستراتيجية|الاستراتيجية)$/.test(nrm(String(q||'')).trim())) return {type:'report', view:'strat', arg:null};
   const raw = String(q || '').trim(), toks = nrm(raw).split(/\s+/).filter(Boolean);
   const poLike = toks.some(t => /\d{4,}/.test(t)), special = ['help','portfolio','sgr','tc','t&c','handover','critical','data','mom','meeting','minutes','helmet','white','wh'].includes(toks.join(' '));
@@ -348,12 +349,12 @@ function routeReport(q){
   if(any('بيانات','البيانات','الملفات','ملفات','الملف') && any('تحديث','التحديث','رفع')) return {type:'report', view:'data'};
   return null;
 }
-const REPORT_LABEL = {strat:'Strategic View', unified:'Search results', meet:'Weekly Meeting Data', mom:'MOM · PMO Executive Meeting', wh:'White Helmet', sgrdays:'SGR within days', adhoc:'Operating Status', sgr:'SGR — Stage Gate Review', tc:'T&C — Testing & Commissioning', trouble:'Expected Trouble', handover:'Handover', data:'Data updates'};
+const REPORT_LABEL = {admin:'Admin', strat:'Strategic View', unified:'Search results', meet:'Weekly Meeting Data', mom:'MOM · PMO Executive Meeting', wh:'White Helmet', sgrdays:'SGR within days', adhoc:'Operating Status', sgr:'SGR — Stage Gate Review', tc:'T&C — Testing & Commissioning', trouble:'Expected Trouble', handover:'Handover', data:'Data updates'};
 function openReport(r){
-  const lead = {strat:'the Strategic View', unified:'the search results', meet:'the weekly meeting data', mom:'the MOM of the PMO Executive Meeting', wh:'the White Helmet dashboard', sgrdays:'the projects reaching SGR within the period', adhoc:'the Operating Status dashboard (projects not fully benefited from)', sgr:'the Stage Gate Review (SGR) view', tc:'the T&C (Testing & Commissioning) list', trouble:'the projects expected to move to Trouble', handover:'the Handover view', data:'the data updates panel'}[r.view];
+  const lead = {admin:'the admin page', strat:'the Strategic View', unified:'the search results', meet:'the weekly meeting data', mom:'the MOM of the PMO Executive Meeting', wh:'the White Helmet dashboard', sgrdays:'the projects reaching SGR within the period', adhoc:'the Operating Status dashboard (projects not fully benefited from)', sgr:'the Stage Gate Review (SGR) view', tc:'the T&C (Testing & Commissioning) list', trouble:'the projects expected to move to Trouble', handover:'the Handover view', data:'the data updates panel'}[r.view];
   addText(corr(r) + `Here is ${lead}:`, 'in');
-  ({strat:addStrategicTab, unified:addUnifiedResults, meet:addMeetingTab, mom:addMOMTab, wh:(a) => (a ? addWHSearch(a) : addWHTab()), sgrdays:addSgrDays, adhoc:addOpsTab, sgr:addSgrTab, tc:addTcTab, trouble:addTroubleTab, handover:addHandoverTab, data:addDataPanel})[r.view](r.arg);
-  speakResponse({strat:'Strategic view of future projects.', unified:'Search results.', meet:'Weekly meeting data.', mom:'Minutes of the PMO executive meeting, Northwestern Cluster.', wh:'White Helmet reports and observations.', sgrdays:'Projects reaching stage gate review soon.', adhoc:'Operating status of projects not fully benefited from.', sgr:'Stage gate review. Red projects need an SGR within a week, yellow within three weeks.', tc:'Testing and commissioning, nearest to today first.', trouble:'Projects expected to move to trouble, soonest first.', handover:'Partial initial handover and initial handover projects.', data:'Data updates.'}[r.view]);
+  ({admin:addAdminTab, strat:addStrategicTab, unified:addUnifiedResults, meet:addMeetingTab, mom:addMOMTab, wh:(a) => (a ? addWHSearch(a) : addWHTab()), sgrdays:addSgrDays, adhoc:addOpsTab, sgr:addSgrTab, tc:addTcTab, trouble:addTroubleTab, handover:addHandoverTab, data:addDataPanel})[r.view](r.arg);
+  speakResponse({admin:'Admin page.', strat:'Strategic view of future projects.', unified:'Search results.', meet:'Weekly meeting data.', mom:'Minutes of the PMO executive meeting, Northwestern Cluster.', wh:'White Helmet reports and observations.', sgrdays:'Projects reaching stage gate review soon.', adhoc:'Operating status of projects not fully benefited from.', sgr:'Stage gate review. Red projects need an SGR within a week, yellow within three weeks.', tc:'Testing and commissioning, nearest to today first.', trouble:'Projects expected to move to trouble, soonest first.', handover:'Partial initial handover and initial handover projects.', data:'Data updates.'}[r.view]);
 }
 
 
@@ -1047,4 +1048,58 @@ function addStrategicTab(){
     `<div class="stlab">مشاريع معتمدة التكاليف · على الـ519 مشروعاً · on top of the 519</div>` +
     stratNode(STRAT_APPROVED);
   finishReport(card);
+}
+
+/* =====================================================================
+   Admin (last tab): usage counts from a Google Sheet + Apps Script in the owner's Google account.
+   No IP addresses are stored. A random device code per browser. Data kept 30 days (kept by the script).
+   The admin password lives only in the Apps Script; the page sends it when asked.
+   ===================================================================== */
+const ADMIN_URL = '';                                       // paste the Apps Script web app URL here (ends with /exec)
+function adminDevCode(){
+  try { let d = localStorage.getItem('pmo_dev'); if (!d) { d = Math.random().toString(16).slice(2, 10).toUpperCase(); localStorage.setItem('pmo_dev', d); } return d; }
+  catch (e) { return 'NOSTORE'; }
+}
+function logEvent(kind, key){
+  if (!ADMIN_URL) return;
+  try { fetch(ADMIN_URL, {method: 'POST', mode: 'no-cors', headers: {'Content-Type': 'text/plain'}, body: JSON.stringify({dev: adminDevCode(), kind, key: String(key || '').slice(0, 60), t: Date.now()})}); } catch (e) {}
+}
+logEvent('session', '');
+function routeAdmin(q){
+  const t = nrm(String(q || '')).trim();
+  return ['admin', 'المشرف', 'الادارة', 'الإدارة'].includes(t) ? {type:'report', view:'admin', arg:null} : null;
+}
+function addAdminTab(){
+  const card = repCard('Admin', 'المشرف', 'Usage: devices, daily connections, tab activity · 30 days');
+  const rb = card.querySelector('.rbody');
+  if (!ADMIN_URL) { rb.innerHTML = '<div class="rempty"><span dir="rtl">لم يتم ربط التحليلات بعد</span><br><small>Analytics is not connected yet. The owner must add the Apps Script web address.</small></div>'; finishReport(card); return; }
+  rb.innerHTML = `<div class="admgate"><div class="rrule">Enter the admin password</div><div class="admrow"><input type="password" class="adsearch admpwd" autocomplete="current-password" placeholder="كلمة المرور · Password"><button type="button" class="optbtn admgo">فتح · Open</button></div><div class="admmsg"></div></div><div class="admout"></div>`;
+  const pw = rb.querySelector('.admpwd'), msg = rb.querySelector('.admmsg'), out = rb.querySelector('.admout');
+  const go = async () => {
+    msg.textContent = 'Loading…'; out.innerHTML = '';
+    try {
+      const r = await fetch(ADMIN_URL + '?action=stats&pwd=' + encodeURIComponent(pw.value), {cache: 'no-store'});
+      const d = await r.json();
+      if (!d.ok) { msg.textContent = 'Wrong password or no data yet.'; return; }
+      msg.textContent = ''; rb.querySelector('.admgate').hidden = true; out.innerHTML = adminHtml(d);
+    } catch (e) { msg.textContent = 'Could not reach the analytics service.'; }
+  };
+  rb.querySelector('.admgo').addEventListener('click', e => { e.preventDefault(); go(); });
+  pw.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); } });
+  finishReport(card);
+}
+function adminHtml(d){
+  const max = Math.max(1, ...d.perDay.map(x => x.sessions));
+  const bars = d.perDay.map(x => `<i title="${x.day}: ${x.sessions}" style="height:${Math.max(3, Math.round(x.sessions / max * 100))}%"></i>`).join('');
+  const tabs = d.tabs.map(x => `<div class="admrow2"><span>${esc(x.key)}</span><b>${x.count}</b></div>`).join('') || '<div class="none">—</div>';
+  const devs = d.devices.map(x => `<div class="admrow2"><span>${esc(x.dev)}</span><small>${esc(x.last)} · ${x.sessions} sessions</small></div>`).join('') || '<div class="none">—</div>';
+  return `<div class="adkpis">` +
+    `<div class="kpi"><span class="kv">${d.devicesNow}</span><span class="kl"><b dir="rtl">أجهزة متصلة الآن</b><small>Devices now (5 min)</small></span></div>` +
+    `<div class="kpi"><span class="kv">${d.uniqueDevices}</span><span class="kl"><b dir="rtl">أجهزة فريدة</b><small>Unique devices (30 days)</small></span></div>` +
+    `<div class="kpi"><span class="kv">${d.sessionsToday}</span><span class="kl"><b dir="rtl">جلسات اليوم</b><small>Sessions today</small></span></div>` +
+    `<div class="kpi"><span class="kv">${d.searchesToday}</span><span class="kl"><b dir="rtl">عمليات بحث اليوم</b><small>Searches today</small></span></div></div>` +
+    `<div class="momsub2"><div class="momsh"><b dir="rtl">الاتصالات يومياً</b><small>Connections per day · 30 days</small></div><div class="admbars">${bars}</div></div>` +
+    `<div class="momsub2"><div class="momsh"><b dir="rtl">نشاط التبويبات اليوم</b><small>Tab activity today</small></div>${tabs}</div>` +
+    `<div class="momsub2"><div class="momsh"><b dir="rtl">الأجهزة</b><small>Devices · anonymous codes only</small></div>${devs}</div>` +
+    `<div class="rrule">Data older than 30 days is deleted. No IP addresses are stored.</div>`;
 }

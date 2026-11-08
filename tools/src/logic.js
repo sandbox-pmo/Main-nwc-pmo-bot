@@ -757,6 +757,7 @@ function handleQuery(qRaw, label, direct){
   qRaw = String(qRaw||'').trim();
   if(!qRaw) return;
   window._routeTyped = (window._typedText === qRaw); window._typedText = null;      // only text typed in the box starts the unified search
+  if (typeof logEvent === 'function') logEvent(window._routeTyped ? 'search' : 'tab', qRaw);   // usage counts (no IP)
   addText(label || qRaw, 'out');
   showTyping();
   setTimeout(() => {
