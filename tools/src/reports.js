@@ -1076,13 +1076,17 @@ function addAdminTab(){
   rb.innerHTML = `<div class="admgate"><div class="rrule">Enter the admin password</div><div class="admrow"><input type="password" class="adsearch admpwd" autocomplete="current-password" placeholder="كلمة المرور · Password"><button type="button" class="optbtn admgo">فتح · Open</button></div><div class="admmsg"></div></div><div class="admout"></div>`;
   const pw = rb.querySelector('.admpwd'), msg = rb.querySelector('.admmsg'), out = rb.querySelector('.admout');
   const go = async () => {
+    const clean = pw.value.replace(/[\s\u200e\u200f\u202a-\u202e\u200b\ufeff]/g, '').trim();   // remove spaces and invisible marks typed or pasted
     msg.textContent = 'Loading…'; out.innerHTML = '';
+    let d;
     try {
-      const r = await fetch(ADMIN_URL + '?action=stats&pwd=' + encodeURIComponent(pw.value), {cache: 'no-store'});
-      const d = await r.json();
-      if (!d.ok) { msg.textContent = 'Wrong password or no data yet.'; return; }
+      const r = await fetch(ADMIN_URL + '?action=stats&pwd=' + encodeURIComponent(clean), {cache: 'no-store'});
+      d = await r.json();
+    } catch (e) { msg.textContent = 'Could not reach the analytics service.'; return; }
+    try {
+      if (!d || !d.ok) { msg.textContent = 'The service replied, but the password was not accepted (' + clean.length + ' characters received). Check the password in the script.'; return; }
       msg.textContent = ''; rb.querySelector('.admgate').hidden = true; out.innerHTML = adminHtml(d);
-    } catch (e) { msg.textContent = 'Could not reach the analytics service.'; }
+    } catch (e) { msg.textContent = 'Could not display the reply.'; }
   };
   rb.querySelector('.admgo').addEventListener('click', e => { e.preventDefault(); go(); });
   pw.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); } });
