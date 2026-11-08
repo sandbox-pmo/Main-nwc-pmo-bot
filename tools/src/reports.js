@@ -1055,7 +1055,7 @@ function addStrategicTab(){
    No IP addresses are stored. A random device code per browser. Data kept 30 days (kept by the script).
    The admin password lives only in the Apps Script; the page sends it when asked.
    ===================================================================== */
-const ADMIN_URL = '';                                       // paste the Apps Script web app URL here (ends with /exec)
+const ADMIN_URL = 'https://script.google.com/macros/s/AKfycbykg4WNyRj6txoIANqT0HkcKJ09OEvMbGk-mS-D0IAiFiwYO3IX49FUFBb_ycwntGHj/exec';                                       // paste the Apps Script web app URL here (ends with /exec)
 function adminDevCode(){
   try { let d = localStorage.getItem('pmo_dev'); if (!d) { d = Math.random().toString(16).slice(2, 10).toUpperCase(); localStorage.setItem('pmo_dev', d); } return d; }
   catch (e) { return 'NOSTORE'; }
