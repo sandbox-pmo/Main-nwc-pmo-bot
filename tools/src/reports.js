@@ -113,7 +113,9 @@ function finishReport(card){ const row = botRow(card, true, 'planning'); scrollT
 const SGR_FILTERS = [['all','All'], ['redyellow','Red + Yellow'], ['red','Red'], ['yellow','Yellow'], ['green','Green'], ['none','No gate']];
 function addSgrTab(filter){
   const today = todayDate();
-  const rows = PROJECTS.map(p => { const info = gateInfo(p, today); return {p, info, f:sgrFlag(info)}; }).sort((a, b) => a.f.key - b.f.key || a.p.ord - b.p.ord);
+  // SGR window: hide gates overdue by more than 21 days, and gates due more than 150 days from today (dated gates only)
+  const inSgrWindow = r => r.info.days == null || (r.info.days >= -21 && r.info.days <= 150);
+  const rows = PROJECTS.map(p => { const info = gateInfo(p, today); return {p, info, f:sgrFlag(info)}; }).filter(inSgrWindow).sort((a, b) => a.f.key - b.f.key || a.p.ord - b.p.ord);
   const n = k => rows.filter(r => r.f.k === k).length;
   const counts = {all: rows.length, redyellow: n('red') + n('yellow'), red: n('red'), yellow: n('yellow'), green: n('green'), none: n('grey')};
   const card = repCard('Stage Gate Review (SGR)', 'مراجعة بوابات المراحل', `Today: <b>${fmtDate(isoOf(today))}</b> · the SGR date is the end date of a project's current gate`);
