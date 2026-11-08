@@ -1074,26 +1074,16 @@ function addAdminTab(){
   const rb = card.querySelector('.rbody');
   if (!ADMIN_URL) { rb.innerHTML = '<div class="rempty"><span dir="rtl">لم يتم ربط التحليلات بعد</span><br><small>Analytics is not connected yet. The owner must add the Apps Script web address.</small></div>'; finishReport(card); return; }
   rb.innerHTML = `<div class="admgate"><div class="rrule">Enter the admin password</div><div class="admrow"><input type="password" class="adsearch admpwd" autocomplete="current-password" placeholder="كلمة المرور · Password"><button type="button" class="optbtn admgo">فتح · Open</button></div><div class="admmsg"></div></div><div class="admout"></div>`;
-  const pw = rb.querySelector('.admpwd'), msg = rb.querySelector('.admmsg'), out = rb.querySelector('.admout');
-  const go = () => {
-    const clean = pw.value.replace(/[\s\u200e\u200f\u202a-\u202e\u200b\ufeff]/g, '').trim();   // remove spaces and invisible marks typed or pasted
-    msg.textContent = 'Loading…'; out.innerHTML = '';
-    const cbName = 'pmoAdmin' + Math.random().toString(36).slice(2, 9);
-    const s = document.createElement('script');
-    const finish = (d) => {
-      delete window[cbName]; s.remove(); clearTimeout(timer);
-      if (!d || !d.ok) { msg.textContent = 'The service replied, but the password was not accepted (' + clean.length + ' characters received). Check the password in the script.'; return; }
-      try { msg.textContent = ''; rb.querySelector('.admgate').hidden = true; out.innerHTML = adminHtml(d); }
-      catch (e) { msg.textContent = 'Connected, but the page could not display the numbers: ' + e.message; }
-    };
-    const timer = setTimeout(() => { delete window[cbName]; s.remove(); msg.textContent = 'Timed out after 30 seconds. Tap Open again.'; }, 30000);
-    window[cbName] = finish;
-    s.onerror = () => { delete window[cbName]; s.remove(); clearTimeout(timer); msg.textContent = 'Google did not return the data (script load failed). The web app may need a New version, or access set to Anyone.'; };
-    s.src = ADMIN_URL + '?action=stats&callback=' + cbName + '&pwd=' + encodeURIComponent(clean);
-    document.body.appendChild(s);
+  const pw = rb.querySelector('.admpwd'), msg = rb.querySelector('.admmsg');
+  const open = () => {
+    const clean = pw.value.replace(/[\s\u200e\u200f\u202a-\u202e\u200b\ufeff]/g, '').trim();   // remove spaces and invisible marks
+    if (!clean) { msg.textContent = 'Type the password first.'; return; }
+    const w = window.open(ADMIN_URL + '?action=stats&pwd=' + encodeURIComponent(clean), '_blank', 'noopener');
+    msg.textContent = w ? 'Statistics opened in a new tab.' : 'The new tab was blocked. Allow pop-ups for this site and try again.';
   };
-  rb.querySelector('.admgo').addEventListener('click', e => { e.preventDefault(); go(); });
-  pw.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); go(); } });
+  rb.querySelector('.admgo').textContent = 'Open statistics · فتح الإحصائيات';
+  rb.querySelector('.admgo').addEventListener('click', e => { e.preventDefault(); open(); });
+  pw.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); open(); } });
   finishReport(card);
 }
 function adminHtml(d){
