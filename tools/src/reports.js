@@ -1083,11 +1083,12 @@ function addAdminTab(){
     const finish = (d) => {
       delete window[cbName]; s.remove(); clearTimeout(timer);
       if (!d || !d.ok) { msg.textContent = 'The service replied, but the password was not accepted (' + clean.length + ' characters received). Check the password in the script.'; return; }
-      msg.textContent = ''; rb.querySelector('.admgate').hidden = true; out.innerHTML = adminHtml(d);
+      try { msg.textContent = ''; rb.querySelector('.admgate').hidden = true; out.innerHTML = adminHtml(d); }
+      catch (e) { msg.textContent = 'Connected, but the page could not display the numbers: ' + e.message; }
     };
-    const timer = setTimeout(() => { delete window[cbName]; s.remove(); msg.textContent = 'Could not reach the analytics service.'; }, 15000);
+    const timer = setTimeout(() => { delete window[cbName]; s.remove(); msg.textContent = 'Timed out after 30 seconds. Tap Open again.'; }, 30000);
     window[cbName] = finish;
-    s.onerror = () => { delete window[cbName]; s.remove(); clearTimeout(timer); msg.textContent = 'Could not reach the analytics service.'; };
+    s.onerror = () => { delete window[cbName]; s.remove(); clearTimeout(timer); msg.textContent = 'Google did not return the data (script load failed). The web app may need a New version, or access set to Anyone.'; };
     s.src = ADMIN_URL + '?action=stats&callback=' + cbName + '&pwd=' + encodeURIComponent(clean);
     document.body.appendChild(s);
   };
