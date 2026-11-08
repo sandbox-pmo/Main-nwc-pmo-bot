@@ -1010,7 +1010,7 @@ function addUnifiedResults(q){
    Collapsible levels, Arabic first. Figures are the slide totals; subtotals are sums of those figures.
    ===================================================================== */
 const STRAT_TREE = {
-  label: {ar: 'المشاريع المستقبلية', en: 'Future projects'}, bn: 42.37, color: '#0E3F66', root: true, slide: '38, 39, 40',
+  label: {ar: 'المشاريع المستقبلية', en: 'Future projects'}, bn: 42.37, count: 519, color: '#0E3F66', root: true, slide: '38, 39, 40',
   kids: [
     {label: {ar: 'ضمن السقف', en: 'Within the budget envelope'}, bn: 5.30, count: 58, color: '#0F8B8D', slide: '38, 40', kids: [
       {label: {ar: 'المدينة المنورة', en: 'Madinah'}, bn: 3.18, count: 30, color: '#4AA3DF', slide: '40'},
@@ -1043,6 +1043,6 @@ function addStrategicTab(){
     `<div class="strat-legend"><span>الأرقام بالمليار ريال · values in bn SAR</span><span>اضغط على أي فئة للطي أو الفتح · tap a category to collapse or expand</span></div>` +
     stratNode(STRAT_TREE) +
     `<div class="stlab">مشاريع معتمدة التكاليف · على الـ519 مشروعاً · on top of the 519</div>` +
-    stratNode(STRAT_APPROVED) +
+    stratNode(STRAT_APPROVED);
   finishReport(card);
 }
