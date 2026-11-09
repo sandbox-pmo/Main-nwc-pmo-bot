@@ -1070,62 +1070,53 @@ function routeAdmin(q){
   const t = nrm(String(q || '')).trim();
   return ['admin', 'المشرف', 'الادارة', 'الإدارة'].includes(t) ? {type:'report', view:'admin', arg:null} : null;
 }
+const ADMIN_SHEET_ID = '1eiyVOcFJ4cV8tKYKIe2Jq2K_s2A1yH6K3diKL8_pK_M';   // the sheet that holds the Events log
+function adminLoadRows(){
+  return new Promise((resolve, reject) => {
+    const name = 'pmoGviz' + Math.random().toString(36).slice(2, 9);
+    const s = document.createElement('script');
+    const cleanup = () => { clearTimeout(timer); delete window[name]; s.remove(); };
+    const timer = setTimeout(() => { cleanup(); reject(new Error('timeout')); }, 20000);
+    window[name] = (resp) => { cleanup(); if (!resp || resp.status !== 'ok') reject(new Error('sheet')); else resolve(resp.table.rows); };
+    s.onerror = () => { cleanup(); reject(new Error('network')); };
+    s.src = `https://docs.google.com/spreadsheets/d/${ADMIN_SHEET_ID}/gviz/tq?tqx=out:json;responseHandler:${name}&headers=1&sheet=Events`;
+    document.body.appendChild(s);
+  });
+}
+function adminDay(ms){ return new Intl.DateTimeFormat('en-CA', {timeZone: 'Asia/Riyadh', year: 'numeric', month: '2-digit', day: '2-digit'}).format(new Date(ms)); }
+function adminComputeStats(gRows){
+  const rows = (gRows || []).map(r => ({ts: Number(r.c[0] && r.c[0].v), dev: String((r.c[2] && r.c[2].v) || ''), kind: String((r.c[3] && r.c[3].v) || ''), key: String((r.c[4] && r.c[4].v) || '')})).filter(r => r.ts > 0);
+  const DAY = 86400000, now = Date.now(), today = adminDay(now);
+  const last30 = rows.filter(r => r.ts >= now - 30 * DAY);
+  const todayRows = rows.filter(r => adminDay(r.ts) === today);
+  const perDay = [];
+  for (let i = 29; i >= 0; i--) { const d = adminDay(now - i * DAY); perDay.push({day: d, sessions: rows.filter(r => r.kind === 'session' && adminDay(r.ts) === d).length}); }
+  const tabCount = {};
+  todayRows.filter(r => r.kind === 'tab' && r.key).forEach(r => tabCount[r.key] = (tabCount[r.key] || 0) + 1);
+  const tabs = Object.keys(tabCount).map(k => ({key: k, count: tabCount[k]})).sort((a, b) => b.count - a.count).slice(0, 15);
+  const byDev = {};
+  last30.forEach(r => { const x = byDev[r.dev] = byDev[r.dev] || {dev: r.dev, last: 0, sessions: 0}; x.last = Math.max(x.last, r.ts); if (r.kind === 'session') x.sessions++; });
+  const devices = Object.values(byDev).sort((a, b) => b.last - a.last).slice(0, 50).map(x => ({dev: x.dev, sessions: x.sessions,
+    last: new Intl.DateTimeFormat('en-GB', {timeZone: 'Asia/Riyadh', day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'}).format(new Date(x.last))}));
+  return {ok: true,
+    devicesNow: new Set(rows.filter(r => r.ts >= now - 5 * 60000).map(r => r.dev)).size,
+    uniqueDevices: new Set(last30.map(r => r.dev)).size,
+    sessionsToday: todayRows.filter(r => r.kind === 'session').length,
+    searchesToday: todayRows.filter(r => r.kind === 'search').length,
+    perDay, tabs, devices};
+}
 function addAdminTab(){
   const card = repCard('Admin', 'المشرف', 'Usage: devices, daily connections, tab activity · 30 days');
   const rb = card.querySelector('.rbody');
-  if (!ADMIN_URL) { rb.innerHTML = '<div class="rempty"><span dir="rtl">لم يتم ربط التحليلات بعد</span><br><small>Analytics is not connected yet.</small></div>'; finishReport(card); return; }
-  rb.innerHTML =
-    `<div class="admgate">` +
-      `<label class="admlab" dir="rtl">كلمة المرور · Password</label>` +
-      `<div class="admpwdrow"><input type="password" class="admpwd" autocomplete="current-password" placeholder="اكتب كلمة المرور هنا · Type the password here"><button type="button" class="admeye" aria-label="show or hide">👁</button></div>` +
-      `<button type="button" class="admgo">فتح لوحة المشرف · Open dashboard</button>` +
-      `<div class="admsteps" hidden>` +
-        `<div class="admstep" data-s="1"><span class="admdot"></span><span dir="rtl">التحقق من الاتصال</span><small>Connecting</small></div>` +
-        `<div class="admstep" data-s="2"><span class="admdot"></span><span dir="rtl">التحقق من كلمة المرور</span><small>Checking password</small></div>` +
-        `<div class="admstep" data-s="3"><span class="admdot"></span><span dir="rtl">تحميل البيانات</span><small>Loading data</small></div>` +
-        `<div class="admstep" data-s="4"><span class="admdot"></span><span dir="rtl">جاهز</span><small>Ready</small></div>` +
-        `<div class="admbar"><i></i></div><div class="admmsg"></div>` +
-      `</div>` +
-    `</div>` +
-    `<div class="admout"></div>` +
-    `<iframe class="admframe" title="admin data" aria-hidden="true"></iframe>`;
-  const pwd = rb.querySelector('.admpwd'), eye = rb.querySelector('.admeye'), go = rb.querySelector('.admgo');
-  const steps = rb.querySelector('.admsteps'), bar = rb.querySelector('.admbar i'), msg = rb.querySelector('.admmsg');
-  const out = rb.querySelector('.admout'), frame = rb.querySelector('.admframe');
-  const setStep = (n, text, bad) => {
-    steps.hidden = false;
-    rb.querySelectorAll('.admstep').forEach(el => { const k = +el.dataset.s; el.classList.toggle('done', k < n); el.classList.toggle('now', k === n && !bad); el.classList.toggle('bad', k === n && !!bad); });
-    bar.style.width = Math.min(100, (n - 1) / 3 * 100 + (n === 4 ? 0 : 12)) + '%';
-    bar.classList.toggle('bad', !!bad);
-    msg.textContent = text || '';
+  const show = () => {
+    rb.innerHTML = `<div class="admtools"><button type="button" class="optbtn admrefresh">تحديث · Refresh</button></div><div class="admout"></div><div class="admmsg"></div>`;
+    const out = rb.querySelector('.admout'), msg = rb.querySelector('.admmsg');
+    msg.textContent = 'جاري تحميل البيانات… · Loading data…';
+    rb.querySelector('.admrefresh').addEventListener('click', e => { e.preventDefault(); show(); });
+    adminLoadRows().then(rows => { msg.textContent = ''; out.innerHTML = adminHtml(adminComputeStats(rows)); })
+      .catch(err => { msg.textContent = 'تعذر قراءة البيانات · Could not read the data (' + err.message + '). Check that the sheet is shared as "Anyone with the link can view".'; });
   };
-  let timer = null, handler = null;
-  const finish = () => { clearTimeout(timer); if (handler) window.removeEventListener('message', handler); handler = null; };
-  eye.addEventListener('click', e => { e.preventDefault(); pwd.type = pwd.type === 'password' ? 'text' : 'password'; });
-  const open = () => {
-    finish(); out.innerHTML = '';
-    const clean = pwd.value.replace(/[\s\u200e\u200f\u202a-\u202e\u200b\ufeff]/g, '').trim();
-    if (!clean) { setStep(1, 'اكتب كلمة المرور أولاً · Type the password first.', true); return; }
-    go.disabled = true; setStep(1, 'جاري الاتصال… · Connecting…');
-    handler = (ev) => {
-      const d = ev.data;
-      if (!d || d.pmoAdmin !== true) return;
-      finish(); go.disabled = false;
-      if (!d.data || !d.data.ok) { setStep(2, 'كلمة المرور غير مقبولة · The password was not accepted (' + clean.length + ' characters received).', true); return; }
-      setStep(3, 'جاري تحميل البيانات… · Loading data…');
-      try { out.innerHTML = `<div class="admtools"><button type="button" class="optbtn admrefresh">تحديث · Refresh</button></div>` + adminHtml(d.data); steps.hidden = true; }
-      catch (e) { setStep(3, 'تعذر عرض البيانات · Could not display the data: ' + e.message, true); return; }
-      rb.querySelector('.admrefresh').addEventListener('click', e => { e.preventDefault(); open(); });
-      rb.querySelector('.admgate').hidden = false;
-    };
-    window.addEventListener('message', handler);
-    timer = setTimeout(() => { finish(); go.disabled = false; setStep(3, 'انتهت المهلة بعد 30 ثانية · Timed out after 30 seconds. Tap Open again.', true); }, 30000);
-    frame.onload = () => { setStep(2, 'جاري التحقق من كلمة المرور… · Checking password…'); };
-    frame.src = ADMIN_URL + '?view=dash&pwd=' + encodeURIComponent(clean) + '&_=' + Date.now();
-    frame.hidden = false;
-  };
-  go.addEventListener('click', e => { e.preventDefault(); open(); });
-  pwd.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); open(); } });
+  show();
   finishReport(card);
 }
 
