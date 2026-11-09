@@ -1073,20 +1073,62 @@ function routeAdmin(q){
 function addAdminTab(){
   const card = repCard('Admin', 'المشرف', 'Usage: devices, daily connections, tab activity · 30 days');
   const rb = card.querySelector('.rbody');
-  if (!ADMIN_URL) { rb.innerHTML = '<div class="rempty"><span dir="rtl">لم يتم ربط التحليلات بعد</span><br><small>Analytics is not connected yet. The owner must add the Apps Script web address.</small></div>'; finishReport(card); return; }
-  rb.innerHTML = `<div class="admgate"><div class="rrule">Enter the admin password</div><div class="admrow"><input type="password" class="adsearch admpwd" autocomplete="current-password" placeholder="كلمة المرور · Password"><button type="button" class="optbtn admgo">فتح · Open</button></div><div class="admmsg"></div></div><div class="admout"></div>`;
-  const pw = rb.querySelector('.admpwd'), msg = rb.querySelector('.admmsg');
-  const open = () => {
-    const clean = pw.value.replace(/[\s\u200e\u200f\u202a-\u202e\u200b\ufeff]/g, '').trim();   // remove spaces and invisible marks
-    if (!clean) { msg.textContent = 'Type the password first.'; return; }
-    const w = window.open(ADMIN_URL + '?action=stats&pwd=' + encodeURIComponent(clean), '_blank', 'noopener');
-    msg.textContent = w ? 'Statistics opened in a new tab.' : 'The new tab was blocked. Allow pop-ups for this site and try again.';
+  if (!ADMIN_URL) { rb.innerHTML = '<div class="rempty"><span dir="rtl">لم يتم ربط التحليلات بعد</span><br><small>Analytics is not connected yet.</small></div>'; finishReport(card); return; }
+  rb.innerHTML =
+    `<div class="admgate">` +
+      `<label class="admlab" dir="rtl">كلمة المرور · Password</label>` +
+      `<div class="admpwdrow"><input type="password" class="admpwd" autocomplete="current-password" placeholder="اكتب كلمة المرور هنا · Type the password here"><button type="button" class="admeye" aria-label="show or hide">👁</button></div>` +
+      `<button type="button" class="admgo">فتح لوحة المشرف · Open dashboard</button>` +
+      `<div class="admsteps" hidden>` +
+        `<div class="admstep" data-s="1"><span class="admdot"></span><span dir="rtl">التحقق من الاتصال</span><small>Connecting</small></div>` +
+        `<div class="admstep" data-s="2"><span class="admdot"></span><span dir="rtl">التحقق من كلمة المرور</span><small>Checking password</small></div>` +
+        `<div class="admstep" data-s="3"><span class="admdot"></span><span dir="rtl">تحميل البيانات</span><small>Loading data</small></div>` +
+        `<div class="admstep" data-s="4"><span class="admdot"></span><span dir="rtl">جاهز</span><small>Ready</small></div>` +
+        `<div class="admbar"><i></i></div><div class="admmsg"></div>` +
+      `</div>` +
+    `</div>` +
+    `<div class="admout"></div>` +
+    `<iframe class="admframe" title="admin data" aria-hidden="true"></iframe>`;
+  const pwd = rb.querySelector('.admpwd'), eye = rb.querySelector('.admeye'), go = rb.querySelector('.admgo');
+  const steps = rb.querySelector('.admsteps'), bar = rb.querySelector('.admbar i'), msg = rb.querySelector('.admmsg');
+  const out = rb.querySelector('.admout'), frame = rb.querySelector('.admframe');
+  const setStep = (n, text, bad) => {
+    steps.hidden = false;
+    rb.querySelectorAll('.admstep').forEach(el => { const k = +el.dataset.s; el.classList.toggle('done', k < n); el.classList.toggle('now', k === n && !bad); el.classList.toggle('bad', k === n && !!bad); });
+    bar.style.width = Math.min(100, (n - 1) / 3 * 100 + (n === 4 ? 0 : 12)) + '%';
+    bar.classList.toggle('bad', !!bad);
+    msg.textContent = text || '';
   };
-  rb.querySelector('.admgo').textContent = 'Open statistics · فتح الإحصائيات';
-  rb.querySelector('.admgo').addEventListener('click', e => { e.preventDefault(); open(); });
-  pw.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); open(); } });
+  let timer = null, handler = null;
+  const finish = () => { clearTimeout(timer); if (handler) window.removeEventListener('message', handler); handler = null; };
+  eye.addEventListener('click', e => { e.preventDefault(); pwd.type = pwd.type === 'password' ? 'text' : 'password'; });
+  const open = () => {
+    finish(); out.innerHTML = '';
+    const clean = pwd.value.replace(/[\s\u200e\u200f\u202a-\u202e\u200b\ufeff]/g, '').trim();
+    if (!clean) { setStep(1, 'اكتب كلمة المرور أولاً · Type the password first.', true); return; }
+    go.disabled = true; setStep(1, 'جاري الاتصال… · Connecting…');
+    handler = (ev) => {
+      const d = ev.data;
+      if (!d || d.pmoAdmin !== true) return;
+      finish(); go.disabled = false;
+      if (!d.data || !d.data.ok) { setStep(2, 'كلمة المرور غير مقبولة · The password was not accepted (' + clean.length + ' characters received).', true); return; }
+      setStep(3, 'جاري تحميل البيانات… · Loading data…');
+      try { out.innerHTML = `<div class="admtools"><button type="button" class="optbtn admrefresh">تحديث · Refresh</button></div>` + adminHtml(d.data); steps.hidden = true; }
+      catch (e) { setStep(3, 'تعذر عرض البيانات · Could not display the data: ' + e.message, true); return; }
+      rb.querySelector('.admrefresh').addEventListener('click', e => { e.preventDefault(); open(); });
+      rb.querySelector('.admgate').hidden = false;
+    };
+    window.addEventListener('message', handler);
+    timer = setTimeout(() => { finish(); go.disabled = false; setStep(3, 'انتهت المهلة بعد 30 ثانية · Timed out after 30 seconds. Tap Open again.', true); }, 30000);
+    frame.onload = () => { setStep(2, 'جاري التحقق من كلمة المرور… · Checking password…'); };
+    frame.src = ADMIN_URL + '?view=dash&pwd=' + encodeURIComponent(clean) + '&_=' + Date.now();
+    frame.hidden = false;
+  };
+  go.addEventListener('click', e => { e.preventDefault(); open(); });
+  pwd.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); open(); } });
   finishReport(card);
 }
+
 function adminHtml(d){
   const max = Math.max(1, ...d.perDay.map(x => x.sessions));
   const bars = d.perDay.map(x => `<i title="${x.day}: ${x.sessions}" style="height:${Math.max(3, Math.round(x.sessions / max * 100))}%"></i>`).join('');

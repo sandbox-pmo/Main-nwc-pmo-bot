@@ -208,3 +208,20 @@ details.gdist{direction:ltr; text-align:left;} .gdist .gd{display:flex; gap:9px;
 .covval{color:#fff; font-weight:800; font-size:12px; border-radius:8px; padding:3px 8px; direction:ltr; min-width:62px; text-align:center;}
 
 .covcard > summary{list-style:none; cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:8px;} .covcard > summary::-webkit-details-marker{display:none;} .covtitle{display:flex; flex-direction:column; gap:2px;} .covcard[open] > summary .chev{transform:rotate(180deg);} .covcard > summary .chev{font-size:14px; color:var(--muted);}
+.admgate{display:flex; flex-direction:column; gap:10px; margin:8px 0 12px; padding:14px; border:1px solid var(--line); border-radius:16px; background:var(--surface2);}
+.admlab{font-size:14px; font-weight:800; color:var(--text); text-align:right;}
+.admpwdrow{display:flex; gap:8px; align-items:stretch;} .admpwd{flex:1; min-height:56px; font-size:18px; padding:12px 14px; border-radius:14px; border:2px solid var(--accent); background:var(--surface); color:var(--text);} .admeye{min-width:56px; border-radius:14px; border:1px solid var(--line); background:var(--surface); font-size:18px;}
+.admgo{min-height:56px; font-size:16px; font-weight:800; border-radius:14px; border:0; background:var(--accent); color:#fff; cursor:pointer;} .admgo:disabled{opacity:.6;}
+.admsteps{display:flex; flex-direction:column; gap:8px; margin-top:4px;}
+.admstep{display:grid; grid-template-columns:22px 1fr; gap:4px 8px; align-items:center; font-size:14px; color:var(--muted);} .admstep small{grid-column:2; font-size:11px; direction:ltr; text-align:left;}
+.admdot{width:16px; height:16px; border-radius:50%; border:2px solid var(--line); display:inline-block;}
+.admstep.now{color:var(--text); font-weight:700;} .admstep.now .admdot{border-color:var(--accent); background:var(--accent-soft); animation:admpulse 1s infinite alternate;}
+.admstep.done{color:var(--text);} .admstep.done .admdot{background:#2E8B57; border-color:#2E8B57;}
+.admstep.bad .admdot{background:#E5484D; border-color:#E5484D;} .admstep.bad{color:#9B2C4C; font-weight:700;}
+.admbar{height:10px; border-radius:6px; background:var(--line); overflow:hidden; margin-top:4px;} .admbar i{display:block; height:100%; width:0; background:var(--accent); border-radius:6px; transition:width .4s;} .admbar.bad i{background:#E5484D;}
+.admmsg{font-size:13px; color:var(--text); text-align:right; min-height:18px;}
+.admframe{position:absolute; width:1px; height:1px; opacity:0; pointer-events:none; border:0;}
+.admtools{display:flex; justify-content:flex-end; margin-bottom:8px;} .admrefresh{min-height:40px;}
+@keyframes admpulse{from{transform:scale(1)} to{transform:scale(1.25)}}
+
+.admsteps[hidden], .admgate[hidden]{display:none !important;}
