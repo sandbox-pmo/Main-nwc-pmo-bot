@@ -1121,6 +1121,6 @@ function addCoverageTab(){
     `<details class="covcard"><summary class="covhead"><span class="covtitle"><b dir="rtl">${esc(c.area.ar)}</b><small>${esc(c.area.en)}</small></span><span class="chev">▾</span></summary>` +
     `<div class="covsub"><b dir="rtl">نسب تغطية خدمات المياه</b><small>Water coverage</small></div>${covBars(c.water)}` +
     `<div class="covsub"><b dir="rtl">نسب تغطية خدمات الصرف الصحي</b><small>Sewer coverage</small></div>${covBars(c.sewer)}</details>`
-  ).join('') + `<div class="rrule">Source: annex 1 (page 9) of the 11 Nov 2026 presentation. Values as printed on that page.</div>`;
+  ).join('');
   finishReport(card);
 }
