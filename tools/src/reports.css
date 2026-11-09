@@ -199,3 +199,12 @@ details.gdist{direction:ltr; text-align:left;} .gdist .gd{display:flex; gap:9px;
 .admgate{display:flex; flex-direction:column; gap:8px; margin:6px 0;} .admrow{display:flex; gap:8px; align-items:center;} .admrow .admpwd{flex:1;} .admmsg{font-size:12px; color:var(--muted);}
 .admbars{display:flex; align-items:flex-end; gap:3px; height:90px; border-bottom:1px solid var(--line); padding-top:6px;} .admbars i{flex:1; background:var(--accent); border-radius:4px 4px 0 0; display:block; min-width:3px;}
 .admrow2{display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:12px; padding:6px 0; border-bottom:1px dashed var(--line);} .admrow2 small{color:var(--muted);}
+.covcard{background:var(--surface2); border:1px solid var(--line); border-radius:14px; padding:10px; margin:10px 0;}
+.covhead{display:flex; flex-direction:column; gap:2px; border-bottom:2px solid var(--line); padding-bottom:6px; margin-bottom:6px;} .covhead b{font-size:15px; color:var(--text);} .covhead small{font-size:11px; color:var(--muted);}
+.covsub{display:flex; flex-direction:column; margin:8px 0 4px; color:var(--gold-t);} .covsub b{font-size:13px;} .covsub small{font-size:10.5px; color:var(--muted);}
+.covrow{display:grid; grid-template-columns:1fr 2fr auto; gap:8px; align-items:center; margin:6px 0;}
+.covlab{display:flex; flex-direction:column;} .covlab b{font-size:11.5px; line-height:1.35; color:var(--text);} .covlab small{font-size:9.5px; color:var(--muted); direction:ltr; text-align:left;}
+.covbar{height:12px; background:var(--line); border-radius:6px; overflow:hidden;} .covbar i{display:block; height:100%; border-radius:6px;}
+.covval{color:#fff; font-weight:800; font-size:12px; border-radius:8px; padding:3px 8px; direction:ltr; min-width:62px; text-align:center;}
+
+.covcard > summary{list-style:none; cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:8px;} .covcard > summary::-webkit-details-marker{display:none;} .covtitle{display:flex; flex-direction:column; gap:2px;} .covcard[open] > summary .chev{transform:rotate(180deg);} .covcard > summary .chev{font-size:14px; color:var(--muted);}

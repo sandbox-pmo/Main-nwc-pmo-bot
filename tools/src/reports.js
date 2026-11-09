@@ -314,6 +314,7 @@ function renderActions(card, base){                                         // t
 
 /* ---------- typed instructions that open these screens ---------- */
 function routeReport(q){
+  if (['coverage','coverage ratio','نسبة التغطية','نسب التغطية','التغطية'].includes(nrm(String(q||'')).trim())) return {type:'report', view:'coverage', arg:null};
   const ad = routeAdmin(q); if (ad) return ad;
   if (/^(strategic|strategy|strategic view|استراتيجي|الرؤية الاستراتيجية|الاستراتيجية)$/.test(nrm(String(q||'')).trim())) return {type:'report', view:'strat', arg:null};
   const raw = String(q || '').trim(), toks = nrm(raw).split(/\s+/).filter(Boolean);
@@ -349,12 +350,12 @@ function routeReport(q){
   if(any('بيانات','البيانات','الملفات','ملفات','الملف') && any('تحديث','التحديث','رفع')) return {type:'report', view:'data'};
   return null;
 }
-const REPORT_LABEL = {admin:'Admin', strat:'Strategic View', unified:'Search results', meet:'Weekly Meeting Data', mom:'MOM · PMO Executive Meeting', wh:'White Helmet', sgrdays:'SGR within days', adhoc:'Operating Status', sgr:'SGR — Stage Gate Review', tc:'T&C — Testing & Commissioning', trouble:'Expected Trouble', handover:'Handover', data:'Data updates'};
+const REPORT_LABEL = {coverage:'Coverage ratio', admin:'Admin', strat:'Strategic View', unified:'Search results', meet:'Weekly Meeting Data', mom:'MOM · PMO Executive Meeting', wh:'White Helmet', sgrdays:'SGR within days', adhoc:'Operating Status', sgr:'SGR — Stage Gate Review', tc:'T&C — Testing & Commissioning', trouble:'Expected Trouble', handover:'Handover', data:'Data updates'};
 function openReport(r){
-  const lead = {admin:'the admin page', strat:'the Strategic View', unified:'the search results', meet:'the weekly meeting data', mom:'the MOM of the PMO Executive Meeting', wh:'the White Helmet dashboard', sgrdays:'the projects reaching SGR within the period', adhoc:'the Operating Status dashboard (projects not fully benefited from)', sgr:'the Stage Gate Review (SGR) view', tc:'the T&C (Testing & Commissioning) list', trouble:'the projects expected to move to Trouble', handover:'the Handover view', data:'the data updates panel'}[r.view];
+  const lead = {coverage:'the coverage ratio summary', admin:'the admin page', strat:'the Strategic View', unified:'the search results', meet:'the weekly meeting data', mom:'the MOM of the PMO Executive Meeting', wh:'the White Helmet dashboard', sgrdays:'the projects reaching SGR within the period', adhoc:'the Operating Status dashboard (projects not fully benefited from)', sgr:'the Stage Gate Review (SGR) view', tc:'the T&C (Testing & Commissioning) list', trouble:'the projects expected to move to Trouble', handover:'the Handover view', data:'the data updates panel'}[r.view];
   addText(corr(r) + `Here is ${lead}:`, 'in');
-  ({admin:addAdminTab, strat:addStrategicTab, unified:addUnifiedResults, meet:addMeetingTab, mom:addMOMTab, wh:(a) => (a ? addWHSearch(a) : addWHTab()), sgrdays:addSgrDays, adhoc:addOpsTab, sgr:addSgrTab, tc:addTcTab, trouble:addTroubleTab, handover:addHandoverTab, data:addDataPanel})[r.view](r.arg);
-  speakResponse({admin:'Admin page.', strat:'Strategic view of future projects.', unified:'Search results.', meet:'Weekly meeting data.', mom:'Minutes of the PMO executive meeting, Northwestern Cluster.', wh:'White Helmet reports and observations.', sgrdays:'Projects reaching stage gate review soon.', adhoc:'Operating status of projects not fully benefited from.', sgr:'Stage gate review. Red projects need an SGR within a week, yellow within three weeks.', tc:'Testing and commissioning, nearest to today first.', trouble:'Projects expected to move to trouble, soonest first.', handover:'Partial initial handover and initial handover projects.', data:'Data updates.'}[r.view]);
+  ({coverage:addCoverageTab, admin:addAdminTab, strat:addStrategicTab, unified:addUnifiedResults, meet:addMeetingTab, mom:addMOMTab, wh:(a) => (a ? addWHSearch(a) : addWHTab()), sgrdays:addSgrDays, adhoc:addOpsTab, sgr:addSgrTab, tc:addTcTab, trouble:addTroubleTab, handover:addHandoverTab, data:addDataPanel})[r.view](r.arg);
+  speakResponse({coverage:'Coverage ratio summary.', admin:'Admin page.', strat:'Strategic view of future projects.', unified:'Search results.', meet:'Weekly meeting data.', mom:'Minutes of the PMO executive meeting, Northwestern Cluster.', wh:'White Helmet reports and observations.', sgrdays:'Projects reaching stage gate review soon.', adhoc:'Operating status of projects not fully benefited from.', sgr:'Stage gate review. Red projects need an SGR within a week, yellow within three weeks.', tc:'Testing and commissioning, nearest to today first.', trouble:'Projects expected to move to trouble, soonest first.', handover:'Partial initial handover and initial handover projects.', data:'Data updates.'}[r.view]);
 }
 
 
@@ -1100,4 +1101,26 @@ function adminHtml(d){
     `<div class="momsub2"><div class="momsh"><b dir="rtl">نشاط التبويبات اليوم</b><small>Tab activity today</small></div>${tabs}</div>` +
     `<div class="momsub2"><div class="momsh"><b dir="rtl">الأجهزة</b><small>Devices · anonymous codes only</small></div>${devs}</div>` +
     `<div class="rrule">Data older than 30 days is deleted. No IP addresses are stored.</div>`;
+}
+
+/* =====================================================================
+   نسبة التغطية: coverage ratios, presentation page 9 (annex 1). Values as printed on that page.
+   ===================================================================== */
+const COVERAGE = [
+  {area: {ar: 'منطقة المدينة المنورة', en: 'Madinah region'}, water: [89.80, 93.64, 100], sewer: [60.78, 70.64, 100]},
+  {area: {ar: 'مدينة المدينة المنورة', en: 'Madinah city'},   water: [94.42, 96.30, 100], sewer: [78.82, 82.30, 100]},
+  {area: {ar: 'مدينة ينبع', en: 'Yanbu city'},                water: [89.80, 92.50, 100], sewer: [60.80, 71.90, 100]},
+];
+const COV_STAGES = [{ar: 'الوضع الحالي', en: 'Current (2026)', col: '#2E8B57'}, {ar: 'بعد إنتهاء المشاريع الجارية', en: 'After ongoing projects (2029)', col: '#0E3F66'}, {ar: 'مستهدفات الإستراتيجية الوطنية للمياه', en: 'National water strategy target (2040)', col: '#8B6914'}];
+function covBars(vals){
+  return COV_STAGES.map((s, i) => `<div class="covrow"><div class="covlab"><b dir="rtl">${esc(s.ar)}</b><small>${esc(s.en)}</small></div><div class="covbar"><i style="width:${vals[i]}%;background:${s.col}"></i></div><span class="covval" style="background:${s.col}">${vals[i].toFixed(2)}%</span></div>`).join('');
+}
+function addCoverageTab(){
+  const card = repCard('نسبة التغطية', 'Coverage ratio', 'Water and sewer coverage · Madinah region, Madinah city, Yanbu');
+  card.querySelector('.rbody').innerHTML = COVERAGE.map(c =>
+    `<details class="covcard"><summary class="covhead"><span class="covtitle"><b dir="rtl">${esc(c.area.ar)}</b><small>${esc(c.area.en)}</small></span><span class="chev">▾</span></summary>` +
+    `<div class="covsub"><b dir="rtl">نسب تغطية خدمات المياه</b><small>Water coverage</small></div>${covBars(c.water)}` +
+    `<div class="covsub"><b dir="rtl">نسب تغطية خدمات الصرف الصحي</b><small>Sewer coverage</small></div>${covBars(c.sewer)}</details>`
+  ).join('') + `<div class="rrule">Source: annex 1 (page 9) of the 11 Nov 2026 presentation. Values as printed on that page.</div>`;
+  finishReport(card);
 }
