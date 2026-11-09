@@ -437,7 +437,7 @@ function addSgrDays(arg){
 /* idle: after one minute without any action the bot says hello once */
 let assistLastAct = Date.now(), assistGreeted = false;
 ['keydown', 'click', 'touchstart', 'input'].forEach(ev => document.addEventListener(ev, () => { assistLastAct = Date.now(); assistGreeted = false; }, true));
-setInterval(() => { if(!assistGreeted && Date.now() - assistLastAct > 120000){ assistGreeted = true; addText('Hi, this is your PMO Buddy. How can I help you?\n\n\u2067مرحبا، أنا PMO رفيقك ، كيف أقدر أساعدك  ؟\u2069', 'in'); } }, 5000);
+setInterval(() => { if(!assistGreeted && Date.now() - assistLastAct > 120000){ assistGreeted = true; addText('👋 \u2067مرحبا، أنا NWC PMO Bot في خدمتك ، كيف أقدر أساعدك ؟\u2069\n\nHi, this is the NWC PMO Bot at your service. How can I help you?', 'in'); } }, 5000);
 
 /* =====================================================================
    White Helmet tab: floor-plan reports, 360 observations, issuers, contractors, consultants, regions.

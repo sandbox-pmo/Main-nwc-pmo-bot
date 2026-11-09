@@ -739,18 +739,26 @@ function portfolioSpeech(scope){
 /* =====================================================================
    Conversation
    ===================================================================== */
-const HELP_INTRO = "Hi, I'm your PMO Bot, I'm here to help you get the latest weekly updates on projects.";
+const HELP_INTRO = "مرحباً، أنا بوت PMO لقطاع الشمال الغربي. كيف أساعدك؟\nHi, I'm the NWC PMO Bot. How can I help you?";
 const HELP_TEXT =
-  HELP_INTRO + "\n\n" +
-  "I show the weekly control card of any project (data through " + REPORT_DATE + "). Ask me by:\n" +
-  "• *PO* — e.g. 901240386 (or its last digits)\n" +
-  "• *Project / contractor / consultant* — Arabic or English, e.g. Yanbu, Badr, ينبع\n" +
-  "• *Status* — troubled, delayed, fully suspended, on schedule, ahead\n" +
-  "• *Flags* — zero progress, partially suspended, critical\n" +
-  "• *Area* — Madinah, Tabuk\n" +
-  "• *Portfolio* — status bars, budget, planned / performance / variance and invoices (tap 📊)\n\n" +
-  "Combine them freely: “delayed in Madinah”, “zero progress Tabuk”.\n" +
-  "🎤 Tap the mic to speak, 🔊 to hear replies read aloud.";
+  "*مرحباً بك في بوت PMO* — أعرض لك بيانات المشاريع الأسبوعية حتى " + REPORT_DATE + ".\n\n" +
+  "*ماذا أستطيع أن أفعل؟*\n" +
+  "• *بطاقة المشروع*: اكتب رقم أمر الشراء (PO) أو رقم المشروع أو اسمه بالعربية أو الإنجليزية.\n" +
+  "• *بحث بالحالة*: متعثر، متأخر، ايقاف كلي، منتظم، متقدم، بدون تقدم.\n" +
+  "• *بحث بالمنطقة أو الجهة*: المدينة المنورة، تبوك، المقاول، الاستشاري (فيوتشر، دورش).\n" +
+  "• *لوحات التبويبات*: المحفظة، بوابات المراجعة (SGR)، الاستلام، الاختبار والتشغيل، المتوقع تعثرها.\n" +
+  "• *تبويبات أخرى*: غير مستفاد منها، الاجتماع الأسبوعي، محضر الاجتماع، الرؤية الاستراتيجية، وايت هيلمت.\n" +
+  "• *البحث الشامل*: اكتب أي كلمة أو جملة، وسأعرض أفضل النتائج من كل التبويبات. إذا كانت النتائج كثيرة سأسألك عن القسم المطلوب.\n" +
+  "• *الكلام*: اضغط 🎤 للتحدث، و🔊 لسماع الردود.\n\n" +
+  "*Combine words freely:* \u201Cdelayed in Madinah\u201D، \u201Cمتعثر تبوك\u201D، \u201Cdorsh ceiling\u201D.\n\n" +
+  "*What I can do*\n" +
+  "• *Project card*: type the PO number, project number or name, in Arabic or English.\n" +
+  "• *Search by status*: troubled, delayed, fully suspended, on schedule, ahead, zero progress.\n" +
+  "• *Search by area or party*: Madinah, Tabuk, contractor, consultant (FCC, Dorsch).\n" +
+  "• *Tabs*: Portfolio, SGR (stage gate review), Handover, Testing & Commissioning, Expected Trouble.\n" +
+  "• *Other tabs*: Not benefited from, Weekly Meeting Data, MOM, Strategic View, White Helmet.\n" +
+  "• *Full search*: type any word or sentence; I search every tab and project card. If there are many results I ask which section you mean.\n" +
+  "• *Voice*: tap 🎤 to speak, 🔊 to hear the replies.";
 
 const cap = t => t.charAt(0).toUpperCase() + t.slice(1);
 function handleQuery(qRaw, label, direct){
@@ -773,7 +781,7 @@ function respond(r, qRaw){
   curPose = poseFor(r); setHeaderPose(curPose); settleHeaderPose();
   if(r.type==='help'){
     addText(HELP_TEXT, 'in');
-    speakResponse(HELP_INTRO + " You can ask me by PO number, project or contractor name, status, or area. Try saying delayed projects in Madinah.");
+    speakResponse("Hi, I am the NWC PMO Bot. Ask me by PO number, project or contractor name, status, or area.");
     return;
   }
   if(r.type==='portfolio'){
