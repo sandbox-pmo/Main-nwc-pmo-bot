@@ -314,6 +314,7 @@ function renderActions(card, base){                                         // t
 
 /* ---------- typed instructions that open these screens ---------- */
 function routeReport(q){
+  if (['hajj','hajj season','موسم الحج','الحج','موسم'].includes(nrm(String(q||'')).trim())) return {type:'report', view:'hajj', arg:null};
   if (['coverage','coverage ratio','نسبة التغطية','نسب التغطية','التغطية'].includes(nrm(String(q||'')).trim())) return {type:'report', view:'coverage', arg:null};
   const ad = routeAdmin(q); if (ad) return ad;
   if (/^(strategic|strategy|strategic view|استراتيجي|الرؤية الاستراتيجية|الاستراتيجية)$/.test(nrm(String(q||'')).trim())) return {type:'report', view:'strat', arg:null};
@@ -350,12 +351,12 @@ function routeReport(q){
   if(any('بيانات','البيانات','الملفات','ملفات','الملف') && any('تحديث','التحديث','رفع')) return {type:'report', view:'data'};
   return null;
 }
-const REPORT_LABEL = {coverage:'Coverage ratio', admin:'Admin', strat:'Strategic View', unified:'Search results', meet:'Weekly Meeting Data', mom:'MOM · PMO Executive Meeting', wh:'White Helmet', sgrdays:'SGR within days', adhoc:'Operating Status', sgr:'SGR — Stage Gate Review', tc:'T&C — Testing & Commissioning', trouble:'Expected Trouble', handover:'Handover', data:'Data updates'};
+const REPORT_LABEL = {hajj:'Hajj Season', coverage:'Coverage ratio', admin:'Admin', strat:'Strategic View', unified:'Search results', meet:'Weekly Meeting Data', mom:'MOM · PMO Executive Meeting', wh:'White Helmet', sgrdays:'SGR within days', adhoc:'Operating Status', sgr:'SGR — Stage Gate Review', tc:'T&C — Testing & Commissioning', trouble:'Expected Trouble', handover:'Handover', data:'Data updates'};
 function openReport(r){
-  const lead = {coverage:'the coverage ratio summary', admin:'the admin page', strat:'the Strategic View', unified:'the search results', meet:'the weekly meeting data', mom:'the MOM of the PMO Executive Meeting', wh:'the White Helmet dashboard', sgrdays:'the projects reaching SGR within the period', adhoc:'the Operating Status dashboard (projects not fully benefited from)', sgr:'the Stage Gate Review (SGR) view', tc:'the T&C (Testing & Commissioning) list', trouble:'the projects expected to move to Trouble', handover:'the Handover view', data:'the data updates panel'}[r.view];
+  const lead = {hajj:'the Hajj Season projects', coverage:'the coverage ratio summary', admin:'the admin page', strat:'the Strategic View', unified:'the search results', meet:'the weekly meeting data', mom:'the MOM of the PMO Executive Meeting', wh:'the White Helmet dashboard', sgrdays:'the projects reaching SGR within the period', adhoc:'the Operating Status dashboard (projects not fully benefited from)', sgr:'the Stage Gate Review (SGR) view', tc:'the T&C (Testing & Commissioning) list', trouble:'the projects expected to move to Trouble', handover:'the Handover view', data:'the data updates panel'}[r.view];
   addText(corr(r) + `Here is ${lead}:`, 'in');
-  ({coverage:addCoverageTab, admin:addAdminTab, strat:addStrategicTab, unified:addUnifiedResults, meet:addMeetingTab, mom:addMOMTab, wh:(a) => (a ? addWHSearch(a) : addWHTab()), sgrdays:addSgrDays, adhoc:addOpsTab, sgr:addSgrTab, tc:addTcTab, trouble:addTroubleTab, handover:addHandoverTab, data:addDataPanel})[r.view](r.arg);
-  speakResponse({coverage:'Coverage ratio summary.', admin:'Admin page.', strat:'Strategic view of future projects.', unified:'Search results.', meet:'Weekly meeting data.', mom:'Minutes of the PMO executive meeting, Northwestern Cluster.', wh:'White Helmet reports and observations.', sgrdays:'Projects reaching stage gate review soon.', adhoc:'Operating status of projects not fully benefited from.', sgr:'Stage gate review. Red projects need an SGR within a week, yellow within three weeks.', tc:'Testing and commissioning, nearest to today first.', trouble:'Projects expected to move to trouble, soonest first.', handover:'Partial initial handover and initial handover projects.', data:'Data updates.'}[r.view]);
+  ({hajj:addHajjTab, coverage:addCoverageTab, admin:addAdminTab, strat:addStrategicTab, unified:addUnifiedResults, meet:addMeetingTab, mom:addMOMTab, wh:(a) => (a ? addWHSearch(a) : addWHTab()), sgrdays:addSgrDays, adhoc:addOpsTab, sgr:addSgrTab, tc:addTcTab, trouble:addTroubleTab, handover:addHandoverTab, data:addDataPanel})[r.view](r.arg);
+  speakResponse({hajj:'Hajj season projects.', coverage:'Coverage ratio summary.', admin:'Admin page.', strat:'Strategic view of future projects.', unified:'Search results.', meet:'Weekly meeting data.', mom:'Minutes of the PMO executive meeting, Northwestern Cluster.', wh:'White Helmet reports and observations.', sgrdays:'Projects reaching stage gate review soon.', adhoc:'Operating status of projects not fully benefited from.', sgr:'Stage gate review. Red projects need an SGR within a week, yellow within three weeks.', tc:'Testing and commissioning, nearest to today first.', trouble:'Projects expected to move to trouble, soonest first.', handover:'Partial initial handover and initial handover projects.', data:'Data updates.'}[r.view]);
 }
 
 
@@ -1155,5 +1156,28 @@ function addCoverageTab(){
     `<div class="covsub"><b dir="rtl">نسب تغطية خدمات المياه</b><small>Water coverage</small></div>${covBars(c.water)}` +
     `<div class="covsub"><b dir="rtl">نسب تغطية خدمات الصرف الصحي</b><small>Sewer coverage</small></div>${covBars(c.sewer)}</details>`
   ).join('');
+  finishReport(card);
+}
+
+/* =====================================================================
+   موسم الحج 1448 هـ: the four projects of slide 2 (North-West sector), linked to their portfolio cards.
+   ===================================================================== */
+const HAJJ_PROJECTS = [
+  {name: 'احلال شبكات وخطوط مياه المدينة المنورة', po: '901240090', pno: 'P878', val: 2.70, hajj: 86.10, full: 29.55, end: '30 شعبان 1448 هـ', purpose: 'رفع كفاءة وجودة المياه المغذية لمستشفى الملك فهد، ومركز نجود، ومركز الكلى، ومبنى شئون المرضى، والعيادة الخارجية للأسنان'},
+  {name: 'انشاء شبكات وخطوط الصرف الصحي بحي الأصيفرين', po: '901240105', pno: '10278', val: 4.20, hajj: 69.20, full: 15.80, end: '15 شوال 1448 هـ', purpose: 'إيصال خدمة الصرف الصحي لمبنى الأدلاء، والأحياء المجاورة لمسجد قباء، والمناطق الغربية المطلة على الحرم النبوي'},
+  {name: 'تنفيذ شبكات الصرف الصحي بأحياء الجرف', po: '901230177', pno: '10129', val: 3.80, hajj: 86.60, full: 23.00, end: '15 شوال 1448 هـ', purpose: 'إيصال خدمة الصرف الصحي لمجمع الملك فهد لطباعة المصحف الشريف (هدية الحرمين) لرفع الضرر البيئي'},
+  {name: 'ترحيل خطوط وتنفيذ شبكات بمناطق متفرقة (المرحلة الأولى)', po: '901250253', pno: 'P832', val: 2.00, hajj: 4.00, full: 1.75, end: '30 شوال 1448 هـ', purpose: 'تنفيذ خط تغذية إضافي لتغذية مسجد قباء بالمياه'}
+];
+function addHajjTab(){
+  const card = repCard('موسم الحج', 'Hajj Season 1448 H', 'North-West sector · Hajj scope projects');
+  const total = HAJJ_PROJECTS.reduce((a, p) => a + p.val, 0);
+  const cards = HAJJ_PROJECTS.map((p, i) => `<div class="hjcard"><div class="hjtop"><span class="hjnum">${i + 1}</span><div class="hjttl"><b dir="rtl">${esc(p.name)}</b><small>PO ${esc(p.po)} · ${esc(p.pno)}</small></div><span class="hjval">${p.val.toFixed(2)}<em>M SAR</em></span></div>` +
+    `<div class="hjpurp" dir="rtl">${esc(p.purpose)}</div>` +
+    `<div class="hjlab"><span dir="rtl">إنجاز نطاق الحج</span><b>${p.hajj.toFixed(2)}%</b></div><div class="hjtrack"><i style="width:${p.hajj}%;background:#0E6286"></i></div>` +
+    `<div class="hjlab"><span dir="rtl">إنجاز المشروع بالكامل</span><b>${p.full.toFixed(2)}%</b></div><div class="hjtrack"><i style="width:${p.full}%;background:#C9A96A"></i></div>` +
+    `<div class="hjfoot"><span class="hjchip">جاري التنفيذ · Ongoing</span><span class="hjchip">نهاية نطاق الحج: ${esc(p.end)}</span></div>` +
+    `<button type="button" class="optbtn hjopen" data-po="${esc(p.po)}">فتح بطاقة المشروع · Open project card ›</button></div>`).join('');
+  card.querySelector('.rbody').innerHTML = `<div class="hjkpis"><div class="hjk"><b>${HAJJ_PROJECTS.length}</b><small>مشاريع · projects</small></div><div class="hjk g"><b>${total.toFixed(2)}</b><small>مليون ريال · M SAR (نطاقات الحج)</small></div></div>` + cards;
+  card.querySelectorAll('.hjopen').forEach(b => b.addEventListener('click', e => { e.preventDefault(); handleQuery(b.dataset.po); }));
   finishReport(card);
 }

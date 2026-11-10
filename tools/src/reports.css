@@ -225,3 +225,13 @@ details.gdist{direction:ltr; text-align:left;} .gdist .gd{display:flex; gap:9px;
 @keyframes admpulse{from{transform:scale(1)} to{transform:scale(1.25)}}
 
 .admsteps[hidden], .admgate[hidden]{display:none !important;}
+.hjkpis{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:6px 0 10px;} .hjk{background:var(--surface2); border:1px solid var(--line); border-top:4px solid #0E6286; border-radius:12px; padding:10px;} .hjk.g{border-top-color:#C9A96A;} .hjk b{display:block; font-size:22px; font-weight:800; color:var(--gold-t);} .hjk small{font-size:10.5px; color:var(--muted);}
+.hjcard{background:var(--surface2); border:1px solid var(--line); border-right:5px solid #0E6286; border-radius:14px; padding:11px; margin:9px 0;}
+.hjtop{display:flex; gap:8px; align-items:flex-start;} .hjnum{width:28px; height:28px; border-radius:50%; background:var(--accent); color:#fff; font-weight:800; font-size:13px; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;}
+.hjttl{flex:1; min-width:0;} .hjttl b{display:block; font-size:13px; line-height:1.4; color:var(--text); text-align:right;} .hjttl small{font-size:10px; color:var(--muted);}
+.hjval{background:#C9A96A; color:#fff; border-radius:10px; padding:5px 8px; font-weight:800; font-size:16px; text-align:center; min-width:64px;} .hjval em{display:block; font-size:9px; font-style:normal; opacity:.9;}
+.hjpurp{font-size:11px; color:var(--text); margin:8px 2px; line-height:1.5; text-align:right;}
+.hjlab{display:flex; justify-content:space-between; font-size:11px; color:var(--text); margin-top:6px;} .hjlab b{color:var(--gold-t);}
+.hjtrack{height:8px; background:var(--line); border-radius:4px; overflow:hidden; margin-top:3px;} .hjtrack i{display:block; height:100%; border-radius:4px;}
+.hjfoot{display:flex; gap:6px; flex-wrap:wrap; margin:8px 0;} .hjchip{font-size:10px; font-weight:700; background:var(--accent-soft); color:var(--accent-t); border-radius:999px; padding:3px 9px;}
+.hjopen{min-height:42px; width:100%; font-weight:800;}
