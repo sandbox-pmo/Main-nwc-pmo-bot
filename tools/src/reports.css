@@ -244,3 +244,6 @@ details.gdist{direction:ltr; text-align:left;} .gdist .gd{display:flex; gap:9px;
 .cbtns{display:flex; gap:8px;} .cbtns .optbtn{flex:1; text-align:center; text-decoration:none; min-height:38px; display:flex; align-items:center; justify-content:center;}
 
 .locbtn{display:flex; align-items:center; justify-content:center; width:100%; min-height:44px; margin:8px 0; text-decoration:none; font-weight:800;}
+
+.trgns{display:flex; gap:8px; flex-wrap:wrap; margin:6px 0 10px;} .trgn{min-height:40px; font-weight:800; font-size:12.5px;} .trgn.on{background:var(--accent); color:#fff; border-color:var(--accent);}
+.trgns .trgn{flex:1 1 0; width:auto;}

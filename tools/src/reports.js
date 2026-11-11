@@ -208,19 +208,29 @@ function troubleRows(today){
     .map(r => ({...r, days: dayDiff(r.d, today)})).sort((a, b) => a.d - b.d || a.p.ord - b.p.ord);
 }
 function addTroubleTab(){
-  const today = todayDate(), rows = troubleRows(today);
-  const c = (lo, hi) => rows.filter(r => r.days >= lo && r.days <= hi).length;
+  const today = todayDate();
   const card = repCard('Expected Trouble', 'المتوقع تعثرها', `Projects expected to move to Trouble, soonest first · today <b>${fmtDate(isoOf(today))}</b> · date from the weekly file (average completion rates)`);
-  let html = `<div class="tsum"><div class="tsum-h">${rows.length} projects</div><div class="tsum-t">Date already passed <b>${c(-1e9, -1)}</b> · within 30 days <b>${c(0, 30)}</b> · 31–90 days <b>${c(31, 90)}</b> · later <b>${c(91, 1e9)}</b></div></div><div class="rlist">`;
-  let group = null;
-  rows.forEach(r => {
-    const g = r.days < 0 ? 'Date already passed' : `${MONTHS_LONG[r.d.getMonth()]} ${r.d.getFullYear()}`;
-    if(g !== group){ group = g; html += `<div class="rgroup">${g}</div>`; }
-    const urgency = r.days < 0 ? 'passed' : r.days <= 30 ? 'u30' : r.days <= 90 ? 'u90' : 'later';
-    html += projRow(r.p, `Expected to move to Trouble: <b>${fmtDate(isoOf(r.d))}</b>`, inDays(r.days), '', 'et-' + urgency);
-  });
-  card.querySelector('.rbody').innerHTML = html + (rows.length ? '' : '<div class="rempty">No project has an expected Trouble date.</div>') + '</div>';
-  wireRows(card); finishReport(card);
+  const body = card.querySelector('.rbody');
+  const draw = (region) => {
+    const all = troubleRows(today);
+    const rows = region === 'all' ? all : all.filter(r => r.p.areaEn === region);
+    const c = (lo, hi) => rows.filter(r => r.days >= lo && r.days <= hi).length;
+    const tog = [['all', 'الكل · All'], ['Madinah', 'المدينة المنورة · Madinah'], ['Tabuk', 'تبوك · Tabuk']]
+      .map(([k, l]) => `<button type="button" class="optbtn trgn${k === region ? ' on' : ''}" data-r="${k}">${l}</button>`).join('');
+    let html = `<div class="trgns">${tog}</div>` + `<div class="tsum"><div class="tsum-h">${rows.length} projects</div><div class="tsum-t">Date already passed <b>${c(-1e9, -1)}</b> · within 30 days <b>${c(0, 30)}</b> · 31–90 days <b>${c(31, 90)}</b> · later <b>${c(91, 1e9)}</b></div></div>`;
+    let group = null;
+    rows.forEach(r => {
+      const g = r.days < 0 ? 'Date already passed' : `${MONTHS_LONG[r.d.getMonth()]} ${r.d.getFullYear()}`;
+      if (g !== group) { group = g; html += `<div class="rgroup">${g}</div>`; }
+      const urgency = r.days < 0 ? 'passed' : r.days <= 30 ? 'u30' : r.days <= 90 ? 'u90' : 'later';
+      html += projRow(r.p, `Expected to move to Trouble: <b>${fmtDate(isoOf(r.d))}</b>`, inDays(r.days), '', 'et-' + urgency);
+    });
+    body.innerHTML = html + (rows.length ? '' : '<div class="rempty">No project in this region has an expected Trouble date.</div>');
+    body.querySelectorAll('.trgn').forEach(btn => btn.addEventListener('click', e => { e.preventDefault(); draw(btn.dataset.r); }));
+    wireRows(card);
+  };
+  draw('all');
+  finishReport(card);
 }
 
 /* ---------- password lock for the update controls ----------
