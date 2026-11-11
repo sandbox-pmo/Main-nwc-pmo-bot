@@ -604,6 +604,13 @@ function techSection(items){
   return `<div class="sec tech"><div class="sh"><b>${LBL.tech[0]}</b><small>${LBL.tech[1]}</small></div>` +
     `<button class="optbtn techbtn" type="button" aria-expanded="false">Show More ▾</button><div class="techbody" hidden>${items.length > 1 ? '<div class="subnote">Newest first</div>' : ''}${body}</div></div>`;
 }
+function coordRow(p){
+  const c = (typeof PROJECT_COORDS !== 'undefined') && PROJECT_COORDS[p.pno];
+  if (!c) return '';
+  const url = 'https://www.google.com/maps?q=' + c.lat + ',' + c.lon;
+  return `<div class="prow crow-card"><span class="l">📌 الإحداثيات<small>Coordinates</small></span><span class="v" style="direction:ltr;unicode-bidi:isolate;display:inline-flex;gap:6px"><bdi>${c.lat.toFixed(6)}</bdi><bdi>${c.lon.toFixed(6)}</bdi></span></div>` +
+    `<a class="optbtn locbtn" href="${url}" target="_blank" rel="noopener">🗺 فتح موقع المشروع على الخريطة · Open location ↗</a>`;
+}
 function cardHtml(p){
   const s = ST[p.sk];
   const zc = p.zero>=3 ? 'bad' : p.zero>=1 ? 'warn' : '';
@@ -628,6 +635,7 @@ function cardHtml(p){
     <div class="meta"><span>${LBL.project[0]} · ${LBL.project[1]}</span></div>
     <div class="name-ar">${esc(p.name)}</div>
     <div class="meta"><span>📍 ${esc(p.area)} · ${p.areaEn}</span><span class="sep">|</span><span>${esc(p.cls)}</span></div>
+    ${coordRow(p)}
     <div class="prow"><span class="l">👷 ${LBL.contractor[0]}<small>${LBL.contractor[1]}</small></span><span class="v">${esc(p.contractor)||'—'}</span></div>
     <div class="prow"><span class="l">🧭 ${LBL.consultant[0]}<small>${LBL.consultant[1]}</small></span><span class="v">${esc(p.consultant)||'—'}</span></div>
     ${sgrBlock(p)}

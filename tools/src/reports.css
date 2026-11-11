@@ -235,3 +235,12 @@ details.gdist{direction:ltr; text-align:left;} .gdist .gd{display:flex; gap:9px;
 .hjtrack{height:8px; background:var(--line); border-radius:4px; overflow:hidden; margin-top:3px;} .hjtrack i{display:block; height:100%; border-radius:4px;}
 .hjfoot{display:flex; gap:6px; flex-wrap:wrap; margin:8px 0;} .hjchip{font-size:10px; font-weight:700; background:var(--accent-soft); color:var(--accent-t); border-radius:999px; padding:3px 9px;}
 .hjopen{min-height:42px; width:100%; font-weight:800;}
+
+.crow-card .v a{color:var(--accent-t); font-weight:800; text-decoration:none; margin-left:4px;}
+.csec{margin-bottom:14px;} .chdr{display:flex; flex-direction:column; gap:2px; border-bottom:2px solid var(--line); padding:4px 0 6px; margin-bottom:6px;} .chdr b{font-size:15px; color:var(--text);} .chdr small{font-size:11px; color:var(--muted);}
+.crow{display:grid; grid-template-columns:1fr; gap:6px; background:var(--surface2); border:1px solid var(--line); border-radius:12px; padding:10px; margin:6px 0;}
+.cinfo b{display:block; font-size:13px; line-height:1.4; color:var(--text); text-align:right;} .cinfo small{font-size:10.5px; color:var(--muted);}
+.cxy{display:flex; gap:10px; direction:ltr; font-size:12px; font-weight:700; color:var(--gold-t);} .cxy span{background:var(--surface); border-radius:8px; padding:3px 8px;}
+.cbtns{display:flex; gap:8px;} .cbtns .optbtn{flex:1; text-align:center; text-decoration:none; min-height:38px; display:flex; align-items:center; justify-content:center;}
+
+.locbtn{display:flex; align-items:center; justify-content:center; width:100%; min-height:44px; margin:8px 0; text-decoration:none; font-weight:800;}
